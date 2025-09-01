@@ -1,0 +1,257 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Sign Up - Create Your Account
+    link(rel="stylesheet", href="/Styles/signup.css")
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap", rel="stylesheet")
+    link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css", rel="stylesheet")
+    
+  body
+    .container
+      .signup-wrapper
+        .signup-header
+          h1.logo
+            i.fas.fa-user-plus
+            | Create Account
+          p.subtitle Join us today and get started with your journey
+          
+        form.signup-form(action="/signup", method="POST", id="signupForm")
+          .form-row
+            .form-group
+              label(for="name")
+                i.fas.fa-user
+                | Full Name
+              input(type="text", id="name", name="name", placeholder="Enter your full name", required)
+              .error-message
+                
+          .form-row
+            .form-group
+              label(for="email")
+                i.fas.fa-envelope
+                | Email Address
+              input(type="email", id="email", name="email", placeholder="Enter your email address", required)
+              .error-message
+              
+          .form-row
+            .form-group
+              label(for="phone")
+                i.fas.fa-phone
+                | Phone Number
+              input(type="tel", id="phone", name="phone", placeholder="Enter your phone number")
+              .error-message
+              
+          .form-row
+            .form-group
+              label(for="password")
+                i.fas.fa-lock
+                | Password
+              .password-input-wrapper
+                input(type="password", id="password", name="password", placeholder="Create a strong password", required)
+                button.password-toggle(type="button", onclick="togglePassword('password')")
+                  i.fas.fa-eye
+              .password-strength
+                .strength-bar
+                  .strength-fill
+                .strength-text Weak
+              .error-message
+              
+          .form-row
+            .form-group
+              label(for="confirmPassword")
+                i.fas.fa-lock
+                | Confirm Password
+              .password-input-wrapper
+                input(type="password", id="confirmPassword", name="confirmPassword", placeholder="Confirm your password", required)
+                button.password-toggle(type="button", onclick="togglePassword('confirmPassword')")
+                  i.fas.fa-eye
+              .error-message
+              
+          .form-row
+            .form-group
+              label(for="role")
+                i.fas.fa-user-tag
+                | Account Type
+              select(id="role", name="role", required)
+                option(value="client", selected) Client
+                option(value="admin") Administrator
+                option(value="salesAgent") Sales Agent
+              .error-message
+              
+          .form-row
+            .form-group
+              label(for="mailingAddress")
+                i.fas.fa-map-marker-alt
+                | Mailing Address
+              textarea(id="mailingAddress", name="mailingAddress", placeholder="Enter your complete mailing address", rows="3", required)
+              .error-message
+              
+          .form-row.terms-row
+            .checkbox-group
+              input(type="checkbox", id="terms", name="terms", required)
+              label(for="terms") 
+                | I agree to the 
+                a(href="/terms", target="_blank") Terms of Service
+                |  and 
+                a(href="/privacy", target="_blank") Privacy Policy
+              .error-message
+              
+          .form-row.newsletter-row
+            .checkbox-group
+              input(type="checkbox", id="newsletter", name="newsletter")
+              label(for="newsletter") Subscribe to our newsletter for updates and offers
+              
+          button.submit-btn(type="submit")
+            i.fas.fa-user-plus
+            | Create Account
+            .loading-spinner
+              i.fas.fa-spinner
+              
+        .signup-footer
+          p Already have an account? 
+            a(href="/login") Sign in here
+          
+          .social-signup
+            p.divider 
+              span Or sign up with
+            .social-buttons
+              button.social-btn.google
+                i.fab.fa-google
+                | Google
+              button.social-btn.facebook
+                i.fab.fa-facebook-f
+                | Facebook
+              button.social-btn.twitter
+                i.fab.fa-twitter
+                | Twitter
+
+    script.
+      // Password toggle functionality
+      function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const toggle = field.nextElementSibling.querySelector('i');
+        
+        if (field.type === 'password') {
+          field.type = 'text';
+          toggle.classList.remove('fa-eye');
+          toggle.classList.add('fa-eye-slash');
+        } else {
+          field.type = 'password';
+          toggle.classList.remove('fa-eye-slash');
+          toggle.classList.add('fa-eye');
+        }
+      }
+      
+      // Password strength checker
+      const passwordField = document.getElementById('password');
+      const strengthBar = document.querySelector('.strength-fill');
+      const strengthText = document.querySelector('.strength-text');
+      
+      passwordField.addEventListener('input', function() {
+        const password = this.value;
+        const strength = checkPasswordStrength(password);
+        
+        strengthBar.className = 'strength-fill ' + strength.class;
+        strengthText.textContent = strength.text;
+      });
+      
+      function checkPasswordStrength(password) {
+        let score = 0;
+        if (password.length >= 8) score++;
+        if (/[a-z]/.test(password)) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+        
+        if (score < 2) return { class: 'weak', text: 'Weak' };
+        if (score < 4) return { class: 'medium', text: 'Medium' };
+        return { class: 'strong', text: 'Strong' };
+      }
+      
+      // Form validation
+      const form = document.getElementById('signupForm');
+      const submitBtn = document.querySelector('.submit-btn');
+      
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Clear previous errors
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        document.querySelectorAll('.form-group').forEach(el => el.classList.remove('error'));
+        
+        let isValid = true;
+        
+        // Validate password match
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (password !== confirmPassword) {
+          showError('confirmPassword', 'Passwords do not match');
+          isValid = false;
+        }
+        
+        // Validate terms checkbox
+        const terms = document.getElementById('terms');
+        if (!terms.checked) {
+          showError('terms', 'You must accept the terms and conditions');
+          isValid = false;
+        }
+        
+        if (isValid) {
+          submitBtn.classList.add('loading');
+          submitBtn.disabled = true;
+          
+          // Simulate form submission
+          setTimeout(() => {
+            form.submit();
+          }, 1500);
+        }
+      });
+      
+      function showError(fieldId, message) {
+        const field = document.getElementById(fieldId);
+        const formGroup = field.closest('.form-group') || field.closest('.checkbox-group');
+        const errorElement = formGroup.querySelector('.error-message');
+        
+        formGroup.classList.add('error');
+        errorElement.textContent = message;
+      }
+      
+      // Real-time validation
+      document.querySelectorAll('input, select, textarea').forEach(field => {
+        field.addEventListener('blur', function() {
+          validateField(this);
+        });
+        
+        field.addEventListener('input', function() {
+          if (this.classList.contains('error')) {
+            validateField(this);
+          }
+        });
+      });
+      
+      function validateField(field) {
+        const formGroup = field.closest('.form-group') || field.closest('.checkbox-group');
+        const errorElement = formGroup.querySelector('.error-message');
+        
+        formGroup.classList.remove('error');
+        errorElement.textContent = '';
+        
+        // Basic validation
+        if (field.hasAttribute('required') && !field.value.trim()) {
+          showError(field.id, 'This field is required');
+          return false;
+        }
+        
+        // Email validation
+        if (field.type === 'email' && field.value) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(field.value)) {
+            showError(field.id, 'Please enter a valid email address');
+            return false;
+          }
+        }
+        
+        return true;
+      }
