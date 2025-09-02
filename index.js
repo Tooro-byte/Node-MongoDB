@@ -1,13 +1,13 @@
 // <<<<<<<<< Cofiguring the different DOTENV Files >>>>>>>>>>
-const envFile =
-  process.env.NODE_ENV === "production"
-    ? ".env.production"
-    : ".env.development";
+// const envFile =
+//   process.env.NODE_ENV === "production"
+//     ? ".env.production"
+//     : ".env.development";
 
-require("dotenv").config({
-  path: envFile,
-});
-console.log(process.env.JWT_KEY);
+// require("dotenv").config({
+//   path: envFile,
+// });
+require("dotenv").config();
 
 // >>>>>>> My E-commerce Website Dependencies <<<<<<<<
 const helmet = require("helmet");
@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === "development") {
 }
 // >>>>>>>Connecting to MongoDB Service<<<<<<
 mongoose
-  .connect("mongodb://localhost:27017/Mongo-Commerce1")
+  .connect(process.env.DATABASE)
   .then(() => console.log(" MongoDB Connection was Sucessfull"))
   .catch((err) => console.error(error.message));
 

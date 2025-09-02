@@ -73,26 +73,44 @@ router.post("/signup", async (req, res) => {
 });
 
 // >>>>>>>>>>> Login Route >>>>>>>>>>>>>
-
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
+
   // >>>>>> Checking If User is in the Database >>>>>>>
   const user = await User.findOne({ email: email });
   if (!user) {
     return res.status(401).json({ message: "Invalid Credentials" });
   }
+
   // >>>>> Comparing User Password with Hashed Password in The DB >>>>>>
   const storedPassword = await bcrypt.compare(password, user.password);
   if (!storedPassword) {
     return res.status(401).json({ message: "Invalid Credentials" });
   }
-  // Creating JWT For and Send it in Response
+
+  // Creating JWT for the user and sending it in the response
   const token = jwt.sign(
-    { _id: user._id, name: user.name },
+    { _id: user._id, name: user.name, role: user.role },
     process.env.JWT_KEY,
     { expiresIn: "1hr" }
   );
-  return res.status(200).json(token);
-});
 
+  // >>>>> REDIRECTING BASED ON USER ROLE <<<<<
+  if (user.role === "admin") {
+    // Redirect to the admin dashboard
+    return res
+      .status(200)
+      .json({ token: token, redirectUrl: "/admin/dashboard" });
+  } else if (user.role === "salesAgent") {
+    // Redirect to the sales agent dashboard
+    return res
+      .status(200)
+      .json({ token: token, redirectUrl: "/salesAgent/dashboard" });
+  } else {
+    // Default to the client dashboard for all other roles (including "client")
+    return res
+      .status(200)
+      .json({ token: token, redirectUrl: "/client/dashboard" });
+  }
+});
 module.exports = router;
