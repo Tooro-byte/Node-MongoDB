@@ -7,7 +7,7 @@ const envFile =
 require("dotenv").config({
   path: envFile,
 });
-console.log(process.env.KEY);
+console.log(process.env.JWT_KEY);
 
 // >>>>>>> My E-commerce Website Dependencies <<<<<<<<
 const helmet = require("helmet");
@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === "development") {
 }
 // >>>>>>>Connecting to MongoDB Service<<<<<<
 mongoose
-  .connect("mongodb://localhost:27017/mongo-demo")
+  .connect("mongodb://localhost:27017/Mongo-Commerce1")
   .then(() => console.log(" MongoDB Connection was Sucessfull"))
   .catch((err) => console.error(error.message));
 

@@ -13,41 +13,63 @@ router.get("/signup", async (req, res) => {
 const joySchema = Joi.object({
   name: Joi.string().min(8).required(),
   email: Joi.string().email().required(),
-  phone: Joi.number().required(),
-  mailingAddress: Joi.string().required(),
-  password: Joi.string().min(10),
+  phone: Joi.number().optional().allow(null, ""),
+  role: Joi.string().valid("client", "admin", "salesAgent").required(),
+  mailingAddress: Joi.string().when("role", {
+    is: "client",
+    then: Joi.string().required(),
+    otherwise: Joi.string().allow("", null),
+  }),
+  password: Joi.string().min(10).required(),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({ "any.only": "Passwords do not match" }),
+  terms: Joi.string().required(),
+  newsletter: Joi.string().optional().allow(null),
 });
 
 router.post("/signup", async (req, res) => {
-  // >>>>> Destructuring User information for easy readabilty <<<<<<<
-  const { name, email, phone, mailingAddress, password } = req.body;
-
   // >..>>>> Validating User Input Information from the Front end aka 'Request body' <<<<<<<
   const joyValidator = joySchema.validate(req.body);
   if (joyValidator.error) {
-    return res.status(400).json(joyValidator.error.details[0].message);
+    return res
+      .status(400)
+      .json({ message: joyValidator.error.details[0].message });
   }
-  //  >>>>>>>>>>  Checking if User is already in the Data base <<<<<<<<
+
+  // >>>>> Destructuring User information for easy readabilty <<<<<<<
+  const { name, email, phone, role, mailingAddress, password } = req.body;
+
+  // >>>>> REMOVE confirmPassword, terms, and newsletter before saving to DB <<<<<
+  delete req.body.confirmPassword;
+  delete req.body.terms;
+  delete req.body.newsletter;
+
+  //  >>>>>>>>>>  Checking if User is already in the Data base <<<<<<<<
   const user = await User.findOne({ email: email });
   if (user) {
     return res.status(400).json({ message: "User already exists" });
   }
-  const hashedPassword = await bcrypt.hash("password", 10);
+  //  >>>> if user not found Create a new one >>>>>>>
+  const hashedPassword = await bcrypt.hash(password, 10);
   const newUser = new User({
     name: name,
     email: email,
     phone: phone,
+    role: role,
     password: hashedPassword,
     mailingAddress: mailingAddress,
   });
+
   await newUser.save();
   const token = jwt.sign(
     { _id: newUser._id, name: newUser.name },
     process.env.JWT_KEY,
     { expiresIn: "1hr" }
   );
+
   res.status(201).json(token);
-  // res.redirect("/login");
 });
 
 // >>>>>>>>>>> Login Route >>>>>>>>>>>>>

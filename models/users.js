@@ -30,7 +30,9 @@ const userSchema = new mongoose.Schema({
   },
   mailingAddress: {
     type: String,
-    required: true,
+    required: function () {
+      return this.role === "client";
+    },
   },
 });
 
