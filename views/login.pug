@@ -1,0 +1,101 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Sign In - Access Your Account
+    link(rel="stylesheet", href="/Styles/login.css")
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap", rel="stylesheet")
+    link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css", rel="stylesheet")
+    
+  body
+    .container
+      .login-wrapper
+        .login-header
+          h1.logo
+            i.fas.fa-sign-in-alt
+            | Welcome Back
+          p.subtitle Sign in to your account to continue
+          
+        //- Display flash messages if any
+        if locals.message
+          .alert.alert-error
+            i.fas.fa-exclamation-triangle
+            span= message
+            button.alert-close(onclick="closeAlert()")
+              i.fas.fa-times
+              
+        if locals.success
+          .alert.alert-success
+            i.fas.fa-check-circle
+            span= success
+            button.alert-close(onclick="closeAlert()")
+              i.fas.fa-times
+
+        form.login-form(action="/login", method="POST", id="loginForm")
+          .form-row
+            .form-group
+              label(for="email")
+                i.fas.fa-envelope
+                | Email Address
+              input(type="email", id="email", name="email", placeholder="Enter your email address", required, autocomplete="email")
+              .error-message
+              
+          .form-row
+            .form-group
+              label(for="password")
+                i.fas.fa-lock
+                | Password
+              .password-input-wrapper
+                input(type="password", id="password", name="password", placeholder="Enter your password", required, autocomplete="current-password")
+                button.password-toggle(type="button", onclick="togglePassword()")
+                  i.fas.fa-eye
+              .error-message
+              
+          .form-row.options-row
+            .checkbox-group
+              input(type="checkbox", id="remember", name="remember")
+              label(for="remember") Remember me for 30 days
+              
+            .forgot-password
+              a(href="/forgot-password") Forgot Password?
+              
+          button.submit-btn(type="submit")
+            i.fas.fa-sign-in-alt
+            | Sign In
+            .loading-spinner
+              i.fas.fa-spinner
+              
+        .login-footer
+          p Don't have an account? 
+            a(href="/signup") Create one here
+          
+          .social-login
+            p.divider 
+              span Or continue with
+            .social-buttons
+              button.social-btn.google(onclick="socialLogin('google')")
+                i.fab.fa-google
+                | Google
+              button.social-btn.facebook(onclick="socialLogin('facebook')")
+                i.fab.fa-facebook-f
+                | Facebook
+              button.social-btn.microsoft(onclick="socialLogin('microsoft')")
+                i.fab.fa-microsoft
+                | Microsoft
+
+        //- Quick Demo Login (Remove in production)
+        .demo-section
+          p.demo-title Quick Demo Access
+          .demo-buttons
+            button.demo-btn(onclick="fillDemo('client')")
+              i.fas.fa-user
+              | Demo Client
+            button.demo-btn(onclick="fillDemo('admin')")
+              i.fas.fa-user-shield
+              | Demo Admin
+            button.demo-btn(onclick="fillDemo('sales')")
+              i.fas.fa-user-tie
+              | Demo Sales
+
+    script(src="/vanilla-js/login.js")

@@ -1,162 +1,220 @@
-// Role change handler - Show/hide mailing address based on role selection
-const roleField = document.getElementById("role");
-const mailingAddressRow = document.getElementById("mailingAddressRow");
-const mailingAddressField = document.getElementById("mailingAddress");
+// signup.js - Complete signup functionality
 
-// Initially hide mailing address if role is not client
-function toggleMailingAddress() {
-  if (roleField.value === "client") {
-    mailingAddressRow.style.display = "block";
-    mailingAddressField.setAttribute("required", "");
-  } else {
-    mailingAddressRow.style.display = "none";
-    mailingAddressField.removeAttribute("required");
-    mailingAddressField.value = ""; // Clear the field when hidden
-    // Clear any error messages
-    const formGroup = mailingAddressField.closest(".form-group");
-    const errorElement = formGroup.querySelector(".error-message");
-    formGroup.classList.remove("error");
-    errorElement.textContent = "";
-  }
-}
+document.addEventListener("DOMContentLoaded", function () {
+  const signupForm = document.getElementById("signupForm");
+  const roleSelect = document.getElementById("role");
+  const mailingAddressRow = document.getElementById("mailingAddressRow");
+  const passwordInput = document.getElementById("password");
+  const confirmPasswordInput = document.getElementById("confirmPassword");
+  const submitBtn = document.querySelector(".submit-btn");
 
-// Set initial state
-toggleMailingAddress();
-
-// Listen for role changes
-roleField.addEventListener("change", toggleMailingAddress);
-
-// Password toggle functionality
-function togglePassword(fieldId) {
-  const field = document.getElementById(fieldId);
-  const toggle = field.nextElementSibling.querySelector("i");
-
-  if (field.type === "password") {
-    field.type = "text";
-    toggle.classList.remove("fa-eye");
-    toggle.classList.add("fa-eye-slash");
-  } else {
-    field.type = "password";
-    toggle.classList.remove("fa-eye-slash");
-    toggle.classList.add("fa-eye");
-  }
-}
-
-// Password strength checker
-const passwordField = document.getElementById("password");
-const strengthBar = document.querySelector(".strength-fill");
-const strengthText = document.querySelector(".strength-text");
-
-passwordField.addEventListener("input", function () {
-  const password = this.value;
-  const strength = checkPasswordStrength(password);
-
-  strengthBar.className = "strength-fill " + strength.class;
-  strengthText.textContent = strength.text;
-});
-
-function checkPasswordStrength(password) {
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (/[a-z]/.test(password)) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-
-  if (score < 2) return { class: "weak", text: "Weak" };
-  if (score < 4) return { class: "medium", text: "Medium" };
-  return { class: "strong", text: "Strong" };
-}
-
-// Form validation
-const form = document.getElementById("signupForm");
-const submitBtn = document.querySelector(".submit-btn");
-
-form.addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  // Clear previous errors
-  document
-    .querySelectorAll(".error-message")
-    .forEach((el) => (el.textContent = ""));
-  document
-    .querySelectorAll(".form-group")
-    .forEach((el) => el.classList.remove("error"));
-
-  let isValid = true;
-
-  // Validate password match
-  const password = document.getElementById("password").value;
-  const confirmPassword = document.getElementById("confirmPassword").value;
-
-  if (password !== confirmPassword) {
-    showError("confirmPassword", "Passwords do not match");
-    isValid = false;
+  // Show/hide mailing address based on role
+  function toggleMailingAddress() {
+    const selectedRole = roleSelect.value;
+    if (selectedRole === "client") {
+      mailingAddressRow.style.display = "block";
+      document
+        .getElementById("mailingAddress")
+        .setAttribute("required", "required");
+    } else {
+      mailingAddressRow.style.display = "none";
+      document.getElementById("mailingAddress").removeAttribute("required");
+      document.getElementById("mailingAddress").value = "";
+    }
   }
 
-  // Validate terms checkbox
-  const terms = document.getElementById("terms");
-  if (!terms.checked) {
-    showError("terms", "You must accept the terms and conditions");
-    isValid = false;
+  // Initialize mailing address visibility
+  toggleMailingAddress();
+
+  // Role change event listener
+  roleSelect.addEventListener("change", toggleMailingAddress);
+
+  // Password strength checker
+  function checkPasswordStrength(password) {
+    const strengthBar = document.querySelector(".strength-fill");
+    const strengthText = document.querySelector(".strength-text");
+
+    let strength = 0;
+
+    // Check criteria
+    if (password.length >= 8) strength += 1;
+    if (password.length >= 12) strength += 1;
+    if (/[a-z]/.test(password)) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+
+    // Update strength indicator
+    const percentage = (strength / 6) * 100;
+    strengthBar.style.width = percentage + "%";
+
+    if (strength <= 2) {
+      strengthBar.className = "strength-fill weak";
+      strengthText.textContent = "Weak";
+      strengthText.className = "strength-text weak";
+    } else if (strength <= 4) {
+      strengthBar.className = "strength-fill medium";
+      strengthText.textContent = "Medium";
+      strengthText.className = "strength-text medium";
+    } else {
+      strengthBar.className = "strength-fill strong";
+      strengthText.textContent = "Strong";
+      strengthText.className = "strength-text strong";
+    }
   }
 
-  if (isValid) {
-    submitBtn.classList.add("loading");
+  // Password input event listener
+  passwordInput.addEventListener("input", function () {
+    checkPasswordStrength(this.value);
+  });
+
+  // Password confirmation validation
+  confirmPasswordInput.addEventListener("input", function () {
+    const password = passwordInput.value;
+    const confirmPassword = this.value;
+    const errorDiv = this.parentNode.parentNode.querySelector(".error-message");
+
+    if (confirmPassword && password !== confirmPassword) {
+      errorDiv.textContent = "Passwords do not match";
+      errorDiv.style.display = "block";
+    } else {
+      errorDiv.textContent = "";
+      errorDiv.style.display = "none";
+    }
+  });
+
+  // Clear error messages
+  function clearErrors() {
+    const errorMessages = document.querySelectorAll(".error-message");
+    errorMessages.forEach((error) => {
+      error.textContent = "";
+      error.style.display = "none";
+    });
+  }
+
+  // Show error message
+  function showError(fieldName, message) {
+    const field =
+      document.getElementById(fieldName) ||
+      document.querySelector(`[name="${fieldName}"]`);
+    if (field) {
+      const errorDiv = field
+        .closest(".form-group")
+        .querySelector(".error-message");
+      if (errorDiv) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = "block";
+      }
+    }
+  }
+
+  // Show loading state
+  function showLoading() {
     submitBtn.disabled = true;
-
-    // Simulate form submission
-    setTimeout(() => {
-      form.submit();
-    }, 1500);
+    submitBtn.classList.add("loading");
+    const spinner = submitBtn.querySelector(".loading-spinner");
+    const text = submitBtn.childNodes[2]; // The text node
+    spinner.style.display = "inline-block";
+    text.textContent = " Creating Account...";
   }
-});
 
-function showError(fieldId, message) {
-  const field = document.getElementById(fieldId);
-  const formGroup =
-    field.closest(".form-group") || field.closest(".checkbox-group");
-  const errorElement = formGroup.querySelector(".error-message");
+  // Hide loading state
+  function hideLoading() {
+    submitBtn.disabled = false;
+    submitBtn.classList.remove("loading");
+    const spinner = submitBtn.querySelector(".loading-spinner");
+    const text = submitBtn.childNodes[2];
+    spinner.style.display = "none";
+    text.textContent = " Create Account";
+  }
 
-  formGroup.classList.add("error");
-  errorElement.textContent = message;
-}
+  // Form submission
+  signupForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-// Real-time validation
-document.querySelectorAll("input, select, textarea").forEach((field) => {
-  field.addEventListener("blur", function () {
-    validateField(this);
-  });
+    clearErrors();
+    showLoading();
 
-  field.addEventListener("input", function () {
-    if (this.classList.contains("error")) {
-      validateField(this);
+    // Get form data and create a JSON object
+    const formData = new FormData(this);
+    const data = {};
+
+    formData.forEach((value, key) => {
+      data[key] = value;
+    });
+
+    // Ensure checkbox values are properly set
+    data.terms = document.getElementById("terms").checked ? "agreed" : "";
+    data.newsletter = document.getElementById("newsletter").checked
+      ? "subscribed"
+      : "";
+
+    console.log("Raw signup data:", data);
+
+    try {
+      const response = await fetch("/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Store token in localStorage
+        if (result.token) {
+          localStorage.setItem("authToken", result.token);
+          console.log("Token stored in localStorage");
+        }
+        // Redirect based on backend response
+        if (result.redirectUrl) {
+          console.log("Redirecting to:", result.redirectUrl);
+          alert("Account created successfully! Redirecting to login...");
+          window.location.href = result.redirectUrl;
+        } else {
+          alert("Account created successfully! Please login to continue.");
+          window.location.href = "/login";
+        }
+      } else {
+        // Handle validation errors from the backend
+        if (result.message) {
+          if (result.message.includes("name")) {
+            showError("name", result.message);
+          } else if (result.message.includes("email")) {
+            showError("email", result.message);
+          } else if (result.message.includes("password")) {
+            showError("password", result.message);
+          } else if (result.message.includes("mailing")) {
+            showError("mailingAddress", result.message);
+          } else if (result.message.includes("already exists")) {
+            showError("email", "This email is already registered");
+          } else {
+            alert(result.message);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert("An error occurred during signup. Please try again.");
+    } finally {
+      hideLoading();
     }
   });
 });
 
-function validateField(field) {
-  const formGroup =
-    field.closest(".form-group") || field.closest(".checkbox-group");
-  const errorElement = formGroup.querySelector(".error-message");
+// Password toggle function (called from HTML)
+function togglePassword(fieldId) {
+  const passwordField = document.getElementById(fieldId);
+  const toggleButton =
+    passwordField.parentNode.querySelector(".password-toggle i");
 
-  formGroup.classList.remove("error");
-  errorElement.textContent = "";
-
-  // Basic validation
-  if (field.hasAttribute("required") && !field.value.trim()) {
-    showError(field.id, "This field is required");
-    return false;
+  if (passwordField.type === "password") {
+    passwordField.type = "text";
+    toggleButton.className = "fas fa-eye-slash";
+  } else {
+    passwordField.type = "password";
+    toggleButton.className = "fas fa-eye";
   }
-
-  // Email validation
-  if (field.type === "email" && field.value) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(field.value)) {
-      showError(field.id, "Please enter a valid email address");
-      return false;
-    }
-  }
-
-  return true;
 }
