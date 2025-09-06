@@ -7,7 +7,13 @@ html(lang="en")
     link(rel="stylesheet", href="/Styles/login.css")
     link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap", rel="stylesheet")
     link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css", rel="stylesheet")
-    
+    style
+      | .tab { display: none; }
+      | .tab.active { display: block; }
+      | .tab-buttons { display: flex; justify-content: center; margin-bottom: 20px; }
+      | .tab-btn { padding: 10px 20px; margin: 0 5px; cursor: pointer; background: #f1f1f1; border-radius: 5px; }
+      | .tab-btn.active { background: #007bff; color: white; }
+
   body
     .container
       .login-wrapper
@@ -16,7 +22,7 @@ html(lang="en")
             i.fas.fa-sign-in-alt
             | Welcome Back
           p.subtitle Sign in to your account to continue
-          
+
         //- Display flash messages if any
         if locals.message
           .alert.alert-error
@@ -32,57 +38,80 @@ html(lang="en")
             button.alert-close(onclick="closeAlert()")
               i.fas.fa-times
 
-        form.login-form(action="/login", method="POST", id="loginForm")
-          .form-row
-            .form-group
-              label(for="email")
-                i.fas.fa-envelope
-                | Email Address
-              input(type="email", id="email", name="email", placeholder="Enter your email address", required, autocomplete="email")
-              .error-message
-              
-          .form-row
-            .form-group
-              label(for="password")
-                i.fas.fa-lock
-                | Password
-              .password-input-wrapper
-                input(type="password", id="password", name="password", placeholder="Enter your password", required, autocomplete="current-password")
-                button.password-toggle(type="button", onclick="togglePassword()")
-                  i.fas.fa-eye
-              .error-message
-              
-          .form-row.options-row
-            .checkbox-group
-              input(type="checkbox", id="remember", name="remember")
-              label(for="remember") Remember me for 30 days
-              
-            .forgot-password
-              a(href="/forgot-password") Forgot Password?
-              
-          button.submit-btn(type="submit")
-            i.fas.fa-sign-in-alt
-            | Sign In
-            .loading-spinner
-              i.fas.fa-spinner
-              
+        .tab-buttons
+          button.tab-btn.active(onclick="showTab('email-tab')") Email & Password
+          button.tab-btn(onclick="showTab('google-tab')") Google
+          button.tab-btn(onclick="showTab('google-id-tab')") Google ID
+
+        .tab.active#email-tab
+          form.login-form(action="/login", method="POST", id="loginForm")
+            .form-row
+              .form-group
+                label(for="email")
+                  i.fas.fa-envelope
+                  | Email Address
+                input(type="email", id="email", name="email", placeholder="Enter your email address", required, autocomplete="email")
+                .error-message
+            .form-row
+              .form-group
+                label(for="password")
+                  i.fas.fa-lock
+                  | Password
+                .password-input-wrapper
+                  input(type="password", id="password", name="password", placeholder="Enter your password", required, autocomplete="current-password")
+                  button.password-toggle(type="button", onclick="togglePassword('password')")
+                    i.fas.fa-eye
+                .error-message
+            .form-row.options-row
+              .checkbox-group
+                input(type="checkbox", id="remember", name="remember")
+                label(for="remember") Remember me for 30 days
+              .forgot-password
+                a(href="/forgot-password") Forgot Password?
+            button.submit-btn(type="submit")
+              i.fas.fa-sign-in-alt
+              | Sign In
+              .loading-spinner
+                i.fas.fa-spinner
+
+        .tab#google-tab
+          .social-login
+            p Log in using your Google account
+            a.social-btn.google(href="/api/auth/google")
+              i.fab.fa-google
+              | Sign In with Google
+
+        .tab#google-id-tab
+          form.login-form(action="/login", method="POST", id="googleIdForm")
+            .form-row
+              .form-group
+                label(for="email-google")
+                  i.fas.fa-envelope
+                  | Email Address
+                input(type="email", id="email-google", name="email", placeholder="Enter your email address", required, autocomplete="email")
+                .error-message
+            .form-row
+              .form-group
+                label(for="googleId")
+                  i.fab.fa-google
+                  | Google ID
+                input(type="text", id="googleId", name="googleId", placeholder="Enter your Google ID", required)
+                .error-message
+            .form-row.options-row
+              .checkbox-group
+                input(type="checkbox", id="remember-google", name="remember")
+                label(for="remember-google") Remember me for 30 days
+              .forgot-password
+                a(href="/forgot-password") Forgot Password?
+            button.submit-btn(type="submit")
+              i.fas.fa-sign-in-alt
+              | Sign In
+              .loading-spinner
+                i.fas.fa-spinner
+
         .login-footer
           p Don't have an account? 
             a(href="/signup") Create one here
-          
-          .social-login
-            p.divider 
-              span Or continue with
-            .social-buttons
-              button.social-btn.google(onclick="socialLogin('google')")
-                i.fab.fa-google
-                | Google
-              button.social-btn.facebook(onclick="socialLogin('facebook')")
-                i.fab.fa-facebook-f
-                | Facebook
-              button.social-btn.microsoft(onclick="socialLogin('microsoft')")
-                i.fab.fa-microsoft
-                | Microsoft
 
         //- Quick Demo Login (Remove in production)
         .demo-section
@@ -99,3 +128,17 @@ html(lang="en")
               | Demo Sales
 
     script(src="/vanilla-js/login.js")
+    script.
+      function showTab(tabId) {
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+      }
+      function closeAlert() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+          alert.style.opacity = '0';
+          setTimeout(() => alert.remove(), 300);
+        });
+      }

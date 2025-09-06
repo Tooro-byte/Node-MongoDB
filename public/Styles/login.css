@@ -6,20 +6,14 @@ body {
   line-height: 1.6;
   color: #333;
   min-height: 100vh;
-
-  background-image: url("/images/your-background.jpg");
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
-
-  /* Alternative backgrounds */
-  /* background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); */
-  /* background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%); */
 }
 
-/* Overlay for better text readability over background images */
+/* Overlay for better text readability */
 body::before {
   content: "";
   position: fixed;
@@ -99,6 +93,56 @@ body::before {
   font-size: 1rem;
   margin: 0;
   font-weight: 400;
+}
+
+/* ============================================
+   TAB STYLES
+   ============================================ */
+
+.tab-buttons {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+  gap: 10px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  cursor: pointer;
+  background: #f1f1f1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  background: #e5e7eb;
+}
+
+.tab-btn.active {
+  background: #667eea;
+  color: white;
+}
+
+.tab {
+  display: none;
+}
+
+.tab.active {
+  display: block;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* ============================================
@@ -395,56 +439,33 @@ input::placeholder {
 /* Social Login */
 .social-login {
   margin-top: 25px;
-}
-
-.divider {
-  position: relative;
-  margin: 20px 0;
   text-align: center;
-  color: #6b7280;
-  font-size: 0.9rem;
 }
 
-.divider::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: #e5e7eb;
-  z-index: 1;
-}
-
-.divider span {
-  background: rgba(255, 255, 255, 0.98);
-  padding: 0 15px;
-  position: relative;
-  z-index: 2;
-}
-
-.social-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
+.social-login p {
+  margin: 0 0 15px 0;
+  color: #64748b;
+  font-size: 0.95rem;
 }
 
 .social-btn {
-  flex: 1;
+  width: 100%;
+  max-width: 300px;
   padding: 12px 16px;
   border: 2px solid #e5e7eb;
   border-radius: 10px;
   background: #fff;
   color: #374151;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   font-family: inherit;
+  text-decoration: none;
 }
 
 .social-btn:hover {
@@ -458,18 +479,8 @@ input::placeholder {
   color: #db4437;
 }
 
-.social-btn.facebook:hover {
-  border-color: #4267b2;
-  color: #4267b2;
-}
-
-.social-btn.microsoft:hover {
-  border-color: #0078d4;
-  color: #0078d4;
-}
-
 /* ============================================
-   DEMO SECTION (Remove in production)
+   DEMO SECTION
    ============================================ */
 
 .demo-section {
@@ -532,14 +543,24 @@ input::placeholder {
     font-size: 1.9rem;
   }
 
+  .tab-buttons {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
   .options-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
 
-  .social-buttons {
-    flex-direction: column;
+  .social-btn {
+    max-width: 100%;
   }
 
   .demo-buttons {
@@ -564,6 +585,11 @@ input::placeholder {
     padding: 14px 20px;
     font-size: 1rem;
   }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
 }
 
 /* ============================================
@@ -579,7 +605,8 @@ input::placeholder {
 }
 
 input:focus,
-button:focus {
+button:focus,
+a:focus {
   outline: 2px solid #667eea;
   outline-offset: 2px;
 }
@@ -589,7 +616,10 @@ button:focus {
     border: 3px solid #000;
   }
 
-  input {
+  input,
+  .submit-btn,
+  .social-btn,
+  .tab-btn {
     border-width: 3px;
   }
 }

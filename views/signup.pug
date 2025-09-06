@@ -7,7 +7,7 @@ html(lang="en")
     link(rel="stylesheet", href="/Styles/signup.css")
     link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap", rel="stylesheet")
     link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css", rel="stylesheet")
-    
+
   body
     .container
       .signup-wrapper
@@ -15,117 +15,95 @@ html(lang="en")
           h1.logo
             i.fas.fa-user-plus
             | Create Account
-          p.subtitle Join us today and get started with your journey
-          
-        form.signup-form(action="/signup", method="POST", id="signupForm")
-          .form-row
-            .form-group
-              label(for="name")
-                i.fas.fa-user
-                | Full Name
-              input(type="text", id="name", name="name", placeholder="Enter your full name", required)
-              .error-message
-                
-          .form-row
-            .form-group
-              label(for="email")
-                i.fas.fa-envelope
-                | Email Address
-              input(type="email", id="email", name="email", placeholder="Enter your email address", required)
-              .error-message
-              
-          .form-row
-            .form-group
-              label(for="phone")
-                i.fas.fa-phone
-                | Phone Number
-              input(type="tel", id="phone", name="phone", placeholder="Enter your phone number")
-              .error-message
-              
-          .form-row
-            .form-group
-              label(for="password")
-                i.fas.fa-lock
-                | Password
-              .password-input-wrapper
-                input(type="password", id="password", name="password", placeholder="Create a strong password", required)
-                button.password-toggle(type="button", onclick="togglePassword('password')")
-                  i.fas.fa-eye
-              .password-strength
-                .strength-bar
-                  .strength-fill
-                .strength-text Weak
-              .error-message
-              
-          .form-row
-            .form-group
-              label(for="confirmPassword")
-                i.fas.fa-lock
-                | Confirm Password
-              .password-input-wrapper
-                input(type="password", id="confirmPassword", name="confirmPassword", placeholder="Confirm your password", required)
-                button.password-toggle(type="button", onclick="togglePassword('confirmPassword')")
-                  i.fas.fa-eye
-              .error-message
-              
-          .form-row
-            .form-group
-              label(for="role")
-                i.fas.fa-user-tag
-                | Account Type
-              select(id="role", name="role", required)
-                option(value="client", selected) Client
-                option(value="admin") Administrator
-                option(value="salesAgent") Sales Agent
-              .error-message
-              
-          // This is the corrected section.
-          // The .form-row with id="mailingAddressRow" is essential for your JS.
-          .form-row#mailingAddressRow
-            .form-group
-              label(for="mailingAddress")
-                i.fas.fa-map-marker-alt
-                | Mailing Address
-              textarea(id="mailingAddress", name="mailingAddress", placeholder="Enter your complete mailing address", rows="3")
-              .error-message
-              
-          .form-row.terms-row
-            .checkbox-group
-              input(type="checkbox", id="terms", name="terms", required)
-              label(for="terms") 
-                | I agree to the 
-                a(href="/terms", target="_blank") Terms of Service
-                |  and 
-                a(href="/privacy", target="_blank") Privacy Policy
-              .error-message
-              
-          .form-row.newsletter-row
-            .checkbox-group
-              input(type="checkbox", id="newsletter", name="newsletter")
-              label(for="newsletter") Subscribe to our newsletter for updates and offers
-              
-          button.submit-btn(type="submit")
-            i.fas.fa-user-plus
-            | Create Account
-            .loading-spinner
-              i.fas.fa-spinner
-              
+          p.subtitle Join us by signing up with your preferred method
+
+        .tab-buttons
+          button.tab-btn.active(data-tab="email-tab") Email & Password
+          button.tab-btn(data-tab="google-tab") Continue with Google
+
+        .tab.active#email-tab
+          form.signup-form(action="/signup/email", method="POST", id="emailForm")
+            .form-row
+              .form-group
+                label(for="name-email")
+                  i.fas.fa-user
+                  | Full Name
+                input(type="text", id="name-email", name="name", placeholder="Enter your full name", required, autocomplete="name")
+                .error-message
+            .form-row
+              .form-group
+                label(for="email-email")
+                  i.fas.fa-envelope
+                  | Email Address
+                input(type="email", id="email-email", name="email", placeholder="Enter your email address", required, autocomplete="email")
+                .error-message
+            .form-row
+              .form-group
+                label(for="password-email")
+                  i.fas.fa-lock
+                  | Password
+                .password-input-wrapper
+                  input(type="password", id="password-email", name="password", placeholder="Create a password", required, autocomplete="new-password")
+                  button.password-toggle(type="button")
+                    i.fas.fa-eye
+                .error-message
+                .password-strength
+                  .strength-bar
+                    .strength-fill
+                  span.strength-text
+            .form-row
+              .form-group
+                label(for="confirm-password-email")
+                  i.fas.fa-lock
+                  | Confirm Password
+                input(type="password", id="confirm-password-email", name="confirmPassword", placeholder="Confirm your password", required, autocomplete="new-password")
+                .error-message
+            .form-row
+              .form-group
+                label(for="role")
+                  i.fas.fa-briefcase
+                  | Role
+                select(id="role", name="role", required)
+                  option(value="", disabled, selected) Select your role
+                  option(value="client") Client
+                  option(value="admin") Admin
+                  option(value="salesAgent") Sales Agent
+                .error-message
+            .form-row#mailingAddressRow
+              .form-group
+                label(for="mailingAddress")
+                  i.fas.fa-map-marker-alt
+                  | Mailing Address
+                textarea(id="mailingAddress", name="mailingAddress", placeholder="Enter your mailing address")
+                .error-message
+            .terms-row
+              .checkbox-group
+                input(type="checkbox", id="terms-email", name="terms", required)
+                label(for="terms-email")
+                  | I agree to the 
+                  a(href="/terms") Terms of Service
+                  |  and 
+                  a(href="/privacy") Privacy Policy
+                .error-message
+            .newsletter-row
+              .checkbox-group
+                input(type="checkbox", id="newsletter-email", name="newsletter")
+                label(for="newsletter-email") Subscribe to our newsletter
+            button.submit-btn(type="submit")
+              i.fas.fa-user-plus
+              | Sign Up
+              .loading-spinner
+                i.fas.fa-spinner
+
+        .tab#google-tab
+          .social-signup
+            p Sign up using your Google account
+            a.social-btn.google(href="/api/auth/google")
+              i.fab.fa-google
+              | Continue with Google
+
         .signup-footer
           p Already have an account? 
-            a(href="/login") Sign in here
-          
-          .social-signup
-            p.divider 
-              span Or sign up with
-            .social-buttons
-              button.social-btn.google
-                i.fab.fa-google
-                | Google
-              button.social-btn.facebook
-                i.fab.fa-facebook-f
-                | Facebook
-              button.social-btn.twitter
-                i.fab.fa-twitter
-                | Twitter
+            a(href="/login") Log in here
 
     script(src="/vanilla-js/signup.js")
