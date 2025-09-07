@@ -19,7 +19,7 @@ html(lang="en")
 
         .tab-buttons
           button.tab-btn.active(data-tab="email-tab") Email & Password
-          button.tab-btn(data-tab="google-tab") Continue with Google
+          button.tab-btn(data-tab="social-tab") Social Login
 
         .tab.active#email-tab
           form.signup-form(action="/signup/email", method="POST", id="emailForm")
@@ -95,12 +95,16 @@ html(lang="en")
               .loading-spinner
                 i.fas.fa-spinner
 
-        .tab#google-tab
+        .tab#social-tab
           .social-signup
-            p Sign up using your Google account
-            a.social-btn.google(href="/api/auth/google")
-              i.fab.fa-google
-              | Continue with Google
+            p Sign up using your social media account
+            .social-buttons
+              a.social-btn.google(href="/api/auth/google")
+                i.fab.fa-google
+                | Continue with Google
+              a.social-btn.facebook(href="/api/auth/facebook")
+                i.fab.fa-facebook-f
+                | Continue with Facebook
 
         .signup-footer
           p Already have an account? 

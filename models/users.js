@@ -25,6 +25,11 @@ const userSchema = new mongoose.Schema(
       sparse: true, // Allows null values while maintaining uniqueness for non-null values
       index: true, // Add index for faster queries
     },
+    facebookId: {
+      type: String,
+      sparse: true, // Allows null values while maintaining uniqueness for non-null values
+      index: true, // Add index for faster queries
+    },
     role: {
       type: String,
       enum: ["client", "admin", "salesAgent"],
@@ -33,8 +38,8 @@ const userSchema = new mongoose.Schema(
     mailingAddress: {
       type: String,
       required: function () {
-        // Only require mailing address for clients who don't use Google auth
-        return this.role === "client" && !this.googleId;
+        // Only require mailing address for clients who don't use social auth
+        return this.role === "client" && !this.googleId && !this.facebookId;
       },
     },
     newsletter: {
@@ -47,13 +52,15 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Add compound index for email and googleId for faster lookups
+// Add compound indexes for email and social IDs for faster lookups
 userSchema.index({ email: 1, googleId: 1 });
+userSchema.index({ email: 1, facebookId: 1 });
+userSchema.index({ googleId: 1, facebookId: 1 });
 
 // Apply passport-local-mongoose plugin
 userSchema.plugin(passportLocalMongoose, {
   usernameField: "email",
-  // Don't require username/password for Google users
+  // Don't require username/password for social auth users
   skipMissingPasswordError: true,
 });
 
