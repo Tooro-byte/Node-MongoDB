@@ -14,7 +14,7 @@ if (!process.env.JWT_KEY) {
 const emailSchema = Joi.object({
   name: Joi.string().min(3).required(),
   email: Joi.string().email().required(),
-  phone: Joi.number().optional().allow(null, ""),
+  phone: Joi.string().optional().allow(null, ""),
   role: Joi.string().valid("client", "admin", "salesAgent").required(),
   mailingAddress: Joi.string().when("role", {
     is: "client",
@@ -52,6 +52,66 @@ router.get("/signup", (req, res) => {
   res.render("signup");
 });
 
+// Render auth success page
+router.get("/auth-success", (req, res) => {
+  const { token, redirectUrl, provider } = req.query;
+
+  if (!token || !redirectUrl) {
+    return res.redirect("/signup?error=invalid_auth_params");
+  }
+
+  const providerName = provider === "google" ? "Google" : "Facebook";
+
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Authentication Success</title>
+      <meta http-equiv="Content-Security-Policy" content="script-src 'self' http://localhost:3005; style-src 'self' 'unsafe-inline';">
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          margin: 0;
+          background-color: rgba(252, 4, 210, 1);
+        }
+        .container {
+          text-align: center;
+          background: teal;
+          padding: 2rem;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px #0841fd79;
+        }
+        .loading {
+          display: inline-block;
+          width: 20px;
+          height: 20px;
+          border: 3px solid #f3f3f3;
+          border-top: 3px solid rgba(4, 248, 167, 1);
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="loading"></div>
+        <h2>${providerName} Authentication Successful!</h2>
+        <p>Redirecting to your dashboard...</p>
+      </div>
+      <script src="/auth-success.js"></script>
+    </body>
+    </html>
+  `);
+});
+
 // Email signup endpoint
 router.post("/signup/email", async (req, res) => {
   const { error } = emailSchema.validate(req.body, { abortEarly: false });
@@ -65,22 +125,38 @@ router.post("/signup/email", async (req, res) => {
     req.body;
 
   try {
-    // Check if user already exists
+    // Check if user already exists by email
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       console.log("User already exists:", email);
-      return res.status(400).json({ message: "User already exists" });
+      return res
+        .status(400)
+        .json({ message: "A user with this email is already registered" });
     }
 
-    // Create new user
-    const newUser = new User({
-      name: name.toLowerCase(),
+    // Create new user data object - only include fields that have values
+    const newUserData = {
+      name,
       email: email.toLowerCase(),
-      phone: phone || null,
       role,
-      mailingAddress: role === "client" ? mailingAddress : "",
-      newsletter: newsletter || false,
-    });
+      newsletter: !!newsletter,
+      lastLogin: new Date(), // Set initial login date
+    };
+
+    // Only add phone if it has a value
+    if (phone && phone.trim() !== "") {
+      newUserData.phone = phone;
+    }
+
+    // Only add mailingAddress if role is client and it has a value
+    if (role === "client" && mailingAddress && mailingAddress.trim() !== "") {
+      newUserData.mailingAddress = mailingAddress;
+    }
+
+    // Don't set googleId or facebookId at all for email signups
+    // This ensures they are completely omitted from the document
+
+    const newUser = new User(newUserData);
 
     // Register user with password
     await User.register(newUser, password);
@@ -96,10 +172,10 @@ router.post("/signup/email", async (req, res) => {
     // Determine redirect URL
     const redirectUrl =
       newUser.role === "admin"
-        ? "/admin/dashboard"
+        ? "/admin-page"
         : newUser.role === "salesAgent"
-        ? "/salesAgent/dashboard"
-        : "/client/dashboard";
+        ? "/sales-agent-page"
+        : "/client-page";
 
     res.status(201).json({
       token,
@@ -108,10 +184,39 @@ router.post("/signup/email", async (req, res) => {
     });
   } catch (error) {
     console.error("Email signup error:", error.message, error.stack);
+    console.error(
+      "Duplicate key error details:",
+      error.keyPattern,
+      error.keyValue
+    );
 
-    // Handle specific mongoose errors
+    // Handle specific errors
     if (error.name === "UserExistsError") {
-      return res.status(400).json({ message: "User already exists" });
+      return res
+        .status(400)
+        .json({ message: "A user with this email is already registered" });
+    }
+    if (error.code === 11000) {
+      if (error.keyPattern?.googleId) {
+        return res.status(500).json({
+          message:
+            "Server error: Issue with user registration. Please contact support.",
+        });
+      }
+      if (error.keyPattern?.facebookId) {
+        return res.status(500).json({
+          message:
+            "Server error: Issue with user registration. Please contact support.",
+        });
+      }
+      if (error.keyPattern?.email) {
+        return res.status(400).json({
+          message: "A user with this email is already registered",
+        });
+      }
+      return res.status(400).json({
+        message: "A user with similar information already exists",
+      });
     }
 
     res.status(500).json({ message: "Server error during signup" });
@@ -121,34 +226,6 @@ router.post("/signup/email", async (req, res) => {
 // Render login page
 router.get("/login", (req, res) => {
   res.render("login");
-});
-
-// Add dashboard routes
-router.get("/client/dashboard", (req, res) => {
-  console.log("Client dashboard accessed");
-  res.send(`
-    <h1>Client Dashboard</h1>
-    <p>Welcome to your client dashboard!</p>
-    <a href="/logout">Logout</a>
-  `);
-});
-
-router.get("/admin/dashboard", (req, res) => {
-  console.log("Admin dashboard accessed");
-  res.send(`
-    <h1>Admin Dashboard</h1>
-    <p>Welcome to the admin dashboard!</p>
-    <a href="/logout">Logout</a>
-  `);
-});
-
-router.get("/salesAgent/dashboard", (req, res) => {
-  console.log("Sales Agent dashboard accessed");
-  res.send(`
-    <h1>Sales Agent Dashboard</h1>
-    <p>Welcome to the sales agent dashboard!</p>
-    <a href="/logout">Logout</a>
-  `);
 });
 
 // Login endpoint
@@ -174,6 +251,12 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    // Update last login
+    user.lastLogin = new Date();
+    user
+      .save()
+      .catch((err) => console.error("Error updating last login:", err));
+
     // Generate JWT token
     const token = jwt.sign(
       { _id: user._id, name: user.name, role: user.role },
@@ -184,10 +267,10 @@ router.post("/login", async (req, res) => {
     // Determine redirect URL
     const redirectUrl =
       user.role === "admin"
-        ? "/admin/dashboard"
+        ? "/admin-page"
         : user.role === "salesAgent"
-        ? "/salesAgent/dashboard"
-        : "/client/dashboard";
+        ? "/sales-agent-page"
+        : "/client-page";
 
     console.log("Login successful for:", email);
     res.status(200).json({
@@ -198,4 +281,16 @@ router.post("/login", async (req, res) => {
   })(req, res);
 });
 
+//>>>>>>>>>>logout button>>>>>>>>>>>
+
+router.get("/logout", (req, res) => {
+  if (req.session) {
+    req.session.destroy((error) => {
+      if (error) {
+        return res.status(500).send("Error Logging out!");
+      }
+      res.send("Thank You for Visting Kings Collections");
+    });
+  }
+});
 module.exports = router;

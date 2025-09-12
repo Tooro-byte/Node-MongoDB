@@ -1,48 +1,42 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Handle Google OAuth callback query parameters
+  // Handle OAuth error query parameters only (success redirects are handled directly now)
   const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get("token");
-  const role = urlParams.get("role");
   const error = urlParams.get("error");
-  const redirectUrl = urlParams.get("redirectUrl");
-  const googleAuth = urlParams.get("googleAuth");
+  const message = urlParams.get("message");
 
-  if (token && role && redirectUrl && googleAuth) {
-    // Store token and redirect for Google OAuth success
-    localStorage.setItem("authToken", token);
-    console.log("Google OAuth success:", {
-      token: token.substring(0, 20) + "...",
-      role,
-      redirectUrl,
-    });
-
-    // Show success message briefly before redirecting
-    showSuccessMessage(
-      "Google authentication successful! Redirecting to dashboard..."
-    );
-
-    setTimeout(() => {
-      window.location.href = decodeURIComponent(redirectUrl);
-    }, 2000);
-    return;
-  }
-
+  // Handle OAuth errors only
   if (error) {
-    console.error("Google OAuth error:", error);
-    showErrorMessage(getErrorMessage(error));
+    console.error("OAuth error:", { error, message });
+    const errorMessage = message
+      ? decodeURIComponent(message)
+      : getErrorMessage(error);
+    showErrorMessage(errorMessage);
+
+    // Clear URL parameters after showing error
+    setTimeout(() => {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }, 100);
   }
 
   // Helper functions for messages
   function showSuccessMessage(message) {
     const messageDiv = createMessageDiv(message, "success");
     document.body.insertBefore(messageDiv, document.body.firstChild);
-    setTimeout(() => messageDiv.remove(), 5000);
+    setTimeout(() => {
+      if (messageDiv.parentNode) {
+        messageDiv.remove();
+      }
+    }, 5000);
   }
 
   function showErrorMessage(message) {
     const messageDiv = createMessageDiv(message, "error");
     document.body.insertBefore(messageDiv, document.body.firstChild);
-    setTimeout(() => messageDiv.remove(), 8000);
+    setTimeout(() => {
+      if (messageDiv.parentNode) {
+        messageDiv.remove();
+      }
+    }, 8000);
   }
 
   function createMessageDiv(message, type) {
@@ -50,25 +44,55 @@ document.addEventListener("DOMContentLoaded", () => {
     div.className = `alert alert-${type}`;
     div.style.cssText = `
       position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-      padding: 15px 25px; border-radius: 5px; z-index: 1000;
+      padding: 15px 25px; border-radius: 5px; z-index: 1000; max-width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 500;
       ${
         type === "success"
           ? "background: #d4edda; color: #155724; border: 1px solid #c3e6cb;"
           : "background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;"
       }
     `;
-    div.textContent = message;
+    div.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <i class="fas fa-${
+          type === "success" ? "check-circle" : "exclamation-triangle"
+        }"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.parentElement.remove()" style="
+          background: none; border: none; color: inherit; font-size: 18px; 
+          cursor: pointer; margin-left: 10px; opacity: 0.7;
+        ">×</button>
+      </div>
+    `;
     return div;
   }
 
   function getErrorMessage(error) {
     const errorMessages = {
-      auth_failed: "Google authentication failed. Please try again.",
-      invalid_profile: "Invalid Google profile data received.",
+      // Facebook specific errors
+      facebook_access_denied:
+        "Facebook access was denied. Please try again and grant necessary permissions.",
+      facebook_auth_failed:
+        "Facebook authentication failed. Please check your internet connection and try again.",
+      facebook_server_error:
+        "Facebook server error. Please try again in a few minutes.",
+
+      // General errors
+      auth_failed: "Social authentication failed. Please try again.",
+      invalid_profile: "Invalid profile data received from social provider.",
       server_error: "Server error during authentication. Please try again.",
+      database_error: "Database error occurred. Please try again.",
+
+      // Network errors
+      network_error:
+        "Network connection error. Please check your internet and try again.",
     };
+
     return (
-      errorMessages[error] || "An unknown error occurred during authentication."
+      errorMessages[error] ||
+      (error.startsWith("facebook_")
+        ? "Facebook authentication error. Please try again."
+        : "An unknown error occurred during authentication.")
     );
   }
 
@@ -96,6 +120,68 @@ document.addEventListener("DOMContentLoaded", () => {
       showTab(tabId);
     });
   });
+
+  // Facebook Auth Button Handler
+  const facebookButton = document.querySelector(".social-btn.facebook");
+  if (facebookButton) {
+    facebookButton.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      // Show loading state
+      const originalText = facebookButton.innerHTML;
+      facebookButton.innerHTML = `
+        <i class="fab fa-facebook-f"></i>
+        <i class="fas fa-spinner fa-spin" style="margin-left: 5px;"></i>
+        Connecting to Facebook...
+      `;
+      facebookButton.style.pointerEvents = "none";
+      facebookButton.style.opacity = "0.7";
+
+      try {
+        // Redirect to Facebook auth
+        window.location.href = "/api/auth/facebook";
+      } catch (error) {
+        console.error("Facebook auth error:", error);
+        showErrorMessage("Failed to connect to Facebook. Please try again.");
+
+        // Restore button state
+        facebookButton.innerHTML = originalText;
+        facebookButton.style.pointerEvents = "auto";
+        facebookButton.style.opacity = "1";
+      }
+    });
+  }
+
+  // Google Auth Button Handler
+  const googleButton = document.querySelector(".social-btn.google");
+  if (googleButton) {
+    googleButton.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      // Show loading state
+      const originalText = googleButton.innerHTML;
+      googleButton.innerHTML = `
+        <i class="fab fa-google"></i>
+        <i class="fas fa-spinner fa-spin" style="margin-left: 5px;"></i>
+        Connecting to Google...
+      `;
+      googleButton.style.pointerEvents = "none";
+      googleButton.style.opacity = "0.7";
+
+      try {
+        // Redirect to Google auth
+        window.location.href = "/api/auth/google";
+      } catch (error) {
+        console.error("Google auth error:", error);
+        showErrorMessage("Failed to connect to Google. Please try again.");
+
+        // Restore button state
+        googleButton.innerHTML = originalText;
+        googleButton.style.pointerEvents = "auto";
+        googleButton.style.opacity = "1";
+      }
+    });
+  }
 
   // Email & Password form handling
   const emailForm = document.getElementById("emailForm");
@@ -199,6 +285,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Password toggle function
+  function togglePassword(inputId) {
+    const passwordField = document.getElementById(inputId);
+    if (!passwordField) return;
+
+    const toggleButton =
+      passwordField.parentNode.querySelector(".password-toggle i");
+    if (!toggleButton) return;
+
+    if (passwordField.type === "password") {
+      passwordField.type = "text";
+      toggleButton.className = "fas fa-eye-slash";
+    } else {
+      passwordField.type = "password";
+      toggleButton.className = "fas fa-eye";
+    }
+  }
+
   // Form utility functions
   function clearErrors(form) {
     const errorMessages = form.querySelectorAll(".error-message");
@@ -296,7 +400,7 @@ document.addEventListener("DOMContentLoaded", () => {
           showSuccessMessage("Account created successfully! Redirecting...");
 
           setTimeout(() => {
-            window.location.href = result.redirectUrl || "/dashboard";
+            window.location.href = result.redirectUrl || "/client-page";
           }, 1500);
         } else {
           handleSignupError(emailForm, result);
@@ -313,10 +417,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function validateFormData(data) {
     const errors = [];
 
-    if (!data.name || data.name.length < 3) {
+    if (!data.name || data.name.trim().length < 2) {
       errors.push({
         field: "name",
-        message: "Name must be at least 3 characters",
+        message: "Name must be at least 2 characters",
       });
     }
 
@@ -338,6 +442,9 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
+    if (!data.role) {
+      errors.push({ field: "role", message: "Please select a role" });
+    }
     if (!data.terms) {
       errors.push({ field: "terms", message: "You must agree to the terms" });
     }
@@ -370,21 +477,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
-
-// Password toggle function
-function togglePassword(inputId) {
-  const passwordField = document.getElementById(inputId);
-  if (!passwordField) return;
-
-  const toggleButton =
-    passwordField.parentNode.querySelector(".password-toggle i");
-  if (!toggleButton) return;
-
-  if (passwordField.type === "password") {
-    passwordField.type = "text";
-    toggleButton.className = "fas fa-eye-slash";
-  } else {
-    passwordField.type = "password";
-    toggleButton.className = "fas fa-eye";
-  }
-}

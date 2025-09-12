@@ -1,0 +1,463 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Kings Collection Customer-Dashboard
+    link(rel="stylesheet", href="/Styles/client-dashboard.css")
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap", rel="stylesheet")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
+
+  body
+    //-Header
+    header.header
+      .container
+        .header-content
+          .logo
+            i.fas.fa-tshirt
+            span MenStyle
+          .header-actions
+            .cart-icon
+              i.fas.fa-shopping-cart
+              span.cart-count 3
+            .user-menu
+              .user-avatar
+                i.fas.fa-user
+              .dropdown-menu
+                a(href="#") Profile Settings
+                a(href="#") Help & Support
+                a(href="/logout") Logout
+
+    //-Main Content
+    main.main-content
+      .container
+        //-Welcome Section
+        section.welcome-section
+          .welcome-card
+            .welcome-text
+              h1 Welcome back, John!
+              p Ready to discover new styles?
+            .account-summary
+              .summary-item
+                .summary-number 12
+                .summary-label Total Orders
+              .summary-item
+                .summary-number $2,450
+                .summary-label Total Spent
+              .summary-item
+                .summary-number Mar 15
+                .summary-label Last Order
+
+        //-Notifications
+        .notifications
+          .notification.success
+            i.fas.fa-check-circle
+            span Your order #ORD-2024-001 has been shipped!
+            button.close-notification
+              i.fas.fa-times
+
+        //-Dashboard Grid
+        .dashboard-grid
+          //-Sidebar Navigation
+          aside.sidebar
+            nav.sidebar-nav
+              a.nav-item.active(href="#" data-section="overview")
+                i.fas.fa-home
+                span Overview
+              a.nav-item(href="#" data-section="orders")
+                i.fas.fa-box
+                span Order History
+              a.nav-item(href="#" data-section="wishlist")
+                i.fas.fa-heart
+                span Wishlist
+                span.count 5
+              a.nav-item(href="#" data-section="cart")
+                i.fas.fa-shopping-cart
+                span Shopping Cart
+                span.count 3
+              a.nav-item(href="#" data-section="account")
+                i.fas.fa-user-cog
+                span Account Settings
+              a.nav-item(href="#" data-section="reviews")
+                i.fas.fa-star
+                span My Reviews
+
+          //-Main Dashboard Content
+          .dashboard-content
+            //-Overview Section
+            section#overview.content-section.active
+              .section-header
+                h2 Dashboard Overview
+                p Here's what's happening with your account
+
+              .overview-grid
+                .overview-card
+                  .card-icon.orders
+                    i.fas.fa-box
+                  .card-content
+                    h3 Recent Orders
+                    p 3 orders in the last 30 days
+                    a.card-link(href="#" data-section="orders") View all orders →
+
+                .overview-card
+                  .card-icon.wishlist
+                    i.fas.fa-heart
+                  .card-content
+                    h3 Wishlist Items
+                    p 5 items waiting for you
+                    a.card-link(href="#" data-section="wishlist") View wishlist →
+
+                .overview-card
+                  .card-icon.recommendations
+                    i.fas.fa-sparkles
+                  .card-content
+                    h3 Recommended
+                    p New arrivals just for you
+                    a.card-link(href="#") Browse recommendations →
+
+              //-Recently Viewed
+              .recently-viewed
+                h3 Recently Viewed
+                .product-grid
+                  .product-card
+                    .product-image
+                      img(src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=300", alt="Classic White Shirt")
+                    .product-info
+                      h4 Classic White Shirt
+                      p $89.99
+                      button.btn.btn-primary Add to Cart
+
+                  .product-card
+                    .product-image
+                      img(src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=300", alt="Denim Jacket")
+                    .product-info
+                      h4 Denim Jacket
+                      p $129.99
+                      button.btn.btn-primary Add to Cart
+
+                  .product-card
+                    .product-image
+                      img(src="https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=300", alt="Leather Boots")
+                    .product-info
+                      h4 Leather Boots
+                      p $199.99
+                      button.btn.btn-primary Add to Cart
+
+            //-Orders Section
+            section#orders.content-section
+              .section-header
+                h2 Order History
+                p Track and manage all your orders
+
+              .orders-container
+                .order-filters
+                  select.filter-select
+                    option(value="all") All Orders
+                    option(value="processing") Processing
+                    option(value="shipped") Shipped
+                    option(value="delivered") Delivered
+                  input.search-input(type="text", placeholder="Search orders...")
+
+                .orders-list
+                  .order-item
+                    .order-header
+                      .order-info
+                        h4 Order #ORD-2024-001
+                        p March 15, 2024
+                      .order-status.shipped
+                        i.fas.fa-truck
+                        span Shipped
+                      .order-total $159.98
+                    .order-details
+                      .order-products
+                        .product-item
+                          img(src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Product")
+                          .product-details
+                            h5 Classic White Shirt
+                            p Size: L, Color: White
+                            span $79.99
+                        .product-item
+                          img(src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Product")
+                          .product-details
+                            h5 Cotton T-Shirt
+                            p Size: M, Color: Navy
+                            span $79.99
+                      .order-actions
+                        button.btn.btn-outline Track Order
+                        button.btn.btn-outline View Details
+                        button.btn.btn-outline Reorder
+
+                  .order-item
+                    .order-header
+                      .order-info
+                        h4 Order #ORD-2024-002
+                        p March 10, 2024
+                      .order-status.delivered
+                        i.fas.fa-check-circle
+                        span Delivered
+                      .order-total $299.99
+                    .order-details
+                      .order-products
+                        .product-item
+                          img(src="https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Product")
+                          .product-details
+                            h5 Leather Boots
+                            p Size: 10, Color: Brown
+                            span $299.99
+                      .order-actions
+                        button.btn.btn-outline Leave Review
+                        button.btn.btn-outline View Details
+                        button.btn.btn-outline Return Item
+
+            //-Wishlist Section
+            section#wishlist.content-section
+              .section-header
+                h2 My Wishlist
+                p Items you've saved for later
+
+              .wishlist-container
+                .wishlist-actions
+                  button.btn.btn-primary Share Wishlist
+                  button.btn.btn-outline Clear All
+
+                .wishlist-grid
+                  .wishlist-item
+                    .wishlist-image
+                      img(src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=300", alt="Premium Suit")
+                      button.remove-wishlist
+                        i.fas.fa-times
+                    .wishlist-info
+                      h4 Premium Suit
+                      p $399.99
+                      .rating
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star-half-alt
+                        span (4.5)
+                      button.btn.btn-primary Add to Cart
+
+                  .wishlist-item
+                    .wishlist-image
+                      img(src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=300", alt="Casual Sneakers")
+                      button.remove-wishlist
+                        i.fas.fa-times
+                    .wishlist-info
+                      h4 Casual Sneakers
+                      p $149.99
+                      .rating
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.far.fa-star
+                        span (4.0)
+                      button.btn.btn-primary Add to Cart
+
+                  .wishlist-item
+                    .wishlist-image
+                      img(src="https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=300", alt="Winter Coat")
+                      button.remove-wishlist
+                        i.fas.fa-times
+                    .wishlist-info
+                      h4 Winter Coat
+                      p $249.99
+                      .rating
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        i.fas.fa-star
+                        span (5.0)
+                      button.btn.btn-primary Add to Cart
+
+            //-Shopping Cart Section
+            section#cart.content-section
+              .section-header
+                h2 Shopping Cart
+                p Review items before checkout
+
+              .cart-container
+                .cart-items
+                  .cart-item
+                    .item-image
+                      img(src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=150", alt="Product")
+                    .item-details
+                      h4 Classic White Shirt
+                      p Size: L, Color: White
+                      .item-price $79.99
+                    .item-quantity
+                      button.qty-btn.minus
+                        i.fas.fa-minus
+                      input.qty-input(type="number", value="1", min="1")
+                      button.qty-btn.plus
+                        i.fas.fa-plus
+                    .item-total $79.99
+                    button.remove-item
+                      i.fas.fa-trash
+
+                  .cart-item
+                    .item-image
+                      img(src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=150", alt="Product")
+                    .item-details
+                      h4 Denim Jacket
+                      p Size: M, Color: Blue
+                      .item-price $129.99
+                    .item-quantity
+                      button.qty-btn.minus
+                        i.fas.fa-minus
+                      input.qty-input(type="number", value="2", min="1")
+                      button.qty-btn.plus
+                        i.fas.fa-plus
+                    .item-total $259.98
+                    button.remove-item
+                      i.fas.fa-trash
+
+                .cart-summary
+                  .summary-row
+                    span Subtotal:
+                    span $339.97
+                  .summary-row
+                    span Shipping:
+                    span $9.99
+                  .summary-row
+                    span Tax:
+                    span $27.99
+                  .summary-row.total
+                    span Total:
+                    span $377.95
+                  button.btn.btn-primary.checkout-btn Proceed to Checkout
+
+            //-Account Settings Section
+            section#account.content-section
+              .section-header
+                h2 Account Settings
+                p Manage your personal information and preferences
+
+              .account-grid
+                .account-card
+                  .card-header
+                    h3 Personal Information
+                    button.btn.btn-outline Edit
+                  .card-content
+                    .info-row
+                      span Name:
+                      span John Doe
+                    .info-row
+                      span Email:
+                      span john.doe@email.com
+                    .info-row
+                      span Phone:
+                      span +1 (555) 123-4567
+
+                .account-card
+                  .card-header
+                    h3 Shipping Addresses
+                    button.btn.btn-outline Add New
+                  .card-content
+                    .address-item
+                      .address-label Default
+                      .address-details
+                        p 123 Main Street
+                        p New York, NY 10001
+                      .address-actions
+                        button.btn.btn-text Edit
+                        button.btn.btn-text Delete
+
+                .account-card
+                  .card-header
+                    h3 Payment Methods
+                    button.btn.btn-outline Add New
+                  .card-content
+                    .payment-item
+                      .payment-icon
+                        i.fab.fa-cc-visa
+                      .payment-details
+                        p **** **** **** 1234
+                        p Expires 12/25
+                      .payment-actions
+                        button.btn.btn-text Edit
+                        button.btn.btn-text Remove
+
+                .account-card
+                  .card-header
+                    h3 Security
+                  .card-content
+                    button.btn.btn-outline Change Password
+                    button.btn.btn-outline Enable Two-Factor Auth
+
+            //-Reviews Section
+            section#reviews.content-section
+              .section-header
+                h2 My Reviews
+                p Your feedback helps other customers
+
+              .reviews-container
+                .review-item
+                  .review-product
+                    img(src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Product")
+                    .product-info
+                      h4 Classic White Shirt
+                      p Purchased on March 10, 2024
+                  .review-content
+                    .review-rating
+                      i.fas.fa-star
+                      i.fas.fa-star
+                      i.fas.fa-star
+                      i.fas.fa-star
+                      i.fas.fa-star
+                    .review-text
+                      p "Excellent quality shirt! The fabric is soft and the fit is perfect. Highly recommend!"
+                    .review-date March 15, 2024
+                  .review-actions
+                    button.btn.btn-outline Edit Review
+                    button.btn.btn-outline Delete Review
+
+                .review-item
+                  .review-product
+                    img(src="https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Product")
+                    .product-info
+                      h4 Leather Boots
+                      p Purchased on February 28, 2024
+                  .review-content
+                    .review-rating
+                      i.fas.fa-star
+                      i.fas.fa-star
+                      i.fas.fa-star
+                      i.fas.fa-star
+                      i.far.fa-star
+                    .review-text
+                      p "Great boots, very comfortable. Only issue is they took a while to break in."
+                    .review-date March 5, 2024
+                  .review-actions
+                    button.btn.btn-outline Edit Review
+                    button.btn.btn-outline Delete Review
+
+    //-Footer
+    footer.footer
+      .container
+        .footer-content
+          .footer-section
+            h4 Customer Service
+            a(href="#") Contact Us
+            a(href="#") FAQ
+            a(href="#") Returns & Exchanges
+          .footer-section
+            h4 About MenStyle
+            a(href="#") Our Story
+            a(href="#") Size Guide
+            a(href="#") Privacy Policy
+          .footer-section
+            h4 Follow Us
+            .social-links
+              a(href="#")
+                i.fab.fa-facebook
+              a(href="#")
+                i.fab.fa-instagram
+              a(href="#")
+                i.fab.fa-twitter
+
+    script(src="/vanilla-js/client-dashboard.js")

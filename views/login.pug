@@ -7,12 +7,6 @@ html(lang="en")
     link(rel="stylesheet", href="/Styles/login.css")
     link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap", rel="stylesheet")
     link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css", rel="stylesheet")
-    style
-      | .tab { display: none; }
-      | .tab.active { display: block; }
-      | .tab-buttons { display: flex; justify-content: center; margin-bottom: 20px; }
-      | .tab-btn { padding: 10px 20px; margin: 0 5px; cursor: pointer; background: #f1f1f1; border-radius: 5px; }
-      | .tab-btn.active { background: #007bff; color: white; }
 
   body
     .container
@@ -39,9 +33,8 @@ html(lang="en")
               i.fas.fa-times
 
         .tab-buttons
-          button.tab-btn.active(onclick="showTab('email-tab')") Email & Password
-          button.tab-btn(onclick="showTab('google-tab')") Google
-          button.tab-btn(onclick="showTab('google-id-tab')") Google ID
+          button.tab-btn.active(data-tab="email-tab") Email & Password
+          button.tab-btn(data-tab="social-tab") Social Login
 
         .tab.active#email-tab
           form.login-form(action="/login", method="POST", id="loginForm")
@@ -74,71 +67,19 @@ html(lang="en")
               .loading-spinner
                 i.fas.fa-spinner
 
-        .tab#google-tab
+        .tab#social-tab
           .social-login
-            p Log in using your Google account
-            a.social-btn.google(href="/api/auth/google")
-              i.fab.fa-google
-              | Sign In with Google
-
-        .tab#google-id-tab
-          form.login-form(action="/login", method="POST", id="googleIdForm")
-            .form-row
-              .form-group
-                label(for="email-google")
-                  i.fas.fa-envelope
-                  | Email Address
-                input(type="email", id="email-google", name="email", placeholder="Enter your email address", required, autocomplete="email")
-                .error-message
-            .form-row
-              .form-group
-                label(for="googleId")
-                  i.fab.fa-google
-                  | Google ID
-                input(type="text", id="googleId", name="googleId", placeholder="Enter your Google ID", required)
-                .error-message
-            .form-row.options-row
-              .checkbox-group
-                input(type="checkbox", id="remember-google", name="remember")
-                label(for="remember-google") Remember me for 30 days
-              .forgot-password
-                a(href="/forgot-password") Forgot Password?
-            button.submit-btn(type="submit")
-              i.fas.fa-sign-in-alt
-              | Sign In
-              .loading-spinner
-                i.fas.fa-spinner
+            p Sign in using your social media account
+            .social-buttons
+              a.social-btn.google(href="/api/auth/google")
+                i.fab.fa-google
+                | Continue with Google
+              a.social-btn.facebook(href="/api/auth/facebook")
+                i.fab.fa-facebook-f
+                | Continue with Facebook
 
         .login-footer
           p Don't have an account? 
             a(href="/signup") Create one here
 
-        //- Quick Demo Login (Remove in production)
-        .demo-section
-          p.demo-title Quick Demo Access
-          .demo-buttons
-            button.demo-btn(onclick="fillDemo('client')")
-              i.fas.fa-user
-              | Demo Client
-            button.demo-btn(onclick="fillDemo('admin')")
-              i.fas.fa-user-shield
-              | Demo Admin
-            button.demo-btn(onclick="fillDemo('sales')")
-              i.fas.fa-user-tie
-              | Demo Sales
-
     script(src="/vanilla-js/login.js")
-    script.
-      function showTab(tabId) {
-        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
-      }
-      function closeAlert() {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-          alert.style.opacity = '0';
-          setTimeout(() => alert.remove(), 300);
-        });
-      }

@@ -68,26 +68,25 @@ router.get(
         { expiresIn: "1h" }
       );
 
-      // Determine redirect URL based on role
+      //>>>>>>> Determine redirect URL based on role>>>>>>
       const redirectUrl =
         dbUser.role === "admin"
-          ? "/admin/dashboard"
+          ? "http://localhost:3005/admin-page"
           : dbUser.role === "salesAgent"
-          ? "/salesAgent/dashboard"
-          : "/client/dashboard";
+          ? "http://localhost:3005/sales-agent-page"
+          : "http://localhost:3005/client-page";
 
-      console.log("=== REDIRECTING USER ===", {
+      console.log("=== REDIRECTING USER DIRECTLY TO DASHBOARD ===", {
         token: token.substring(0, 20) + "...",
         role: dbUser.role,
         redirectUrl,
       });
 
-      // Redirect to signup page with success parameters
-      res.redirect(
-        `http://localhost:3005/signup?token=${token}&role=${
-          dbUser.role
-        }&redirectUrl=${encodeURIComponent(redirectUrl)}&googleAuth=true`
-      );
+      // Redirect to a dedicated auth success page with token as URL parameter
+      const authSuccessUrl = `http://localhost:3005/auth-success?token=${encodeURIComponent(
+        token
+      )}&redirectUrl=${encodeURIComponent(redirectUrl)}&provider=google`;
+      res.redirect(authSuccessUrl);
     } catch (error) {
       console.error(
         "=== GOOGLE CALLBACK ERROR ===",
@@ -99,17 +98,49 @@ router.get(
   }
 );
 
-//>>>>>>>>>>>>>>>> Implementing Facebook API >>>>>>>>>>>>>>
+// >>>>>>>>>>>> Implementing Facebook Login In the Application so far >>>>>>>>>>>>>
 router.get(
   "/facebook",
-  passport.authenticate("facebook", { scope: ["public_profile", "email"] })
+  (req, res, next) => {
+    console.log("=== FACEBOOK AUTH INITIATED ===");
+    console.log("Request headers:", req.headers);
+    next();
+  },
+  passport.authenticate("facebook", {
+    scope: ["public_profile", "email"],
+    authType: "rerequest", // Forces permission dialog
+  })
 );
 
 router.get(
   "/facebook/callback",
+  (req, res, next) => {
+    console.log("=== FACEBOOK CALLBACK RECEIVED ===");
+    console.log("Query parameters:", req.query);
+    console.log("Body:", req.body);
+
+    // Check for Facebook error in callback
+    if (req.query.error) {
+      console.error("Facebook OAuth Error:", {
+        error: req.query.error,
+        error_reason: req.query.error_reason,
+        error_description: req.query.error_description,
+      });
+
+      return res.redirect(
+        `http://localhost:3005/signup?error=facebook_${
+          req.query.error
+        }&message=${encodeURIComponent(
+          req.query.error_description || "Facebook authentication failed"
+        )}`
+      );
+    }
+
+    next();
+  },
   passport.authenticate("facebook", {
     session: false,
-    failureRedirect: "http://localhost:3005/signup?error=auth_failed",
+    failureRedirect: "http://localhost:3005/signup?error=facebook_auth_failed",
   }),
   async (req, res) => {
     try {
@@ -127,16 +158,16 @@ router.get(
       if (!user) {
         console.error("No user data received from Facebook authentication");
         return res.redirect(
-          "http://localhost:3005/signup?error=invalid_profile"
+          "http://localhost:3005/signup?error=invalid_profile&message=No user data received"
         );
       }
 
-      // Verify user was actually saved to database
+      // Verify user exists in database
       const dbUser = await User.findById(user._id);
       if (!dbUser) {
         console.error("User not found in database after Facebook auth");
         return res.redirect(
-          "http://localhost:3005/signup?error=database_error"
+          "http://localhost:3005/signup?error=database_error&message=User not saved to database"
         );
       }
 
@@ -162,30 +193,32 @@ router.get(
       // Determine redirect URL based on role
       const redirectUrl =
         dbUser.role === "admin"
-          ? "/admin/dashboard"
+          ? "http://localhost:3005/admin-page"
           : dbUser.role === "salesAgent"
-          ? "/salesAgent/dashboard"
-          : "/client/dashboard";
+          ? "http://localhost:3005/sales-agent-page"
+          : "http://localhost:3005/client-page";
 
-      console.log("=== REDIRECTING FACEBOOK USER ===", {
+      console.log("=== REDIRECTING FACEBOOK USER DIRECTLY TO DASHBOARD ===", {
         token: token.substring(0, 20) + "...",
         role: dbUser.role,
         redirectUrl,
       });
 
-      // Redirect to signup page with success parameters
-      res.redirect(
-        `http://localhost:3005/signup?token=${token}&role=${
-          dbUser.role
-        }&redirectUrl=${encodeURIComponent(redirectUrl)}&facebookAuth=true`
-      );
+      // Redirect to a dedicated auth success page with token as URL parameter
+      const authSuccessUrl = `http://localhost:3005/auth-success?token=${encodeURIComponent(
+        token
+      )}&redirectUrl=${encodeURIComponent(redirectUrl)}&provider=facebook`;
+      res.redirect(authSuccessUrl);
     } catch (error) {
-      console.error(
-        "=== FACEBOOK CALLBACK ERROR ===",
-        error.message,
-        error.stack
+      console.error("=== FACEBOOK CALLBACK ERROR ===");
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+
+      res.redirect(
+        `http://localhost:3005/signup?error=server_error&message=${encodeURIComponent(
+          "Server error during Facebook authentication: " + error.message
+        )}`
       );
-      res.redirect("http://localhost:3005/signup?error=server_error");
     }
   }
 );

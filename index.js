@@ -31,6 +31,8 @@ const User = require("./models/users");
 // >>>>>> Import Routes from multipe sources and use them here! <<<<<<<<<<<<
 const userSigup = require("./routes/userAuth");
 const authRoutes = require("./routes/auth");
+const clientPage = require("./routes/client");
+const salesPage = require("./routes/salesAgent");
 
 // >>>>>>>>>Handling JSON Objects with the Express Middleware <<<<<<<
 app.use(express.json());
@@ -68,6 +70,8 @@ passport.deserializeUser(User.deserializeUser());
 // >>>>>>> Use the already imported Routes <<<<<<<<<
 app.use("/", userSigup);
 app.use("/api/auth", authRoutes);
+app.use("/", clientPage);
+app.use("/", salesPage);
 
 // Placeholder dashboard route
 app.get("/dashboard", (req, res) => {
