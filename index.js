@@ -1,4 +1,4 @@
-// <<<<<<<<< Cofiguring the different DOTENV Files >>>>>>>>>>
+// <<<<<<<<< Configuring the different DOTENV Files >>>>>>>>>>
 require("dotenv").config();
 require("./config/passport");
 
@@ -14,13 +14,13 @@ const expressSession = require("express-session")({
   saveUninitialized: false,
 });
 
-// >>>>>>> My E-commerce Website Instatiations <<<<<<<<
+// >>>>>>> My E-commerce Website Instantiations <<<<<<<<
 const app = express();
 const PORT = process.env.PORT || 3005;
 
 const User = require("./models/users");
 
-// >>>>>> Import Routes from multipe sources and use them here! <<<<<<<<<<<<
+// >>>>>> Import Routes from multiple sources and use them here! <<<<<<<<<<<<
 const userSigup = require("./routes/userAuth");
 const authRoutes = require("./routes/auth");
 const clientPage = require("./routes/client");
@@ -28,15 +28,15 @@ const salesPage = require("./routes/salesAgent");
 const categoryRouter = require("./routes/categoryRoutes");
 const indexRouter = require("./routes/indexRoute");
 
-// >>>>>>>>>Handling JSON Objects with the Express Middleware <<<<<<<
+// >>>>>>>>> Handling JSON Objects with the Express Middleware <<<<<<<
 app.use(express.json());
 
-// >>>>>>>>>>>Setting up templating Engines <<<<<<<<<<
+// >>>>>>>>>>> Setting up templating Engines <<<<<<<<<<
 app.set("view engine", "pug");
 app.set("views", "./views");
 
 // >>>>>>>>>>> More Middlewares <<<<<<<<<<
-// Corrected: Configure helmet's Content Security Policy to allow external scripts and inline scripts.
+// Updated: Configure helmet's Content Security Policy to allow YouTube iframes, scripts, and styles
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -45,15 +45,24 @@ app.use(
         "'self'",
         "https://cdn.tailwindcss.com",
         "https://kit.fontawesome.com",
-        "'unsafe-inline'", // This allows the inline <script> tag in your Pug file
+        "'unsafe-inline'", // Allows inline scripts in your Pug file
+        "https://www.youtube.com", // Added for YouTube embed scripts
+        "https://s.ytimg.com", // Added for YouTube iframe player scripts
       ],
       styleSrc: [
         "'self'",
         "https://cdn.tailwindcss.com",
         "https://fonts.googleapis.com",
-        "'unsafe-inline'", // This allows the inline <style> tag in your Pug file
+        "'unsafe-inline'", // Allows inline styles in your Pug file
       ],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      frameSrc: [
+        "'self'",
+        "https://www.youtube.com", // Added to allow YouTube iframes
+        "https://www.youtube-nocookie.com", // Optional: For privacy-enhanced mode
+      ],
+      imgSrc: ["'self'", "data:", "https://i.ytimg.com"], // Added for YouTube thumbnails
+      connectSrc: ["'self'", "https://www.youtube.com"], // Optional: For YouTube API connections
     },
   })
 );
@@ -71,7 +80,7 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
   console.log("Morgan on It");
 }
-// >>>>>>>Connecting to MongoDB Service<<<<<<
+// >>>>>>> Connecting to MongoDB Service <<<<<<
 async function connectToDatabase() {
   try {
     await mongoose.connect(process.env.DATABASE);
@@ -82,7 +91,7 @@ async function connectToDatabase() {
 }
 connectToDatabase();
 
-// >>>>>>>>Passport Configurations <<<<<<<<<<
+// >>>>>>>> Passport Configurations <<<<<<<<<<
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
@@ -97,7 +106,7 @@ app.use("/", clientPage);
 app.use("/", salesPage);
 app.use("/", categoryRouter);
 
-//Handling Non -existing routes.
+// Handling Non-existing routes.
 app.use((req, res) => {
   console.log("404 - Route not found:", req.originalUrl);
   res.status(404).send("Error, Page not found");
@@ -109,7 +118,7 @@ app.use((err, req, res, next) => {
   res.status(500).send("Internal Server Error");
 });
 
-// >>>>>>>>>>>>>Boostsrapping th Server <<<<<<<<<<
+// >>>>>>>>>>>>> Bootstrapping the Server <<<<<<<<<<
 app.listen(PORT, () => {
   console.log(`Secure connection on ${PORT} `);
 });

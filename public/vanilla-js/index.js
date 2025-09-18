@@ -167,6 +167,20 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
+  // YouTube Play Button Functionality
+  const playButton = document.querySelector(".play-button");
+  const iframe = document.querySelector(".video-container iframe");
+  if (playButton && iframe) {
+    playButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      iframe.contentWindow.postMessage(
+        '{"event":"command","func":"playVideo","args":""}',
+        "*"
+      );
+      playButton.parentElement.style.opacity = "0"; // Hide overlay after click
+    });
+  }
+
   // Intersection Observer for animations
   const observerOptions = {
     threshold: 0.1,

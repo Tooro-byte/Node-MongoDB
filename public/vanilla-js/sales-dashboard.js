@@ -1,1230 +1,1311 @@
-// Sales Agent Dashboard Management System
-class SalesAgentDashboard {
+/**
+ * Kings Collection Sales Dashboard
+ * Enhanced JavaScript functionality with modern ES6+ features
+ * Version: 2.0.3
+ * Updated: Added click-based dropdown toggling for user menu and nav bar, improved accessibility, fixed hover issue
+ */
+
+class SalesDashboard {
   constructor() {
-    this.currentSection = "overview";
-    this.orders = this.loadOrders();
-    this.customers = this.loadCustomers();
-    this.inquiries = this.loadInquiries();
-    this.returns = this.loadReturns();
-    this.inventory = this.loadInventory();
+    this.currentSection = "dashboard";
+    this.currentTime = new Date();
+    this.cartItems = new Map();
+    this.notifications = [];
+    this.tasks = [];
+    this.promotions = [];
+    this.taxRate = 0.085; // Configurable tax rate
+    this.locale = "en-US"; // Configurable locale
+
     this.init();
   }
 
   init() {
-    this.setupNavigation();
-    this.setupOrderManagement();
-    this.setupCustomerManagement();
-    this.setupInquiryManagement();
-    this.setupReturnManagement();
-    this.setupInventoryManagement();
-    this.setupAnalytics();
-    this.setupTools();
-    this.setupModals();
-    this.setupNotifications();
-    this.updateDashboardStats();
+    this.initializeClock();
+    this.initializeNavigation();
+    this.initializeQuickActions();
+    this.initializePOS();
+    this.initializeModals();
+    this.initializeDropdowns(); // Replaced initializeNotifications
     this.initializeCharts();
+    this.initializeEventListeners();
+    this.loadDashboardData();
+
+    // Auto-refresh functionality
+    this.startAutoRefresh();
   }
 
-  // Navigation System
-  setupNavigation() {
-    const navItems = document.querySelectorAll(".nav-item");
-    const contentSections = document.querySelectorAll(".content-section");
+  /**
+   * Digital Clock Functionality
+   */
+  initializeClock() {
+    this.updateClock();
+    setInterval(() => this.updateClock(), 1000);
+  }
 
+  updateClock() {
+    const now = new Date();
+    const timeElement = document.getElementById("currentTime");
+    const dateElement = document.getElementById("currentDate");
+
+    if (timeElement && dateElement) {
+      const timeString = now.toLocaleTimeString(this.locale, {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+      });
+      const dateString = now.toLocaleDateString(this.locale, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+
+      timeElement.textContent = timeString;
+      dateElement.textContent = dateString;
+    } else {
+      console.warn("Clock elements not found");
+    }
+
+    this.updateGreeting(now);
+  }
+
+  updateGreeting(now) {
+    const hour = now.getHours();
+    const greetingElement = document.querySelector(".greeting-text");
+
+    if (greetingElement) {
+      let greeting;
+      if (hour < 12) greeting = "Good Morning,";
+      else if (hour < 17) greeting = "Good Afternoon,";
+      else greeting = "Good Evening,";
+      greetingElement.textContent = greeting;
+    } else {
+      console.warn("Greeting element not found");
+    }
+  }
+
+  /**
+   * Navigation System
+   */
+  initializeNavigation() {
+    const navItems = document.querySelectorAll(".nav-item[data-section]");
     navItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         e.preventDefault();
         const targetSection = item.getAttribute("data-section");
+        this.switchSection(targetSection);
+      });
+    });
 
-        if (targetSection) {
-          this.switchSection(targetSection);
-          this.updateActiveNav(item);
+    this.initializeTabNavigation();
+  }
+
+  switchSection(sectionId) {
+    const sections = document.querySelectorAll(".content-section");
+    sections.forEach((section) => section.classList.remove("active"));
+
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+      targetSection.classList.add("active");
+    } else {
+      console.warn(`Section ${sectionId} not found`);
+    }
+
+    const navItems = document.querySelectorAll(".nav-item");
+    navItems.forEach((item) => item.classList.remove("active"));
+
+    const activeNavItem = document.querySelector(
+      `[data-section="${sectionId}"]`
+    );
+    if (activeNavItem) {
+      activeNavItem.classList.add("active");
+    }
+
+    this.currentSection = sectionId;
+    this.loadSectionData(sectionId);
+    this.showToast(
+      "success",
+      "Navigation",
+      `Switched to ${this.formatSectionName(sectionId)} section`
+    );
+  }
+
+  initializeTabNavigation() {
+    const tabLinks = document.querySelectorAll(".tab-link[data-tab]");
+    tabLinks.forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const targetTab = link.getAttribute("data-tab");
+
+        tabLinks.forEach((l) => l.classList.remove("active"));
+        link.classList.add("active");
+
+        const tabPanels = document.querySelectorAll(".tab-panel");
+        tabPanels.forEach((panel) => panel.classList.remove("active"));
+        const targetPanel = document.getElementById(`${targetTab}-settings`);
+        if (targetPanel) {
+          targetPanel.classList.add("active");
+        } else {
+          console.warn(`Tab panel ${targetTab}-settings not found`);
+        }
+      });
+    });
+  }
+
+  formatSectionName(sectionId) {
+    return (
+      sectionId.charAt(0).toUpperCase() + sectionId.slice(1).replace("-", " ")
+    );
+  }
+
+  /**
+   * Dropdown System (User Menu and Nav Bar)
+   */
+  initializeDropdowns() {
+    // User Menu Dropdown
+    const userMenu = document.querySelector(".user-menu");
+    const userDropdown = document.querySelector(".dropdown-menu");
+
+    if (userMenu && userDropdown) {
+      userMenu.setAttribute("tabindex", "0"); // Make focusable
+      userMenu.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.toggleDropdown(userDropdown);
+      });
+      userMenu.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          this.toggleDropdown(userDropdown);
+        }
+      });
+
+      // Handle user menu item clicks
+      const dropdownItems = userDropdown.querySelectorAll("[data-action]");
+      dropdownItems.forEach((item) => {
+        item.addEventListener("click", (e) => {
+          e.preventDefault();
+          const action = item.getAttribute("data-action");
+          this.handleUserAction(action);
+          this.closeAllDropdowns();
+        });
+      });
+    } else {
+      console.warn("User menu or dropdown not found");
+    }
+
+    // Navigation Bar Dropdowns
+    const navItems = document.querySelectorAll(".top-nav .nav-item");
+    navItems.forEach((item) => {
+      const dropdown = item.querySelector(".nav-dropdown");
+      if (dropdown) {
+        item.setAttribute("tabindex", "0"); // Make focusable
+        item.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.toggleDropdown(dropdown);
+        });
+        item.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            this.toggleDropdown(dropdown);
+          }
+        });
+
+        // Handle nav dropdown item clicks
+        const notificationItems =
+          dropdown.querySelectorAll(".notification-item");
+        notificationItems.forEach((notifItem) => {
+          notifItem.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const title =
+              notifItem.querySelector(".notification-title")?.textContent ||
+              "Item";
+            this.showToast("info", "Notification", `Clicked ${title}`);
+            this.closeAllDropdowns();
+          });
+        });
+      }
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener("click", (e) => {
+      const dropdowns = document.querySelectorAll(
+        ".dropdown-menu, .nav-dropdown"
+      );
+      dropdowns.forEach((dropdown) => {
+        if (
+          !dropdown.contains(e.target) &&
+          dropdown.classList.contains("active")
+        ) {
+          dropdown.classList.remove("active");
         }
       });
     });
 
-    // Quick action buttons
+    // Prevent dropdown closure when clicking inside
+    const allDropdowns = document.querySelectorAll(
+      ".dropdown-menu, .nav-dropdown"
+    );
+    allDropdowns.forEach((dropdown) => {
+      dropdown.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+    });
+  }
+
+  toggleDropdown(dropdown) {
+    if (!dropdown) return;
+    const isActive = dropdown.classList.contains("active");
+    this.closeAllDropdowns();
+    if (!isActive) {
+      dropdown.classList.add("active");
+      const firstItem = dropdown.querySelector("a, button");
+      if (firstItem) firstItem.focus();
+    }
+  }
+
+  closeAllDropdowns() {
+    const dropdowns = document.querySelectorAll(
+      ".dropdown-menu, .nav-dropdown"
+    );
+    dropdowns.forEach((dropdown) => dropdown.classList.remove("active"));
+  }
+
+  /**
+   * Quick Actions
+   */
+  initializeQuickActions() {
     const quickActions = document.querySelectorAll(".action-btn");
-    quickActions.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.handleQuickAction(e.target);
+    quickActions.forEach((action) => {
+      action.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (action.classList.contains("new-order")) {
+          this.handleNewOrder();
+        } else if (action.classList.contains("pos")) {
+          this.switchSection("pos");
+        } else if (action.classList.contains("customer-lookup")) {
+          this.handleCustomerLookup();
+        } else {
+          const actionName =
+            action.querySelector("span")?.textContent || "Action";
+          this.showToast("info", "Quick Action", `${actionName} clicked`);
+        }
       });
     });
   }
 
-  switchSection(sectionName) {
-    const contentSections = document.querySelectorAll(".content-section");
+  handleNewOrder() {
+    this.showModal("orderModal", "Create New Order", this.getNewOrderContent());
+  }
 
-    contentSections.forEach((section) => {
-      section.classList.remove("active");
-    });
-
-    const targetSection = document.getElementById(sectionName);
-    if (targetSection) {
-      targetSection.classList.add("active");
-      this.currentSection = sectionName;
-
-      // Load section-specific data
-      this.loadSectionData(sectionName);
-
-      // Scroll to top of content
-      targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  handleCustomerLookup() {
+    const searchTerm = prompt("Enter customer name, email, or order number:");
+    if (searchTerm) {
+      this.searchCustomers(searchTerm);
     }
   }
 
-  updateActiveNav(activeItem) {
-    const navItems = document.querySelectorAll(".nav-item");
-    navItems.forEach((item) => item.classList.remove("active"));
-    activeItem.classList.add("active");
+  searchCustomers(searchTerm) {
+    this.showLoading();
+    setTimeout(() => {
+      this.hideLoading();
+      this.switchSection("customers");
+      this.showToast(
+        "success",
+        "Customer Search",
+        `Found customers matching "${searchTerm}"`
+      );
+    }, 1500);
   }
 
-  loadSectionData(sectionName) {
-    switch (sectionName) {
-      case "overview":
-        this.updateOverviewMetrics();
-        break;
-      case "orders":
-        this.refreshOrderQueue();
-        break;
-      case "customers":
-        this.refreshCustomerList();
-        break;
-      case "inquiries":
-        this.refreshInquiries();
-        break;
-      case "returns":
-        this.refreshReturns();
-        break;
-      case "inventory":
-        this.refreshInventory();
-        break;
-      case "analytics":
-        this.updateAnalytics();
-        break;
+  /**
+   * Point of Sale System
+   */
+  initializePOS() {
+    this.initializeProductSearch();
+    this.initializeProductGrid();
+    this.initializeCart();
+    this.initializePaymentMethods();
+  }
+
+  initializeProductSearch() {
+    const searchInput = document.getElementById("productSearch");
+    if (searchInput) {
+      let searchTimeout;
+      searchInput.addEventListener("input", (e) => {
+        clearTimeout(searchTimeout);
+        const searchTerm = e.target.value.toLowerCase();
+        searchTimeout = setTimeout(() => this.filterProducts(searchTerm), 300);
+      });
+
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && e.target.value.startsWith("*")) {
+          const barcode = e.target.value.substring(1);
+          this.handleBarcodeSearch(barcode);
+        }
+      });
+    } else {
+      console.warn("Product search input not found");
     }
   }
 
-  // Order Management
-  setupOrderManagement() {
-    // Bulk actions
-    const bulkSelect = document.querySelector(".bulk-select");
-    const bulkBtns = document.querySelectorAll(".bulk-btn");
+  filterProducts(searchTerm) {
+    const products = document.querySelectorAll(".product-item");
+    products.forEach((product) => {
+      const productName =
+        product.querySelector(".product-name")?.textContent.toLowerCase() || "";
+      const isVisible = searchTerm === "" || productName.includes(searchTerm);
+      product.style.display = isVisible ? "block" : "none";
+    });
+  }
 
-    if (bulkSelect) {
-      bulkSelect.addEventListener("change", (e) => {
-        this.toggleAllOrders(e.target.checked);
-      });
+  handleBarcodeSearch(barcode) {
+    this.showToast("info", "Barcode Scan", `Scanning barcode: ${barcode}`);
+    setTimeout(() => {
+      const mockProduct = {
+        id: barcode,
+        name: "Scanned Product",
+        price: 99.99,
+        stock: 12,
+      };
+      this.addToCart(mockProduct);
+    }, 500);
+  }
+
+  initializeProductGrid() {
+    const products = document.querySelectorAll(".product-item");
+    products.forEach((product) => {
+      const addButton = product.querySelector(".add-to-cart");
+      if (addButton) {
+        addButton.addEventListener("click", () => {
+          const productData = {
+            id: product.getAttribute("data-product-id"),
+            name:
+              product.querySelector(".product-name")?.textContent ||
+              "Unknown Product",
+            price: parseFloat(product.getAttribute("data-price")) || 0,
+            image: product.querySelector(".product-image img")?.src,
+          };
+          this.addToCart(productData);
+        });
+      }
+    });
+  }
+
+  initializeCart() {
+    const clearButton = document.querySelector(".clear-cart");
+    const cartContainer = document.getElementById("cartItems");
+
+    if (clearButton) {
+      clearButton.addEventListener("click", () => this.clearCart());
+    } else {
+      console.warn("Clear cart button not found");
     }
 
-    bulkBtns.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.handleBulkAction(e.target);
-      });
-    });
+    if (cartContainer) {
+      cartContainer.addEventListener("click", (e) => {
+        const target = e.target.closest("button");
+        if (!target) return;
 
-    // Order filters
-    const orderFilters = document.querySelectorAll(
-      ".order-filters select, .order-filters input"
-    );
-    orderFilters.forEach((filter) => {
-      filter.addEventListener("change", () => {
-        this.filterOrders();
-      });
-      filter.addEventListener("input", () => {
-        this.filterOrders();
-      });
-    });
+        const productId = target.getAttribute("data-product-id");
+        const action = target.getAttribute("data-action");
 
-    // Individual order actions
-    const orderActions = document.querySelectorAll(
-      ".order-actions .action-btn"
-    );
-    orderActions.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.handleOrderAction(e.target);
+        if (target.classList.contains("remove-item")) {
+          this.removeFromCart(productId);
+        } else if (action === "increase") {
+          const item = this.cartItems.get(productId);
+          if (item) this.updateCartQuantity(productId, item.quantity + 1);
+        } else if (action === "decrease") {
+          const item = this.cartItems.get(productId);
+          if (item) this.updateCartQuantity(productId, item.quantity - 1);
+        }
       });
-    });
-
-    // Order checkboxes
-    const orderCheckboxes = document.querySelectorAll(".order-checkbox input");
-    orderCheckboxes.forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        this.updateBulkActions();
-      });
-    });
+    } else {
+      console.warn("Cart container not found");
+    }
   }
 
-  toggleAllOrders(checked) {
-    const orderCheckboxes = document.querySelectorAll(".order-checkbox input");
-    orderCheckboxes.forEach((checkbox) => {
-      checkbox.checked = checked;
-    });
-    this.updateBulkActions();
+  addToCart(product) {
+    const existingItem = this.cartItems.get(product.id);
+    if (existingItem) {
+      existingItem.quantity += 1;
+      existingItem.total = existingItem.quantity * existingItem.price;
+    } else {
+      this.cartItems.set(product.id, {
+        ...product,
+        quantity: 1,
+        total: product.price,
+      });
+    }
+    this.updateCartDisplay();
+    this.showToast("success", "Cart", `${product.name} added to cart`);
   }
 
-  handleBulkAction(button) {
-    const selectedOrders = this.getSelectedOrders();
-    const action = button.textContent.trim();
+  removeFromCart(productId) {
+    this.cartItems.delete(productId);
+    this.updateCartDisplay();
+    this.showToast("info", "Cart", "Item removed from cart");
+  }
 
-    if (selectedOrders.length === 0) {
-      this.showToast("Please select orders first", "warning");
+  updateCartQuantity(productId, quantity) {
+    const item = this.cartItems.get(productId);
+    if (item && quantity > 0) {
+      item.quantity = quantity;
+      item.total = item.quantity * item.price;
+      this.updateCartDisplay();
+    } else if (quantity <= 0) {
+      this.removeFromCart(productId);
+    }
+  }
+
+  clearCart() {
+    this.cartItems.clear();
+    this.updateCartDisplay();
+    this.showToast("info", "Cart", "Cart cleared");
+  }
+
+  updateCartDisplay() {
+    const cartContainer = document.getElementById("cartItems");
+    if (!cartContainer) {
+      console.warn("Cart container not found");
       return;
     }
 
-    switch (action) {
-      case "Mark as Processed":
-        this.bulkProcessOrders(selectedOrders);
-        break;
-      case "Print Labels":
-        this.bulkPrintLabels(selectedOrders);
-        break;
-      case "Ship Selected":
-        this.bulkShipOrders(selectedOrders);
-        break;
+    cartContainer.innerHTML = "";
+    if (this.cartItems.size === 0) {
+      cartContainer.innerHTML = `
+        <div class="empty-cart">
+          <i class="fas fa-shopping-cart"></i>
+          <p>Add items to start a sale</p>
+        </div>
+      `;
+      this.updateCartTotals(0, 0, 0);
+      return;
+    }
+
+    let subtotal = 0;
+    this.cartItems.forEach((item, id) => {
+      subtotal += item.total;
+      const cartItemHTML = `
+        <div class="cart-item" data-product-id="${id}">
+          <div class="item-info">
+            <div class="item-image">
+              <img src="${
+                item.image ||
+                "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=50"
+              }" alt="${item.name}">
+            </div>
+            <div class="item-details">
+              <div class="item-name">${item.name}</div>
+              <div class="item-price">$${item.price.toFixed(2)}</div>
+            </div>
+          </div>
+          <div class="item-controls">
+            <div class="quantity-controls">
+              <button class="qty-btn minus" data-action="decrease" data-product-id="${id}">
+                <i class="fas fa-minus"></i>
+              </button>
+              <span class="quantity">${item.quantity}</span>
+              <button class="qty-btn plus" data-action="increase" data-product-id="${id}">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            <div class="item-total">$${item.total.toFixed(2)}</div>
+            <button class="remove-item" data-product-id="${id}">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      `;
+      cartContainer.insertAdjacentHTML("beforeend", cartItemHTML);
+    });
+
+    const tax = subtotal * this.taxRate;
+    const total = subtotal + tax;
+    this.updateCartTotals(subtotal, tax, total);
+  }
+
+  updateCartTotals(subtotal, tax, total) {
+    const subtotalElement = document.querySelector(".subtotal");
+    const taxElement = document.querySelector(".tax-amount");
+    const totalElement = document.querySelector(".total-amount");
+
+    if (subtotalElement) {
+      subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+    } else {
+      console.warn("Subtotal element not found");
+    }
+    if (taxElement) {
+      taxElement.textContent = `$${tax.toFixed(2)}`;
+    } else {
+      console.warn("Tax element not found");
+    }
+    if (totalElement) {
+      totalElement.textContent = `$${total.toFixed(2)}`;
+    } else {
+      console.warn("Total element not found");
     }
   }
 
-  handleOrderAction(button) {
-    const orderItem = button.closest(".order-item");
-    const orderNumber = orderItem.querySelector(".order-number").textContent;
-    const action = button.textContent.trim();
+  initializePaymentMethods() {
+    const paymentBtns = document.querySelectorAll(".payment-btn");
+    const paymentInput = document.querySelector(".payment-amount");
+    const completeButton = document.querySelector(".complete-sale");
+    const holdButton = document.querySelector(".hold-sale");
 
-    switch (action) {
-      case "Process":
-        this.processOrder(orderNumber);
-        break;
-      case "Ship":
-      case "Ship Now":
-        this.shipOrder(orderNumber);
-        break;
-      case "View":
-        this.viewOrderDetails(orderNumber);
-        break;
-      case "Message":
-        this.messageCustomer(orderNumber);
-        break;
-      case "Label":
-        this.printLabel(orderNumber);
-        break;
-      case "Track":
-        this.trackOrder(orderNumber);
-        break;
-    }
-  }
-
-  processOrder(orderNumber) {
-    this.showToast(`Processing order ${orderNumber}...`, "info");
-
-    // Simulate processing
-    setTimeout(() => {
-      this.updateOrderStatus(orderNumber, "processing");
-      this.showToast(`Order ${orderNumber} marked as processing`, "success");
-    }, 1000);
-  }
-
-  shipOrder(orderNumber) {
-    this.showToast(`Shipping order ${orderNumber}...`, "info");
-
-    // Simulate shipping
-    setTimeout(() => {
-      this.updateOrderStatus(orderNumber, "shipped");
-      this.showToast(`Order ${orderNumber} has been shipped`, "success");
-    }, 1500);
-  }
-
-  viewOrderDetails(orderNumber) {
-    this.openModal("orderModal", {
-      title: `Order Details - ${orderNumber}`,
-      content: this.generateOrderDetailsHTML(orderNumber),
-    });
-  }
-
-  // Customer Management
-  setupCustomerManagement() {
-    const customerSearch = document.querySelector(".customer-search input");
-    const customerFilters = document.querySelectorAll(
-      ".customer-search select"
-    );
-    const customerActions = document.querySelectorAll(".customer-actions .btn");
-
-    if (customerSearch) {
-      customerSearch.addEventListener("input", () => {
-        this.filterCustomers();
-      });
-    }
-
-    customerFilters.forEach((filter) => {
-      filter.addEventListener("change", () => {
-        this.filterCustomers();
-      });
-    });
-
-    customerActions.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.handleCustomerAction(e.target);
-      });
-    });
-  }
-
-  handleCustomerAction(button) {
-    const customerCard = button.closest(".customer-card");
-    const customerName =
-      customerCard.querySelector(".customer-name").textContent;
-    const action = button.textContent.trim();
-
-    switch (action) {
-      case "Message":
-        this.messageCustomer(customerName);
-        break;
-      case "View Profile":
-        this.viewCustomerProfile(customerName);
-        break;
-      case "Order History":
-        this.viewCustomerOrderHistory(customerName);
-        break;
-      case "Welcome Offer":
-        this.sendWelcomeOffer(customerName);
-        break;
-    }
-  }
-
-  messageCustomer(customer) {
-    this.openModal("customerModal", {
-      title: `Message Customer - ${customer}`,
-      content: this.generateMessageFormHTML(customer),
-    });
-  }
-
-  viewCustomerProfile(customerName) {
-    this.openModal("customerModal", {
-      title: `Customer Profile - ${customerName}`,
-      content: this.generateCustomerProfileHTML(customerName),
-    });
-  }
-
-  // Inquiry Management
-  setupInquiryManagement() {
-    const inquiryFilters = document.querySelectorAll(".inquiry-filters select");
-    const inquiryActions = document.querySelectorAll(".inquiry-actions .btn");
-
-    inquiryFilters.forEach((filter) => {
-      filter.addEventListener("change", () => {
-        this.filterInquiries();
-      });
-    });
-
-    inquiryActions.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.handleInquiryAction(e.target);
-      });
-    });
-  }
-
-  handleInquiryAction(button) {
-    const inquiryItem = button.closest(".inquiry-item");
-    const customerName =
-      inquiryItem.querySelector(".customer-name").textContent;
-    const subject = inquiryItem.querySelector(".inquiry-subject").textContent;
-    const action = button.textContent.trim();
-
-    switch (action) {
-      case "Respond":
-        this.respondToInquiry(customerName, subject);
-        break;
-      case "View Full":
-        this.viewFullInquiry(customerName, subject);
-        break;
-      case "Call Customer":
-        this.callCustomer(customerName);
-        break;
-      case "Size Guide":
-        this.showSizeGuide();
-        break;
-    }
-  }
-
-  respondToInquiry(customer, subject) {
-    this.showToast(`Opening response form for ${customer}`, "info");
-    // Implementation for response form
-  }
-
-  // Return Management
-  setupReturnManagement() {
-    const returnFilters = document.querySelectorAll(".return-filters select");
-    const returnActions = document.querySelectorAll(".return-actions .btn");
-
-    returnFilters.forEach((filter) => {
-      filter.addEventListener("change", () => {
-        this.filterReturns();
-      });
-    });
-
-    returnActions.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.handleReturnAction(e.target);
-      });
-    });
-  }
-
-  handleReturnAction(button) {
-    const returnItem = button.closest(".return-item");
-    const returnNumber = returnItem.querySelector(".return-number").textContent;
-    const action = button.textContent.trim();
-
-    switch (action) {
-      case "Approve":
-        this.approveReturn(returnNumber);
-        break;
-      case "Decline":
-        this.declineReturn(returnNumber);
-        break;
-      case "Process Return":
-        this.processReturn(returnNumber);
-        break;
-      case "Print Label":
-        this.printReturnLabel(returnNumber);
-        break;
-      case "Message Customer":
-        this.messageCustomerAboutReturn(returnNumber);
-        break;
-      case "View Details":
-        this.viewReturnDetails(returnNumber);
-        break;
-    }
-  }
-
-  approveReturn(returnNumber) {
-    this.showToast(`Approving return ${returnNumber}...`, "info");
-
-    setTimeout(() => {
-      this.updateReturnStatus(returnNumber, "approved");
-      this.showToast(`Return ${returnNumber} has been approved`, "success");
-    }, 1000);
-  }
-
-  // Inventory Management
-  setupInventoryManagement() {
-    const inventorySearch = document.querySelector(".inventory-search input");
-    const inventoryActions = document.querySelectorAll(
-      ".inventory-actions .btn"
-    );
-    const scanBarcodeBtn = document.querySelector(".inventory-search .btn");
-
-    if (inventorySearch) {
-      inventorySearch.addEventListener("input", () => {
-        this.filterInventory();
-      });
-    }
-
-    if (scanBarcodeBtn) {
-      scanBarcodeBtn.addEventListener("click", () => {
-        this.scanBarcode();
-      });
-    }
-
-    inventoryActions.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.handleInventoryAction(e.target);
-      });
-    });
-  }
-
-  handleInventoryAction(button) {
-    const inventoryItem = button.closest(".inventory-item");
-    const productName =
-      inventoryItem.querySelector(".product-name").textContent;
-    const action = button.textContent.trim();
-
-    switch (action) {
-      case "Restock":
-        this.restockProduct(productName);
-        break;
-      case "Update":
-        this.updateProductInfo(productName);
-        break;
-      case "View Details":
-        this.viewProductDetails(productName);
-        break;
-      case "View All":
-        this.viewAllProducts(button.closest(".stat-card"));
-        break;
-    }
-  }
-
-  scanBarcode() {
-    this.showToast("Barcode scanner activated", "info");
-    // Implementation for barcode scanning
-  }
-
-  // Analytics
-  setupAnalytics() {
-    const analyticsFilters = document.querySelectorAll(
-      ".analytics-filters select"
-    );
-    const exportBtns = document.querySelectorAll(".card-actions .btn");
-
-    analyticsFilters.forEach((filter) => {
-      filter.addEventListener("change", () => {
-        this.updateAnalytics();
-      });
-    });
-
-    exportBtns.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        if (btn.textContent.includes("Export")) {
-          this.exportData();
-        }
-      });
-    });
-  }
-
-  initializeCharts() {
-    // Initialize performance chart
-    const performanceCtx = document.getElementById("performanceChart");
-    if (performanceCtx) {
-      this.createPerformanceChart(performanceCtx);
-    }
-
-    // Initialize metric charts
-    const metricCharts = document.querySelectorAll(".metric-chart canvas");
-    metricCharts.forEach((canvas) => {
-      this.createMiniChart(canvas);
-    });
-  }
-
-  createPerformanceChart(ctx) {
-    // Simulated chart creation (would use Chart.js in real implementation)
-    const canvas = ctx.getContext("2d");
-    canvas.fillStyle = "#3498db";
-    canvas.fillRect(0, 0, ctx.width, ctx.height);
-  }
-
-  createMiniChart(canvas) {
-    // Simulated mini chart creation
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#2ecc71";
-    ctx.fillRect(0, 20, canvas.width, 20);
-  }
-
-  // Tools
-  setupTools() {
-    const toolBtns = document.querySelectorAll(".tool-action .btn");
-
-    toolBtns.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.launchTool(e.target);
-      });
-    });
-  }
-
-  launchTool(button) {
-    const toolCard = button.closest(".tool-card");
-    const toolTitle = toolCard.querySelector(".tool-title").textContent;
-
-    this.showToast(`Launching ${toolTitle}...`, "info");
-
-    // Simulate tool launch
-    setTimeout(() => {
-      this.showToast(`${toolTitle} is now ready`, "success");
-    }, 1500);
-  }
-
-  // Modal Management
-  setupModals() {
-    const modalCloses = document.querySelectorAll(".modal-close");
-    const modalOverlays = document.querySelectorAll(".modal-overlay");
-
-    modalCloses.forEach((btn) => {
+    paymentBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
-        this.closeModal(btn.closest(".modal-overlay"));
+        paymentBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
       });
     });
 
-    modalOverlays.forEach((overlay) => {
-      overlay.addEventListener("click", (e) => {
-        if (e.target === overlay) {
-          this.closeModal(overlay);
+    if (paymentInput) {
+      paymentInput.addEventListener("input", (e) => {
+        const amountPaid = parseFloat(e.target.value);
+        if (isNaN(amountPaid)) {
+          this.showToast(
+            "warning",
+            "Invalid Input",
+            "Please enter a valid amount"
+          );
+          e.target.value = "";
+          return;
+        }
+        const totalAmount = this.calculateCartTotal();
+        const change = Math.max(0, amountPaid - totalAmount);
+        const changeElement = document.querySelector(".change-amount");
+        if (changeElement) {
+          changeElement.textContent = `Change: $${change.toFixed(2)}`;
+        } else {
+          console.warn("Change amount element not found");
         }
       });
+    } else {
+      console.warn("Payment input not found");
+    }
+
+    if (completeButton) {
+      completeButton.addEventListener("click", () => this.completeSale());
+    } else {
+      console.warn("Complete sale button not found");
+    }
+
+    if (holdButton) {
+      holdButton.addEventListener("click", () => this.holdSale());
+    } else {
+      console.warn("Hold sale button not found");
+    }
+  }
+
+  calculateCartTotal() {
+    let subtotal = 0;
+    this.cartItems.forEach((item) => {
+      subtotal += item.total;
     });
+    return subtotal + subtotal * this.taxRate;
   }
 
-  openModal(modalId, options = {}) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-
-    if (options.title) {
-      const titleElement = modal.querySelector(".modal-header h3");
-      if (titleElement) titleElement.textContent = options.title;
+  completeSale() {
+    if (this.cartItems.size === 0) {
+      this.showToast("warning", "Sale Error", "Cart is empty");
+      return;
     }
 
-    if (options.content) {
-      const bodyElement = modal.querySelector(".modal-body");
-      if (bodyElement) bodyElement.innerHTML = options.content;
-    }
+    const totalAmount = this.calculateCartTotal();
+    const paymentMethod =
+      document.querySelector(".payment-btn.active")?.textContent.trim() ||
+      "Cash";
 
-    modal.classList.add("active");
-    document.body.style.overflow = "hidden";
-  }
-
-  closeModal(modal) {
-    modal.classList.remove("active");
-    document.body.style.overflow = "";
-  }
-
-  // Notification System
-  setupNotifications() {
-    const notificationIcon = document.querySelector(".notifications-icon");
-
-    if (notificationIcon) {
-      notificationIcon.addEventListener("click", () => {
-        this.showNotificationPanel();
-      });
-    }
-
-    // Auto-update notifications
-    setInterval(() => {
-      this.updateNotificationCount();
-    }, 30000); // Update every 30 seconds
-  }
-
-  showToast(message, type = "info") {
-    const toastContainer = document.getElementById("toastContainer");
-    if (!toastContainer) return;
-
-    const toast = document.createElement("div");
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-      <i class="toast-icon fas ${this.getToastIcon(type)}"></i>
-      <span class="toast-message">${message}</span>
-      <button class="toast-close">
-        <i class="fas fa-times"></i>
-      </button>
-    `;
-
-    toastContainer.appendChild(toast);
-
-    // Setup close button
-    const closeBtn = toast.querySelector(".toast-close");
-    closeBtn.addEventListener("click", () => {
-      this.removeToast(toast);
-    });
-
-    // Show toast
+    this.showLoading();
     setTimeout(() => {
-      toast.classList.add("show");
-    }, 100);
-
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-      this.removeToast(toast);
-    }, 5000);
-  }
-
-  getToastIcon(type) {
-    const icons = {
-      success: "fa-check-circle",
-      error: "fa-exclamation-circle",
-      warning: "fa-exclamation-triangle",
-      info: "fa-info-circle",
-    };
-    return icons[type] || icons.info;
-  }
-
-  removeToast(toast) {
-    toast.classList.remove("show");
-    setTimeout(() => {
-      if (toast.parentNode) {
-        toast.parentNode.removeChild(toast);
-      }
-    }, 300);
-  }
-
-  // Quick Actions
-  handleQuickAction(button) {
-    const action = button.textContent.trim();
-
-    switch (action) {
-      case "New Order":
-        this.createNewOrder();
-        break;
-      case "Find Customer":
-        this.switchSection("customers");
-        break;
-      case "Check Inventory":
-        this.switchSection("inventory");
-        break;
-      case "Print Labels":
-        this.printLabels();
-        break;
-      case "Export Data":
-        this.exportData();
-        break;
-    }
-  }
-
-  createNewOrder() {
-    this.showToast("Opening new order form...", "info");
-    // Implementation for new order creation
-  }
-
-  printLabels() {
-    this.showToast("Preparing labels for printing...", "info");
-    // Implementation for label printing
-  }
-
-  exportData() {
-    this.showToast("Exporting data...", "info");
-
-    setTimeout(() => {
-      this.showToast("Data export completed", "success");
+      this.hideLoading();
+      const receiptData = {
+        id: "RCP-" + Date.now(),
+        items: Array.from(this.cartItems.values()),
+        total: totalAmount,
+        paymentMethod: paymentMethod,
+        timestamp: new Date(),
+      };
+      this.clearCart();
+      this.showToast(
+        "success",
+        "Sale Complete",
+        `Transaction completed - $${totalAmount.toFixed(2)}`
+      );
+      this.showReceiptModal(receiptData);
     }, 2000);
   }
 
-  // Data Management
+  holdSale() {
+    if (this.cartItems.size === 0) {
+      this.showToast("warning", "Hold Sale", "Cart is empty");
+      return;
+    }
+
+    const heldSale = {
+      id: "HOLD-" + Date.now(),
+      items: Array.from(this.cartItems.values()),
+      timestamp: new Date(),
+    };
+    this.saveHeldSale(heldSale);
+    this.clearCart();
+    this.showToast("info", "Sale Held", "Current sale has been held");
+  }
+
+  saveHeldSale(saleData) {
+    let heldSales = JSON.parse(localStorage.getItem("heldSales") || "[]");
+    heldSales.push(saleData);
+    localStorage.setItem("heldSales", JSON.stringify(heldSales));
+  }
+
+  showReceiptModal(receiptData) {
+    const receiptContent = this.generateReceiptContent(receiptData);
+    this.showModal("receiptModal", "Transaction Receipt", receiptContent);
+  }
+
+  generateReceiptContent(data) {
+    let itemsHTML = "";
+    data.items.forEach((item) => {
+      itemsHTML += `
+        <div class="receipt-item">
+          <span class="item-name">${item.name}</span>
+          <span class="item-qty">x${item.quantity}</span>
+          <span class="item-total">$${item.total.toFixed(2)}</span>
+        </div>
+      `;
+    });
+
+    return `
+      <div class="receipt-content">
+        <div class="receipt-header">
+          <h4>Kings Collection</h4>
+          <p>Receipt #${data.id}</p>
+          <p>${data.timestamp.toLocaleString()}</p>
+        </div>
+        <div class="receipt-items">
+          ${itemsHTML}
+        </div>
+        <div class="receipt-total">
+          <strong>Total: $${data.total.toFixed(2)}</strong>
+        </div>
+        <div class="receipt-payment">
+          <p>Paid with: ${data.paymentMethod}</p>
+        </div>
+        <div class="receipt-footer">
+          <p>Thank you for your business!</p>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Modal System
+   */
+  initializeModals() {
+    const modalOverlays = document.querySelectorAll(".modal-overlay");
+    modalOverlays.forEach((modal) => {
+      const closeBtn = modal.querySelector(".modal-close");
+      const cancelBtn = modal.querySelector(".modal-cancel");
+
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) this.hideModal(modal.id);
+      });
+
+      if (closeBtn) {
+        closeBtn.addEventListener("click", () => this.hideModal(modal.id));
+      }
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => this.hideModal(modal.id));
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        const activeModal = document.querySelector(".modal-overlay.active");
+        if (activeModal) this.hideModal(activeModal.id);
+      }
+    });
+  }
+
+  showModal(modalId, title, content) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      const titleElement = modal.querySelector(".modal-header h3");
+      const bodyElement = modal.querySelector(".modal-body");
+
+      if (titleElement) {
+        titleElement.textContent = title;
+        titleElement.setAttribute("id", `${modalId}-title`);
+        modal.setAttribute("aria-labelledby", `${modalId}-title`);
+      }
+      if (bodyElement) bodyElement.innerHTML = content;
+
+      modal.setAttribute("role", "dialog");
+      modal.setAttribute("aria-modal", "true");
+      modal.classList.add("active");
+
+      const firstFocusable = modal.querySelector(
+        "button, input, select, textarea"
+      );
+      if (firstFocusable) firstFocusable.focus();
+    } else {
+      console.warn(`Modal ${modalId} not found`);
+    }
+  }
+
+  hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.classList.remove("active");
+  }
+
+  getNewOrderContent() {
+    return `
+      <div class="order-form">
+        <div class="form-group">
+          <label for="customerSelect">Customer</label>
+          <select id="customerSelect" class="form-input">
+            <option value="">Select Customer</option>
+            <option value="1">John Smith</option>
+            <option value="2">Sarah Johnson</option>
+            <option value="3">Mike Wilson</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="orderType">Order Type</label>
+          <select id="orderType" class="form-input">
+            <option value="standard">Standard Delivery</option>
+            <option value="express">Express Delivery</option>
+            <option value="pickup">Store Pickup</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="orderNotes">Order Notes</label>
+          <textarea id="orderNotes" class="form-input" rows="3" placeholder="Special instructions..."></textarea>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Notification System
+   */
+  loadNotifications() {
+    // Mock data; replace with API call for production
+    this.notifications = [
+      {
+        id: 1,
+        type: "urgent",
+        title: "Urgent Order",
+        message: "Order #ORD-2024-1234 is overdue",
+        time: new Date(Date.now() - 5 * 60 * 1000),
+        read: false,
+      },
+      {
+        id: 2,
+        type: "message",
+        title: "Customer Inquiry",
+        message: "New message from John Smith",
+        time: new Date(Date.now() - 12 * 60 * 1000),
+        read: false,
+      },
+    ];
+    this.updateNotificationBadge();
+  }
+
+  updateNotificationBadge() {
+    const badge = document.querySelector(".notification-badge");
+    const unreadCount = this.notifications.filter((n) => !n.read).length;
+    if (badge) {
+      badge.textContent = unreadCount;
+      badge.style.display = unreadCount > 0 ? "block" : "none";
+    } else {
+      console.warn("Notification badge not found");
+    }
+  }
+
+  showToast(type, title, message, duration = 4000) {
+    const toastContainer = document.getElementById("toastContainer");
+    if (!toastContainer) {
+      console.warn("Toast container not found");
+      return;
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    const icon = this.getToastIcon(type);
+    toast.innerHTML = `
+      <div class="toast-icon">
+        <i class="fas ${icon}"></i>
+      </div>
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+    `;
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add("show");
+    }, 100);
+    setTimeout(() => {
+      toast.classList.remove("show");
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 300);
+    }, duration);
+  }
+
+  getToastIcon(type) {
+    switch (type) {
+      case "success":
+        return "fa-check-circle";
+      case "warning":
+        return "fa-exclamation-triangle";
+      case "error":
+        return "fa-times-circle";
+      case "info":
+      default:
+        return "fa-info-circle";
+    }
+  }
+
+  /**
+   * Loading States
+   */
+  showLoading() {
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    if (loadingOverlay) {
+      loadingOverlay.classList.add("active");
+    } else {
+      console.warn("Loading overlay not found");
+    }
+  }
+
+  hideLoading() {
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    if (loadingOverlay) {
+      loadingOverlay.classList.remove("active");
+    }
+  }
+
+  /**
+   * Chart Initialization
+   */
+  initializeCharts() {
+    // Requires Chart.js: <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    this.initializeSalesChart();
+    this.initializeCustomerChart();
+    this.initializePerformanceChart();
+  }
+
+  initializeSalesChart() {
+    const canvas = document.getElementById("salesChart");
+    if (!canvas) {
+      console.warn("Sales chart canvas not found");
+      return;
+    }
+    // Mock Chart.js implementation; replace with real data
+    new Chart(canvas, {
+      type: "line",
+      data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+        datasets: [
+          {
+            label: "Sales Trend",
+            data: [1200, 1900, 3000, 2500, 4000, 3500],
+            borderColor: "#c64ff0",
+            backgroundColor: "rgba(198, 79, 240, 0.3)",
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+  }
+
+  initializeCustomerChart() {
+    const canvas = document.getElementById("customerChart");
+    if (!canvas) {
+      console.warn("Customer chart canvas not found");
+      return;
+    }
+    // Mock Chart.js implementation; replace with real data
+    new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: ["Q1", "Q2", "Q3", "Q4"],
+        datasets: [
+          {
+            label: "Customer Growth",
+            data: [150, 300, 450, 600],
+            backgroundColor: "rgba(198, 79, 240, 0.5)",
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+  }
+
+  initializePerformanceChart() {
+    const canvas = document.getElementById("performanceChart");
+    if (!canvas) {
+      console.warn("Performance chart canvas not found");
+      return;
+    }
+    // Mock Chart.js implementation; replace with real data
+    new Chart(canvas, {
+      type: "line",
+      data: {
+        labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+        datasets: [
+          {
+            label: "Performance",
+            data: [80, 85, 90, 88, 92],
+            borderColor: "#c64ff0",
+            backgroundColor: "rgba(198, 79, 240, 0.3)",
+            fill: true,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        scales: { y: { beginAtZero: true } },
+      },
+    });
+  }
+
+  /**
+   * Data Loading and Management
+   */
+  loadDashboardData() {
+    this.updateDashboardStats();
+    this.loadRecentActivity();
+    this.loadPriorityTasks();
+  }
+
+  loadSectionData(sectionId) {
+    switch (sectionId) {
+      case "orders":
+        this.loadOrdersData();
+        break;
+      case "customers":
+        this.loadCustomersData();
+        break;
+      case "inventory":
+        this.loadInventoryData();
+        break;
+      case "tasks":
+        this.loadTasksData();
+        break;
+      case "promotions":
+        this.loadPromotionsData();
+        break;
+      // Admin-specific sections (placeholder for owner dashboard)
+      case "analytics":
+        this.loadAnalyticsData();
+        break;
+      case "employees":
+        this.loadEmployeeData();
+        break;
+      case "financials":
+        this.loadFinancialData();
+        break;
+      case "marketing":
+        this.loadMarketingData();
+        break;
+      default:
+        break;
+    }
+  }
+
   updateDashboardStats() {
-    // Update header stats
-    this.updateHeaderStats();
-
-    // Update navigation counts
-    this.updateNavigationCounts();
-
-    // Update overview metrics
-    this.updateOverviewMetrics();
+    this.animateCounter(".stat-number", [24, 3200, 18]);
   }
 
-  updateHeaderStats() {
-    const pendingOrders = this.orders.filter(
-      (order) => order.status === "new"
-    ).length;
-    const newInquiries = this.inquiries.filter(
-      (inquiry) => inquiry.status === "new"
-    ).length;
-    const ordersToday = this.orders.filter((order) =>
-      this.isToday(order.date)
-    ).length;
-
-    // Update header stat numbers
-    const statNumbers = document.querySelectorAll(".header-stats .stat-number");
-    if (statNumbers[0]) statNumbers[0].textContent = pendingOrders;
-    if (statNumbers[1]) statNumbers[1].textContent = newInquiries;
-    if (statNumbers[2]) statNumbers[2].textContent = ordersToday;
-  }
-
-  updateNavigationCounts() {
-    const overviewCount = this.orders.filter(
-      (order) => order.status === "new"
-    ).length;
-    const orderCount = this.orders.filter((order) =>
-      ["new", "processing"].includes(order.status)
-    ).length;
-    const inquiryCount = this.inquiries.filter(
-      (inquiry) => inquiry.status === "new"
-    ).length;
-    const returnCount = this.returns.filter(
-      (ret) => ret.status === "pending"
-    ).length;
-
-    this.updateNavCount("overview", overviewCount);
-    this.updateNavCount("orders", orderCount);
-    this.updateNavCount("inquiries", inquiryCount);
-    this.updateNavCount("returns", returnCount);
-  }
-
-  updateNavCount(section, count) {
-    const navItem = document.querySelector(
-      `[data-section="${section}"] .count`
-    );
-    if (navItem && count > 0) {
-      navItem.textContent = count;
-      navItem.style.display = "inline-block";
-    } else if (navItem) {
-      navItem.style.display = "none";
-    }
-  }
-
-  // Filter Functions
-  filterOrders() {
-    const statusFilter = document.querySelector(".order-filters select").value;
-    const searchTerm = document
-      .querySelector(".order-filters input")
-      .value.toLowerCase();
-    const orderItems = document.querySelectorAll(".order-item");
-
-    orderItems.forEach((item) => {
-      const orderNumber = item
-        .querySelector(".order-number")
-        .textContent.toLowerCase();
-      const customerName = item
-        .querySelector(".order-customer")
-        .textContent.toLowerCase();
-      const status = item
-        .querySelector(".status-badge")
-        .textContent.toLowerCase();
-
-      const matchesStatus =
-        statusFilter === "all" || status.includes(statusFilter);
-      const matchesSearch =
-        orderNumber.includes(searchTerm) || customerName.includes(searchTerm);
-
-      if (matchesStatus && matchesSearch) {
-        item.style.display = "flex";
-      } else {
-        item.style.display = "none";
+  animateCounter(selector, values) {
+    const elements = document.querySelectorAll(selector);
+    elements.forEach((element, index) => {
+      if (values[index] !== undefined) {
+        let current = 0;
+        const target = values[index];
+        const increment = target / 50;
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            current = target;
+            clearInterval(timer);
+          }
+          element.textContent = selector.includes("revenue")
+            ? "$" + Math.floor(current).toLocaleString()
+            : Math.floor(current);
+        }, 20);
       }
     });
   }
 
-  filterCustomers() {
-    const typeFilter = document.querySelector(".customer-search select").value;
-    const searchTerm = document
-      .querySelector(".customer-search input")
-      .value.toLowerCase();
-    const customerCards = document.querySelectorAll(".customer-card");
-
-    customerCards.forEach((card) => {
-      const customerName = card
-        .querySelector(".customer-name")
-        .textContent.toLowerCase();
-      const customerEmail = card
-        .querySelector(".customer-email")
-        .textContent.toLowerCase();
-      const isVip = card.classList.contains("vip");
-      const isNew = card.classList.contains("new");
-
-      let matchesType = true;
-      if (typeFilter === "vip") matchesType = isVip;
-      else if (typeFilter === "new") matchesType = isNew;
-
-      const matchesSearch =
-        customerName.includes(searchTerm) || customerEmail.includes(searchTerm);
-
-      if (matchesType && matchesSearch) {
-        card.style.display = "block";
-      } else {
-        card.style.display = "none";
-      }
-    });
-  }
-
-  // Utility Functions
-  isToday(date) {
-    const today = new Date();
-    const checkDate = new Date(date);
-    return checkDate.toDateString() === today.toDateString();
-  }
-
-  formatCurrency(amount) {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  }
-
-  formatDate(date) {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
-
-  // Data Loading Functions
-  loadOrders() {
-    // Simulated order data
-    return [
+  loadRecentActivity() {
+    // Mock data; replace with API call
+    const activities = [
       {
-        id: "ORD-2024-1234",
+        type: "order",
         customer: "John Smith",
-        date: new Date(),
-        status: "new",
-        total: 299.97,
-        items: 3,
-        priority: "high",
+        action: "placed a new order",
+        orderId: "#ORD-2024-1237",
+        time: "2 minutes ago",
+        avatar:
+          "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=40",
       },
       {
-        id: "ORD-2024-1235",
+        type: "shipping",
         customer: "Sarah Johnson",
-        date: new Date(Date.now() - 3600000),
-        status: "processing",
-        total: 189.98,
-        items: 2,
-        priority: "normal",
+        action: "was shipped to",
+        orderId: "#ORD-2024-1230",
+        time: "15 minutes ago",
+        icon: "fa-truck",
       },
-    ];
-  }
-
-  loadCustomers() {
-    return [
       {
-        name: "John Smith",
-        email: "john.smith@email.com",
-        type: "vip",
-        orders: 24,
-        spent: 2450,
+        type: "review",
+        customer: "Mike Wilson",
+        action: "left a 5-star review",
+        time: "1 hour ago",
+        icon: "fa-star",
       },
     ];
+    // Update DOM with activities
   }
 
-  loadInquiries() {
-    return [
+  loadPriorityTasks() {
+    this.tasks = [
       {
-        customer: "John Smith",
-        subject: "Order Issue",
-        status: "new",
-        priority: "urgent",
-        date: new Date(),
+        id: 1,
+        title: "Follow up on Order #ORD-2024-1234",
+        description: "Customer John Smith waiting for missing item update",
+        priority: "high",
+        dueDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
+        status: "urgent",
+        assignee: "me",
       },
-    ];
-  }
-
-  loadReturns() {
-    return [
       {
-        id: "RTN-2024-001",
-        orderId: "ORD-2024-1200",
-        status: "pending",
-        value: 89.99,
-        reason: "Wrong Size",
+        id: 2,
+        title: "Restock Low Inventory Items",
+        description: "Check and reorder 23 items that are running low",
+        priority: "medium",
+        dueDate: new Date(Date.now() + 4 * 60 * 60 * 1000),
+        status: "today",
+        assignee: "me",
       },
     ];
   }
 
-  loadInventory() {
-    return [
+  loadOrdersData() {
+    console.log("Loading orders data..."); // Replace with API call
+  }
+
+  loadCustomersData() {
+    console.log("Loading customers data..."); // Replace with API call
+  }
+
+  loadInventoryData() {
+    console.log("Loading inventory data..."); // Replace with API call
+  }
+
+  loadTasksData() {
+    console.log("Loading tasks data..."); // Replace with API call
+  }
+
+  loadPromotionsData() {
+    this.promotions = [
       {
-        name: "Classic White Shirt",
-        sku: "CWS-001",
-        category: "Shirts",
-        stock: 6,
-        status: "low",
+        id: 1,
+        title: "Summer Sale 2024",
+        code: "SUMMER30",
+        discount: "30% OFF",
+        description: "All summer collection items",
+        validUntil: "2024-06-30",
+        uses: 234,
+        revenue: 12500,
+        featured: true,
+      },
+      {
+        id: 2,
+        title: "Buy 2 Get 1 Free",
+        code: "BUY2GET1",
+        discount: "BOGO Offer",
+        description: "Selected shirts and accessories",
+        validUntil: "2024-03-31",
+        uses: 67,
+        revenue: 3200,
+        featured: false,
       },
     ];
   }
 
-  // HTML Generators
-  generateOrderDetailsHTML(orderNumber) {
-    return `
-      <div class="order-details-content">
-        <h4>Order Information</h4>
-        <p><strong>Order Number:</strong> ${orderNumber}</p>
-        <p><strong>Customer:</strong> John Smith</p>
-        <p><strong>Status:</strong> Processing</p>
-        <p><strong>Total:</strong> $299.97</p>
-        
-        <h4>Items</h4>
-        <div class="order-items-list">
-          <div class="item">
-            <span>Classic White Shirt - Size L</span>
-            <span>$89.99</span>
-          </div>
-          <div class="item">
-            <span>Denim Jacket - Size M</span>
-            <span>$129.99</span>
-          </div>
-        </div>
-      </div>
-    `;
+  // Admin-specific methods (placeholders for owner dashboard)
+  loadAnalyticsData() {
+    console.log("Loading analytics data..."); // Replace with API call
   }
 
-  generateCustomerProfileHTML(customerName) {
-    return `
-      <div class="customer-profile-content">
-        <h4>Customer Information</h4>
-        <p><strong>Name:</strong> ${customerName}</p>
-        <p><strong>Email:</strong> john.smith@email.com</p>
-        <p><strong>Phone:</strong> +1 (555) 123-4567</p>
-        <p><strong>Total Orders:</strong> 24</p>
-        <p><strong>Total Spent:</strong> $2,450</p>
-        <p><strong>Customer Since:</strong> January 2023</p>
-      </div>
-    `;
+  loadEmployeeData() {
+    console.log("Loading employee data..."); // Replace with API call
   }
 
-  generateMessageFormHTML(customer) {
-    return `
-      <div class="message-form">
-        <div class="form-group">
-          <label>To: ${customer}</label>
-        </div>
-        <div class="form-group">
-          <label>Subject:</label>
-          <input type="text" class="form-control" placeholder="Enter subject">
-        </div>
-        <div class="form-group">
-          <label>Message:</label>
-          <textarea class="form-control" rows="5" placeholder="Type your message here..."></textarea>
-        </div>
-      </div>
-    `;
+  loadFinancialData() {
+    console.log("Loading financial data..."); // Replace with API call
   }
 
-  // Update Functions
-  updateOrderStatus(orderNumber, newStatus) {
-    const orderItem = document.querySelector(`[data-order="${orderNumber}"]`);
-    if (orderItem) {
-      const statusBadge = orderItem.querySelector(".status-badge");
-      if (statusBadge) {
-        statusBadge.textContent =
-          newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-        statusBadge.className = `status-badge ${newStatus}`;
+  loadMarketingData() {
+    console.log("Loading marketing data..."); // Replace with API call
+  }
+
+  /**
+   * Auto-refresh functionality
+   */
+  startAutoRefresh() {
+    setInterval(() => {
+      if (this.currentSection === "dashboard" && !document.hidden) {
+        this.loadDashboardData();
       }
-    }
-  }
+    }, 5 * 60 * 1000);
 
-  updateReturnStatus(returnNumber, newStatus) {
-    const returnItem = document.querySelector(
-      `[data-return="${returnNumber}"]`
-    );
-    if (returnItem) {
-      const statusBadge = returnItem.querySelector(".status-badge");
-      if (statusBadge) {
-        statusBadge.textContent =
-          newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-        statusBadge.className = `status-badge ${newStatus}`;
+    setInterval(() => {
+      if (!document.hidden) {
+        this.loadSectionData(this.currentSection);
       }
+    }, 2 * 60 * 1000);
+  }
+
+  /**
+   * Event Listeners
+   */
+  initializeEventListeners() {
+    const refreshBtn = document.querySelector(".refresh-btn");
+    if (refreshBtn) {
+      refreshBtn.addEventListener("click", () => this.handleRefresh());
+    } else {
+      console.warn("Refresh button not found");
     }
-  }
 
-  updateOverviewMetrics() {
-    // Update metric cards with current data
-    const metricNumbers = document.querySelectorAll(".metric-number");
-    if (metricNumbers[0]) metricNumbers[0].textContent = "156";
-    if (metricNumbers[1]) metricNumbers[1].textContent = "$24,580";
-    if (metricNumbers[2]) metricNumbers[2].textContent = "89";
-    if (metricNumbers[3]) metricNumbers[3].textContent = "4.8";
-  }
-
-  // Refresh Functions
-  refreshOrderQueue() {
-    this.filterOrders();
-    this.updateBulkActions();
-  }
-
-  refreshCustomerList() {
-    this.filterCustomers();
-  }
-
-  refreshInquiries() {
-    this.filterInquiries();
-  }
-
-  refreshReturns() {
-    this.filterReturns();
-  }
-
-  refreshInventory() {
-    this.filterInventory();
-  }
-
-  updateAnalytics() {
-    // Refresh analytics charts and data
-    this.initializeCharts();
-  }
-
-  // Helper Functions
-  getSelectedOrders() {
-    const selectedCheckboxes = document.querySelectorAll(
-      ".order-checkbox input:checked"
+    document.addEventListener("keydown", (e) =>
+      this.handleKeyboardShortcuts(e)
     );
-    return Array.from(selectedCheckboxes).map((checkbox) => {
-      return checkbox.closest(".order-item").querySelector(".order-number")
-        .textContent;
+    window.addEventListener("resize", () => this.handleWindowResize());
+    window.addEventListener("online", () => {
+      this.showToast("success", "Connection", "Back online");
+    });
+    window.addEventListener("offline", () => {
+      this.showToast("warning", "Connection", "You are now offline");
     });
   }
 
-  updateBulkActions() {
-    const selectedCount = this.getSelectedOrders().length;
-    const bulkActions = document.querySelector(".bulk-actions");
-
-    if (bulkActions) {
-      if (selectedCount > 0) {
-        bulkActions.style.opacity = "1";
-        bulkActions.style.pointerEvents = "auto";
-      } else {
-        bulkActions.style.opacity = "0.5";
-        bulkActions.style.pointerEvents = "none";
-      }
+  handleUserAction(action) {
+    switch (action) {
+      case "profile":
+        this.switchSection("settings");
+        break;
+      case "preferences":
+        this.switchSection("settings");
+        setTimeout(() => {
+          const prefTab = document.querySelector('[data-tab="preferences"]');
+          if (prefTab) prefTab.click();
+          else console.warn("Preferences tab not found");
+        }, 100);
+        break;
+      case "help":
+        this.showHelpModal();
+        break;
+      case "logout":
+        this.handleLogout();
+        break;
     }
   }
 
-  updateNotificationCount() {
-    const notificationCount = document.querySelector(".notification-count");
-    if (notificationCount) {
-      // Simulate dynamic notification count
-      const count = Math.floor(Math.random() * 20) + 5;
-      notificationCount.textContent = count;
+  handleRefresh() {
+    this.showLoading();
+    setTimeout(() => {
+      this.loadDashboardData();
+      this.hideLoading();
+      this.showToast("success", "Refresh", "Dashboard data updated");
+    }, 1000);
+  }
+
+  handleKeyboardShortcuts(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "n") {
+      e.preventDefault();
+      this.handleNewOrder();
+    }
+    if (e.key === "F1") {
+      e.preventDefault();
+      this.switchSection("pos");
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+      e.preventDefault();
+      this.handleCustomerLookup();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "d") {
+      e.preventDefault();
+      this.switchSection("dashboard");
+    }
+  }
+
+  handleWindowResize() {
+    const sidebar = document.querySelector(".sidebar");
+    const isMobile = window.innerWidth <= 768;
+    if (sidebar) {
+      if (isMobile) sidebar.classList.add("mobile");
+      else sidebar.classList.remove("mobile");
+    } else {
+      console.warn("Sidebar not found");
+    }
+  }
+
+  showHelpModal() {
+    const helpContent = `
+      <div class="help-content">
+        <h4>Keyboard Shortcuts</h4>
+        <ul>
+          <li><kbd>Ctrl+N</kbd> - New Order</li>
+          <li><kbd>F1</kbd> - Open POS</li>
+          <li><kbd>Ctrl+F</kbd> - Search Customers</li>
+          <li><kbd>Ctrl+D</kbd> - Dashboard</li>
+          <li><kbd>Esc</kbd> - Close Modals</li>
+        </ul>
+        <h4>Support</h4>
+        <p>For technical support, contact:</p>
+        <ul>
+          <li>Email: support@kingscollection.com</li>
+          <li>Phone: +1 (555) 123-4567</li>
+          <li>Hours: 9 AM - 6 PM EST</li>
+        </ul>
+      </div>
+    `;
+    this.showModal("helpModal", "Help & Support", helpContent);
+  }
+
+  handleLogout() {
+    if (confirm("Are you sure you want to logout?")) {
+      this.showLoading();
+      setTimeout(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = "/login";
+      }, 1500);
     }
   }
 }
 
-// Initialize Dashboard when DOM is loaded
+// Initialize dashboard when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  const dashboard = new SalesAgentDashboard();
-
-  // Make dashboard globally available for debugging
-  window.salesDashboard = dashboard;
-
-  // Add some interactive enhancements
-  addInteractiveEnhancements();
+  window.salesDashboard = new SalesDashboard();
 });
 
-// Additional Interactive Features
-function addInteractiveEnhancements() {
-  // Smooth scrolling for anchor links
-  const anchorLinks = document.querySelectorAll('a[href^="#"]');
-  anchorLinks.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const target = document.querySelector(link.getAttribute("href"));
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-      }
-    });
-  });
-
-  // Enhanced hover effects for cards
-  const cards = document.querySelectorAll(
-    ".metric-card, .task-card, .customer-card, .tool-card"
-  );
-  cards.forEach((card) => {
-    card.addEventListener("mouseenter", function () {
-      this.style.transform = "translateY(-8px)";
-    });
-
-    card.addEventListener("mouseleave", function () {
-      this.style.transform = "translateY(0)";
-    });
-  });
-
-  // Loading states for buttons
-  const buttons = document.querySelectorAll(".btn, .action-btn");
-  buttons.forEach((btn) => {
-    btn.addEventListener("click", function () {
-      if (!this.classList.contains("loading")) {
-        this.classList.add("loading");
-        const originalText = this.innerHTML;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-
-        setTimeout(() => {
-          this.classList.remove("loading");
-          this.innerHTML = originalText;
-        }, 1500);
-      }
-    });
-  });
-
-  // Dynamic time updates
-  updateTimeElements();
-  setInterval(updateTimeElements, 60000); // Update every minute
-
-  // Keyboard shortcuts
-  document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey || e.metaKey) {
-      switch (e.key) {
-        case "1":
-          e.preventDefault();
-          document.querySelector('[data-section="overview"]').click();
-          break;
-        case "2":
-          e.preventDefault();
-          document.querySelector('[data-section="orders"]').click();
-          break;
-        case "3":
-          e.preventDefault();
-          document.querySelector('[data-section="customers"]').click();
-          break;
-        case "f":
-          e.preventDefault();
-          const searchInput = document.querySelector(".search-input");
-          if (searchInput) searchInput.focus();
-          break;
-      }
-    }
-  });
-
-  // Auto-save functionality for forms
-  const formInputs = document.querySelectorAll("input, textarea, select");
-  formInputs.forEach((input) => {
-    input.addEventListener("change", () => {
-      // Simulate auto-save
-      showAutoSaveIndicator();
-    });
-  });
+// Export for potential module use
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = SalesDashboard;
 }
-
-function updateTimeElements() {
-  const timeElements = document.querySelectorAll(
-    ".task-time, .inquiry-time, .time-elapsed"
-  );
-  timeElements.forEach((element) => {
-    // Update relative time displays
-    const text = element.textContent;
-    if (text.includes("ago") || text.includes("overdue")) {
-      // Simulate time updates
-      element.style.opacity = "0.8";
-      setTimeout(() => {
-        element.style.opacity = "1";
-      }, 200);
-    }
-  });
-}
-
-function showAutoSaveIndicator() {
-  const indicator = document.createElement("div");
-  indicator.className = "auto-save-indicator";
-  indicator.innerHTML = '<i class="fas fa-check"></i> Saved';
-  indicator.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #2ecc71;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  `;
-
-  document.body.appendChild(indicator);
-
-  setTimeout(() => {
-    indicator.style.opacity = "1";
-  }, 100);
-
-  setTimeout(() => {
-    indicator.style.opacity = "0";
-    setTimeout(() => {
-      document.body.removeChild(indicator);
-    }, 300);
-  }, 2000);
-}
-
-// Performance monitoring
-const performanceMonitor = {
-  init() {
-    this.trackPageLoad();
-    this.trackUserInteractions();
-  },
-
-  trackPageLoad() {
-    window.addEventListener("load", () => {
-      const loadTime = performance.now();
-      console.log(`Dashboard loaded in ${loadTime.toFixed(2)}ms`);
-    });
-  },
-
-  trackUserInteractions() {
-    let interactionCount = 0;
-    document.addEventListener("click", () => {
-      interactionCount++;
-      if (interactionCount % 10 === 0) {
-        console.log(`User interactions: ${interactionCount}`);
-      }
-    });
-  },
-};
-
-// Initialize performance monitoring
-performanceMonitor.init();

@@ -3,817 +3,1027 @@ html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title Sales Agent Dashboard - MenStyle Store
-    link(rel="stylesheet", href="/Styles/sales-dashboard.css")
+    title Sales Agent Dashboard - Kings Collection
+    link(rel="stylesheet", href="/styles/sales-dashboard.css")
     link(rel="preconnect", href="https://fonts.googleapis.com")
     link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
-    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap", rel="stylesheet")
-    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css")
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap", rel="stylesheet")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
 
   body
-    //-Header
+    //- New Top Navigation Bar for Notifications, Urgent Orders, and Customer Inquiries
+    nav.top-nav
+      .container
+        .nav-content
+          .nav-item.notifications
+            .nav-icon
+              i.fas.fa-bell
+              .notification-badge 7
+            .nav-label Notifications
+            .nav-dropdown
+              .notification-header Notifications
+              .notification-item
+                .notification-icon
+                  i.fas.fa-exclamation-triangle
+                .notification-content
+                  .notification-title Urgent Order
+                  .notification-time 5 min ago
+              .notification-item
+                .notification-icon
+                  i.fas.fa-message
+                .notification-content
+                  .notification-title Customer Inquiry
+                  .notification-time 12 min ago
+          .nav-item.urgent-orders
+            .nav-icon
+              i.fas.fa-exclamation-triangle
+              .notification-badge 3
+            .nav-label Urgent Orders
+            .nav-dropdown
+              .notification-header Urgent Orders
+              .notification-item
+                .notification-icon
+                  i.fas.fa-clock
+                .notification-content
+                  .notification-title Order #ORD-2024-1234
+                  .notification-time 2 hours overdue
+              .notification-item
+                .notification-icon
+                  i.fas.fa-box
+                .notification-content
+                  .notification-title Order #ORD-2024-1235
+                  .notification-time 1 hour overdue
+          .nav-item.customer-inquiries
+            .nav-icon
+              i.fas.fa-message
+              .notification-badge 5
+            .nav-label Customer Inquiries
+            .nav-dropdown
+              .notification-header Customer Inquiries
+              .notification-item
+                .notification-icon
+                  i.fas.fa-user
+                .notification-content
+                  .notification-title John Smith
+                  .notification-time 10 min ago
+              .notification-item
+                .notification-icon
+                  i.fas.fa-user
+                .notification-content
+                  .notification-title Sarah Johnson
+                  .notification-time 15 min ago
+
+    //- Refined Header with Branding, Welcome, Clock, Stats, and User Actions
     header.header
+      .header-background
       .container
         .header-content
-          .logo
-            i.fas.fa-tshirt
-            span MenStyle
-            .role-badge Sales Agent
-          .header-stats
-            .stat-item
-              .stat-number 24
-              .stat-label Pending Orders
-            .stat-item
-              .stat-number 8
-              .stat-label New Inquiries
-            .stat-item
-              .stat-number 156
-              .stat-label Orders Today
-          .header-actions
-            .notifications-icon
-              i.fas.fa-bell
-              span.notification-count 12
-            .user-menu
-              .user-avatar
-                i.fas.fa-user-tie
-              .dropdown-menu
-                a(href="#") Profile Settings
-                a(href="#") Help & Support
-                a(href="/logout") Logout
+          .header-row
+            .header-column.header-logo
+              .logo-section
+                .logo-icon
+                  i.fas.fa-crown
+                .logo-text
+                  .brand-name Kings Collection
+                  .brand-tagline Premium Fashion Dashboard
+            .header-column.header-welcome
+              .welcome-section
+                .welcome-message
+                  .greeting-text Good Morning,
+                  .user-name Alex Thompson
+                  .role-badge
+                    i.fas.fa-star
+                    span Senior Sales Agent
+            .header-column.header-clock
+              .digital-clock
+                .time-display
+                  .current-time#currentTime
+                  .current-date#currentDate
+                .clock-decoration
+                  i.fas.fa-clock
+            .header-column.header-stats
+              .header-stats
+                .stat-card.orders
+                  .stat-icon
+                    i.fas.fa-shopping-cart
+                  .stat-content
+                    .stat-number 24
+                    .stat-label Pending Orders
+                  .stat-trend.up +5%
+                .stat-card.revenue
+                  .stat-icon
+                    i.fas.fa-dollar-sign
+                  .stat-content
+                    .stat-number $3.2K
+                    .stat-label Today's Sales
+                  .stat-trend.up +12%
+                .stat-card.customers
+                  .stat-icon
+                    i.fas.fa-users
+                  .stat-content
+                    .stat-number 18
+                    .stat-label New Customers
+                  .stat-trend.up +8%
+            .header-column.header-actions
+              .header-actions
+                .user-menu
+                  .user-avatar
+                    img(src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=60", alt="User Avatar")
+                    .status-indicator.online
+                  .dropdown-menu
+                    .dropdown-header
+                      .user-info
+                        .user-name Alex Thompson
+                        .user-email alex.thompson@kingscollection.com
+                    .dropdown-divider
+                    a.dropdown-item(href="#" data-action="profile")
+                      i.fas.fa-user
+                      span Profile Settings
+                    a.dropdown-item(href="#" data-action="preferences")
+                      i.fas.fa-cog
+                      span Preferences
+                    a.dropdown-item(href="#" data-action="help")
+                      i.fas.fa-question-circle
+                      span Help & Support
+                    .dropdown-divider
+                    a.dropdown-item.logout(href="#" data-action="logout")
+                      i.fas.fa-sign-out-alt
+                      span Logout
 
-    //-Main Content
+    //- Main Content Area (unchanged)
     main.main-content
       .container
-        //-Quick Actions Bar
-        .quick-actions
-          button.action-btn.primary
-            i.fas.fa-plus
-            span New Order
-          button.action-btn.secondary
-            i.fas.fa-search
-            span Find Customer
-          button.action-btn.secondary
-            i.fas.fa-barcode
-            span Check Inventory
-          button.action-btn.secondary
-            i.fas.fa-print
-            span Print Labels
-          button.action-btn.secondary
-            i.fas.fa-download
-            span Export Data
+        .quick-actions-bar
+          .quick-actions-left
+            .action-group.primary-actions
+              button.action-btn.primary.new-order
+                i.fas.fa-plus-circle
+                span New Order
+                .action-shortcut Ctrl+N
+              button.action-btn.secondary.pos
+                i.fas.fa-cash-register
+                span Quick Sale
+                .action-shortcut F1
+              button.action-btn.secondary.customer-lookup
+                i.fas.fa-search-plus
+                span Find Customer
+                .action-shortcut Ctrl+F
+          .action-group.secondary-actions
+            button.action-btn.secondary
+              i.fas.fa-barcode
+              span Scan Item
+            button.action-btn.secondary
+              i.fas.fa-print
+              span Print Labels
+            button.action-btn.secondary
+              i.fas.fa-download
+              span Export Data
+          .quick-stats
+            .quick-stat
+              .stat-value 156
+              .stat-label Orders Today
+            .quick-stat
+              .stat-value $24.5K
+              .stat-label Revenue
+            .quick-stat
+              .stat-value 4.8★
+              .stat-label Rating
 
-        //-Dashboard Grid
-        .dashboard-grid
-          //-Sidebar Navigation
+        .dashboard-layout
           aside.sidebar
+            .sidebar-header
+              .sidebar-title Navigation
+              .sidebar-toggle
+                i.fas.fa-bars
             nav.sidebar-nav
-              a.nav-item.active(href="#" data-section="overview")
-                i.fas.fa-tachometer-alt
-                span Overview
-                span.count 24
-              a.nav-item(href="#" data-section="orders")
-                i.fas.fa-box
-                span Order Queue
-                span.count 18
-              a.nav-item(href="#" data-section="customers")
-                i.fas.fa-users
-                span Customers
-              a.nav-item(href="#" data-section="inquiries")
-                i.fas.fa-comments
-                span Inquiries
-                span.count 8
-              a.nav-item(href="#" data-section="returns")
-                i.fas.fa-undo
-                span Returns
-                span.count 5
-              a.nav-item(href="#" data-section="inventory")
-                i.fas.fa-warehouse
-                span Inventory
-              a.nav-item(href="#" data-section="analytics")
-                i.fas.fa-chart-line
-                span Analytics
-              a.nav-item(href="#" data-section="tools")
-                i.fas.fa-tools
-                span Tools
-
-          //-Main Dashboard Content
-          .dashboard-content
-            //-Overview Section
-            section#overview.content-section.active
-              .section-header
-                h2 Sales Agent Overview
-                p Manage orders, assist customers, and track performance
-                .time-filter
-                  select.filter-select
-                    option(value="today") Today
-                    option(value="week") This Week
-                    option(value="month") This Month
-
-              //-Performance Metrics
-              .metrics-grid
-                .metric-card.orders
-                  .metric-icon
+              .nav-section
+                .section-title Core Functions
+                a.nav-item.active(href="#" data-section="dashboard")
+                  .nav-icon
+                    i.fas.fa-tachometer-alt
+                  .nav-content
+                    span Dashboard
+                    .nav-badge 3
+                a.nav-item(href="#" data-section="orders")
+                  .nav-icon
                     i.fas.fa-shopping-cart
-                  .metric-content
-                    .metric-number 156
-                    .metric-label Orders Processed
-                    .metric-change +12%
-                  .metric-chart
-                    canvas#ordersChart
+                  .nav-content
+                    span Orders
+                    .nav-badge.urgent 24
+                a.nav-item(href="#" data-section="pos")
+                  .nav-icon
+                    i.fas.fa-cash-register
+                  .nav-content
+                    span Point of Sale
+                    .nav-shortcut F2
+                a.nav-item(href="#" data-section="customers")
+                  .nav-icon
+                    i.fas.fa-users
+                  .nav-content
+                    span Customers
+                    .nav-badge 8
+                a.nav-item(href="#" data-section="inventory")
+                  .nav-icon
+                    i.fas.fa-warehouse
+                  .nav-content
+                    span Inventory
+                    .nav-badge.warning 23
+              .nav-section
+                .section-title Management
+                a.nav-item(href="#" data-section="returns")
+                  .nav-icon
+                    i.fas.fa-undo-alt
+                  .nav-content
+                    span Returns
+                    .nav-badge 5
+                a.nav-item(href="#" data-section="tasks")
+                  .nav-icon
+                    i.fas.fa-tasks
+                  .nav-content
+                    span Tasks
+                    .nav-badge.urgent 12
+                a.nav-item(href="#" data-section="messages")
+                  .nav-icon
+                    i.fas.fa-comments
+                  .nav-content
+                    span Messages
+                    .nav-badge 7
+                a.nav-item(href="#" data-section="promotions")
+                  .nav-icon
+                    i.fas.fa-tags
+                  .nav-content
+                    span Promotions
+                    .nav-badge.active 4
+              .nav-section
+                .section-title Analytics & Reports
+                a.nav-item(href="#" data-section="reports")
+                  .nav-icon
+                    i.fas.fa-chart-line
+                  .nav-content
+                    span Reports
+                a.nav-item(href="#" data-section="analytics")
+                  .nav-icon
+                    i.fas.fa-analytics
+                  .nav-content
+                    span Analytics
+              .nav-section
+                .section-title Personal
+                a.nav-item(href="#" data-section="schedule")
+                  .nav-icon
+                    i.fas.fa-calendar-alt
+                  .nav-content
+                    span Schedule
+                a.nav-item(href="#" data-section="training")
+                  .nav-icon
+                    i.fas.fa-graduation-cap
+                  .nav-content
+                    span Training
+                a.nav-item(href="#" data-section="settings")
+                  .nav-icon
+                    i.fas.fa-cog
+                  .nav-content
+                    span Settings
 
-                .metric-card.revenue
-                  .metric-icon
-                    i.fas.fa-dollar-sign
-                  .metric-content
-                    .metric-number $24,580
-                    .metric-label Revenue Generated
-                    .metric-change +8%
-                  .metric-chart
-                    canvas#revenueChart
-
-                .metric-card.customers
-                  .metric-icon
-                    i.fas.fa-user-friends
-                  .metric-content
-                    .metric-number 89
-                    .metric-label Customers Helped
-                    .metric-change +15%
-                  .metric-chart
-                    canvas#customersChart
-
-                .metric-card.satisfaction
-                  .metric-icon
-                    i.fas.fa-star
-                  .metric-content
-                    .metric-number 4.8
-                    .metric-label Avg Rating
-                    .metric-change +0.2
-                  .metric-chart
-                    canvas#satisfactionChart
-
-              //-Priority Tasks
-              .priority-section
-                h3 Priority Tasks
-                .task-grid
-                  .task-card.urgent
-                    .task-header
-                      .task-icon
-                        i.fas.fa-exclamation-triangle
-                      .task-title Urgent Orders
-                      .task-count 3
-                    .task-list
-                      .task-item
-                        span Order #ORD-2024-1234
-                        .task-time 2 hours overdue
-                      .task-item
-                        span Order #ORD-2024-1235
-                        .task-time 1 hour overdue
-                      .task-item
-                        span Order #ORD-2024-1236
-                        .task-time 30 mins overdue
-
-                  .task-card.pending
-                    .task-header
-                      .task-icon
-                        i.fas.fa-clock
-                      .task-title Pending Approvals
-                      .task-count 8
-                    .task-list
-                      .task-item
-                        span Return Request #RTN-001
-                        .task-time 2 hours ago
-                      .task-item
-                        span Refund Request #REF-045
-                        .task-time 4 hours ago
-                      .task-item
-                        span Exchange Request #EXC-023
-                        .task-time 6 hours ago
-
-                  .task-card.follow-up
-                    .task-header
-                      .task-icon
-                        i.fas.fa-phone
-                      .task-title Follow-ups
-                      .task-count 12
-                    .task-list
-                      .task-item
-                        span Customer: John Smith
-                        .task-time Call scheduled 2 PM
-                      .task-item
-                        span Customer: Sarah Johnson
-                        .task-time Email sent, awaiting reply
-                      .task-item
-                        span Customer: Mike Wilson
-                        .task-time Order inquiry pending
-
-            //-Order Queue Section
-            section#orders.content-section
+          .content-area
+            section#dashboard.content-section.active
               .section-header
-                h2 Order Processing Queue
-                p Manage and process customer orders efficiently
-                .order-filters
-                  select.filter-select
-                    option(value="all") All Orders
-                    option(value="new") New Orders
-                    option(value="processing") Processing
-                    option(value="ready") Ready to Ship
-                    option(value="shipped") Shipped
-                  input.search-input(type="text", placeholder="Search orders...")
-                  button.btn.btn-primary
-                    i.fas.fa-filter
-                    span Advanced Filter
-
-              .orders-container
-                .orders-header
-                  .bulk-actions
-                    input.bulk-select(type="checkbox")
-                    button.bulk-btn
-                      i.fas.fa-check
-                      span Mark as Processed
-                    button.bulk-btn
-                      i.fas.fa-print
-                      span Print Labels
-                    button.bulk-btn
-                      i.fas.fa-truck
-                      span Ship Selected
-
-                .orders-list
-                  .order-item.priority-high
-                    .order-checkbox
-                      input(type="checkbox")
-                    .order-info
-                      .order-number #ORD-2024-1234
-                      .order-customer John Smith
-                      .order-date March 15, 2024 - 2:30 PM
-                      .order-priority
-                        i.fas.fa-exclamation-circle
-                        span High Priority
-                    .order-details
-                      .order-items 3 items
-                      .order-total $299.97
-                      .order-shipping Express Delivery
-                    .order-status
-                      .status-badge.new New Order
-                      .time-elapsed 2h 15m
-                    .order-actions
-                      button.action-btn.primary
-                        i.fas.fa-play
-                        span Process
-                      button.action-btn.secondary
-                        i.fas.fa-eye
-                        span View
-                      button.action-btn.secondary
-                        i.fas.fa-comment
-                        span Message
-
-                  .order-item
-                    .order-checkbox
-                      input(type="checkbox")
-                    .order-info
-                      .order-number #ORD-2024-1235
-                      .order-customer Sarah Johnson
-                      .order-date March 15, 2024 - 1:45 PM
-                    .order-details
-                      .order-items 2 items
-                      .order-total $189.98
-                      .order-shipping Standard Delivery
-                    .order-status
-                      .status-badge.processing Processing
-                      .time-elapsed 3h 0m
-                    .order-actions
-                      button.action-btn.primary
-                        i.fas.fa-truck
-                        span Ship
-                      button.action-btn.secondary
-                        i.fas.fa-eye
-                        span View
-                      button.action-btn.secondary
-                        i.fas.fa-print
-                        span Label
-
-                  .order-item
-                    .order-checkbox
-                      input(type="checkbox")
-                    .order-info
-                      .order-number #ORD-2024-1236
-                      .order-customer Mike Wilson
-                      .order-date March 15, 2024 - 12:20 PM
-                    .order-details
-                      .order-items 1 item
-                      .order-total $129.99
-                      .order-shipping Standard Delivery
-                    .order-status
-                      .status-badge.ready Ready to Ship
-                      .time-elapsed 4h 25m
-                    .order-actions
-                      button.action-btn.primary
-                        i.fas.fa-shipping-fast
-                        span Ship Now
-                      button.action-btn.secondary
-                        i.fas.fa-eye
-                        span View
-                      button.action-btn.secondary
-                        i.fas.fa-barcode
-                        span Track
-
-            //-Customer Management Section
-            section#customers.content-section
-              .section-header
-                h2 Customer Management
-                p Search, view, and manage customer accounts
-                .customer-search
-                  .search-container
-                    input.search-input(type="text", placeholder="Search by name, email, or order number...")
-                    button.search-btn
-                      i.fas.fa-search
-                  .search-filters
+                .header-content
+                  h2 Dashboard Overview
+                  p Welcome back! Here's what's happening with your sales today.
+                .header-actions
+                  .time-filter
                     select.filter-select
-                      option(value="all") All Customers
-                      option(value="vip") VIP Customers
-                      option(value="new") New Customers
-                      option(value="inactive") Inactive
-                    select.filter-select
-                      option(value="all") All Time
-                      option(value="30days") Last 30 Days
-                      option(value="90days") Last 90 Days
+                      option(value="today") Today
+                      option(value="week") This Week
+                      option(value="month") This Month
+                  button.btn.btn-primary.refresh-btn
+                    i.fas.fa-sync-alt
+                    span Refresh
 
-              .customers-container
-                .customers-grid
-                  .customer-card.vip
-                    .customer-avatar
-                      img(src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Customer")
-                      .vip-badge VIP
-                    .customer-info
-                      .customer-name John Smith
-                      .customer-email john.smith@email.com
-                      .customer-phone +1 (555) 123-4567
-                      .customer-stats
-                        .stat
-                          span 24 Orders
-                        .stat
-                          span $2,450 Spent
-                        .stat
-                          span Last: Mar 15
-                    .customer-actions
-                      button.btn.btn-primary
-                        i.fas.fa-comment
-                        span Message
-                      button.btn.btn-secondary
-                        i.fas.fa-eye
-                        span View Profile
-                      button.btn.btn-secondary
-                        i.fas.fa-history
-                        span Order History
-
-                  .customer-card
-                    .customer-avatar
-                      img(src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Customer")
-                    .customer-info
-                      .customer-name Sarah Johnson
-                      .customer-email sarah.j@email.com
-                      .customer-phone +1 (555) 987-6543
-                      .customer-stats
-                        .stat
-                          span 8 Orders
-                        .stat
-                          span $890 Spent
-                        .stat
-                          span Last: Mar 14
-                    .customer-actions
-                      button.btn.btn-primary
-                        i.fas.fa-comment
-                        span Message
-                      button.btn.btn-secondary
-                        i.fas.fa-eye
-                        span View Profile
-                      button.btn.btn-secondary
-                        i.fas.fa-history
-                        span Order History
-
-                  .customer-card.new
-                    .customer-avatar
-                      img(src="https://images.pexels.com/photos/1043471/pexels-photo-1043471.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Customer")
-                      .new-badge New
-                    .customer-info
-                      .customer-name Mike Wilson
-                      .customer-email mike.w@email.com
-                      .customer-phone +1 (555) 456-7890
-                      .customer-stats
-                        .stat
-                          span 1 Order
-                        .stat
-                          span $129 Spent
-                        .stat
-                          span Last: Today
-                    .customer-actions
-                      button.btn.btn-primary
-                        i.fas.fa-comment
-                        span Message
-                      button.btn.btn-secondary
-                        i.fas.fa-eye
-                        span View Profile
-                      button.btn.btn-secondary
-                        i.fas.fa-gift
-                        span Welcome Offer
-
-            //-Customer Inquiries Section
-            section#inquiries.content-section
-              .section-header
-                h2 Customer Inquiries
-                p Respond to customer questions and support requests
-                .inquiry-filters
-                  select.filter-select
-                    option(value="all") All Inquiries
-                    option(value="new") New
-                    option(value="pending") Pending Response
-                    option(value="resolved") Resolved
-                  select.filter-select
-                    option(value="all") All Types
-                    option(value="order") Order Issues
-                    option(value="product") Product Questions
-                    option(value="shipping") Shipping
-                    option(value="return") Returns
-
-              .inquiries-container
-                .inquiry-item.urgent
-                  .inquiry-header
-                    .customer-info
-                      .customer-avatar
-                        img(src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50", alt="Customer")
-                      .customer-details
-                        .customer-name John Smith
-                        .inquiry-time 2 hours ago
-                        .inquiry-type Order Issue
-                    .inquiry-status
-                      .status-badge.urgent Urgent
-                      .priority-indicator
-                        i.fas.fa-exclamation-triangle
-                  .inquiry-content
-                    .inquiry-subject Order #ORD-2024-1234 - Missing Item
-                    .inquiry-preview "Hi, I received my order today but one of the items (Blue Polo Shirt - Size L) is missing from the package. Could you please help me resolve this issue?"
-                  .inquiry-actions
-                    button.btn.btn-primary
-                      i.fas.fa-reply
-                      span Respond
-                    button.btn.btn-secondary
-                      i.fas.fa-eye
-                      span View Full
-                    button.btn.btn-secondary
-                      i.fas.fa-phone
-                      span Call Customer
-
-                .inquiry-item
-                  .inquiry-header
-                    .customer-info
-                      .customer-avatar
-                        img(src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50", alt="Customer")
-                      .customer-details
-                        .customer-name Sarah Johnson
-                        .inquiry-time 4 hours ago
-                        .inquiry-type Product Question
-                    .inquiry-status
-                      .status-badge.new New
-                  .inquiry-content
-                    .inquiry-subject Size Guide Question - Leather Jacket
-                    .inquiry-preview "Hello, I'm interested in purchasing the Brown Leather Jacket but I'm unsure about the sizing. Could you provide more detailed measurements for size M?"
-                  .inquiry-actions
-                    button.btn.btn-primary
-                      i.fas.fa-reply
-                      span Respond
-                    button.btn.btn-secondary
-                      i.fas.fa-eye
-                      span View Full
-                    button.btn.btn-secondary
-                      i.fas.fa-ruler
-                      span Size Guide
-
-            //-Returns Section
-            section#returns.content-section
-              .section-header
-                h2 Returns & Exchanges
-                p Process return requests and manage exchanges
-                .return-filters
-                  select.filter-select
-                    option(value="all") All Returns
-                    option(value="pending") Pending Review
-                    option(value="approved") Approved
-                    option(value="processing") Processing
-                    option(value="completed") Completed
-                  select.filter-select
-                    option(value="all") All Reasons
-                    option(value="defective") Defective
-                    option(value="wrong-size") Wrong Size
-                    option(value="not-as-described") Not as Described
-
-              .returns-container
-                .return-item
-                  .return-header
-                    .return-info
-                      .return-number #RTN-2024-001
-                      .original-order Order #ORD-2024-1200
-                      .return-date Requested: March 14, 2024
-                    .return-status
-                      .status-badge.pending Pending Review
-                      .return-value $89.99
-                  .return-details
-                    .customer-info
-                      .customer-name Customer: John Smith
-                      .customer-email john.smith@email.com
-                    .return-reason
-                      .reason-label Reason: Wrong Size
-                      .reason-description "Ordered Large but need Medium size"
-                    .return-items
-                      .item
-                        img(src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=60", alt="Product")
-                        .item-details
-                          .item-name Classic White Shirt
-                          .item-size Size: L → M (Exchange)
-                          .item-price $89.99
-                  .return-actions
-                    button.btn.btn-success
-                      i.fas.fa-check
-                      span Approve
-                    button.btn.btn-danger
-                      i.fas.fa-times
-                      span Decline
-                    button.btn.btn-secondary
-                      i.fas.fa-comment
-                      span Message Customer
-
-                .return-item
-                  .return-header
-                    .return-info
-                      .return-number #RTN-2024-002
-                      .original-order Order #ORD-2024-1185
-                      .return-date Requested: March 13, 2024
-                    .return-status
-                      .status-badge.approved Approved
-                      .return-value $129.99
-                  .return-details
-                    .customer-info
-                      .customer-name Customer: Mike Wilson
-                      .customer-email mike.w@email.com
-                    .return-reason
-                      .reason-label Reason: Defective Item
-                      .reason-description "Zipper is broken on arrival"
-                    .return-items
-                      .item
-                        img(src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=60", alt="Product")
-                        .item-details
-                          .item-name Denim Jacket
-                          .item-size Size: M
-                          .item-price $129.99
-                  .return-actions
-                    button.btn.btn-primary
-                      i.fas.fa-shipping-fast
-                      span Process Return
-                    button.btn.btn-secondary
-                      i.fas.fa-print
-                      span Print Label
-                    button.btn.btn-secondary
-                      i.fas.fa-eye
-                      span View Details
-
-            //-Inventory Section
-            section#inventory.content-section
-              .section-header
-                h2 Inventory Management
-                p Check stock levels and manage product availability
-                .inventory-search
-                  input.search-input(type="text", placeholder="Search products by name, SKU, or category...")
-                  button.search-btn
-                    i.fas.fa-search
-                  button.btn.btn-secondary
-                    i.fas.fa-barcode
-                    span Scan Barcode
-
-              .inventory-container
-                .inventory-stats
-                  .stat-card.low-stock
-                    .stat-icon
-                      i.fas.fa-exclamation-triangle
-                    .stat-content
-                      .stat-number 23
-                      .stat-label Low Stock Items
-                    .stat-action
-                      button.btn.btn-warning View All
-
-                  .stat-card.out-of-stock
-                    .stat-icon
-                      i.fas.fa-times-circle
-                    .stat-content
-                      .stat-number 8
-                      .stat-label Out of Stock
-                    .stat-action
-                      button.btn.btn-danger View All
-
-                  .stat-card.total-products
-                    .stat-icon
-                      i.fas.fa-boxes
-                    .stat-content
-                      .stat-number 1,247
-                      .stat-label Total Products
-                    .stat-action
-                      button.btn.btn-primary View All
-
-                .inventory-grid
-                  .inventory-item.low-stock
-                    .product-image
-                      img(src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Product")
-                      .stock-indicator.low Low Stock
-                    .product-info
-                      .product-name Classic White Shirt
-                      .product-sku SKU: CWS-001
-                      .product-category Shirts
-                    .stock-info
-                      .stock-levels
-                        .size-stock
-                          span S: 2
-                        .size-stock
-                          span M: 1
-                        .size-stock.critical
-                          span L: 0
-                        .size-stock
-                          span XL: 3
-                      .total-stock Total: 6 units
-                    .inventory-actions
-                      button.btn.btn-primary
-                        i.fas.fa-plus
-                        span Restock
-                      button.btn.btn-secondary
-                        i.fas.fa-edit
-                        span Update
-
-                  .inventory-item
-                    .product-image
-                      img(src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Product")
-                      .stock-indicator.good In Stock
-                    .product-info
-                      .product-name Denim Jacket
-                      .product-sku SKU: DJ-002
-                      .product-category Jackets
-                    .stock-info
-                      .stock-levels
-                        .size-stock
-                          span S: 15
-                        .size-stock
-                          span M: 22
-                        .size-stock
-                          span L: 18
-                        .size-stock
-                          span XL: 12
-                      .total-stock Total: 67 units
-                    .inventory-actions
-                      button.btn.btn-secondary
-                        i.fas.fa-eye
-                        span View Details
-                      button.btn.btn-secondary
-                        i.fas.fa-edit
-                        span Update
-
-            //-Analytics Section
-            section#analytics.content-section
-              .section-header
-                h2 Sales Analytics
-                p Track your performance and sales metrics
-                .analytics-filters
-                  select.filter-select
-                    option(value="today") Today
-                    option(value="week") This Week
-                    option(value="month") This Month
-                    option(value="quarter") This Quarter
-
-              .analytics-container
-                .analytics-overview
-                  .overview-card
+              .dashboard-grid
+                .metrics-row
+                  .metric-card.sales
                     .card-header
-                      h3 Sales Performance
-                      .card-actions
-                        button.btn.btn-secondary
-                          i.fas.fa-download
-                          span Export
+                      .card-icon
+                        i.fas.fa-chart-line
+                      .card-title Today's Performance
                     .card-content
-                      .performance-chart
-                        canvas#performanceChart
-                      .performance-stats
-                        .stat-item
-                          .stat-label Orders Processed
-                          .stat-value 156
-                          .stat-change +12%
-                        .stat-item
-                          .stat-label Revenue Generated
-                          .stat-value $24,580
-                          .stat-change +8%
-                        .stat-item
-                          .stat-label Avg Order Value
-                          .stat-value $157.69
-                          .stat-change +3%
+                      .primary-metric
+                        .metric-value $24,580
+                        .metric-label Revenue
+                        .metric-change +12.5%
+                      .secondary-metrics
+                        .metric-item
+                          .metric-number 156
+                          .metric-text Orders
+                        .metric-item
+                          .metric-number $157.69
+                          .metric-text Avg Order
+                    .card-chart
+                      canvas#salesChart
 
-                  .overview-card
+                  .metric-card.orders
                     .card-header
-                      h3 Customer Satisfaction
-                      .card-actions
-                        button.btn.btn-secondary
+                      .card-icon
+                        i.fas.fa-shopping-cart
+                      .card-title Order Status
+                    .card-content
+                      .order-breakdown
+                        .order-status
+                          .status-indicator.new
+                          .status-info
+                            .status-count 24
+                            .status-label New Orders
+                        .order-status
+                          .status-indicator.processing
+                          .status-info
+                            .status-count 18
+                            .status-label Processing
+                        .order-status
+                          .status-indicator.shipped
+                          .status-info
+                            .status-count 45
+                            .status-label Shipped Today
+                    .card-action
+                      button.btn.btn-outline
+                        span View All Orders
+                        i.fas.fa-arrow-right
+
+                  .metric-card.customers
+                    .card-header
+                      .card-icon
+                        i.fas.fa-users
+                      .card-title Customer Activity
+                    .card-content
+                      .customer-stats
+                        .stat-row
+                          .stat-label New Customers
+                          .stat-value 18
+                          .stat-trend +25%
+                        .stat-row
+                          .stat-label Returning Customers
+                          .stat-value 67
+                          .stat-trend +8%
+                        .stat-row
+                          .stat-label Customer Satisfaction
+                          .stat-value 4.8★
+                          .stat-trend +0.2
+                    .card-chart
+                      canvas#customerChart
+
+                .priority-section
+                  .section-title
+                    h3 Priority Tasks
+                    .task-counter
+                      span 15 pending
+                  .priority-grid
+                    .priority-card.urgent
+                      .priority-header
+                        .priority-icon
+                          i.fas.fa-exclamation-triangle
+                        .priority-title Urgent Actions
+                        .priority-count 3
+                      .priority-list
+                        .priority-item
+                          .item-icon
+                            i.fas.fa-clock
+                          .item-content
+                            .item-title Order #ORD-2024-1234
+                            .item-subtitle 2 hours overdue
+                          .item-action
+                            button.btn.btn-sm.btn-danger Process Now
+                        .priority-item
+                          .item-icon
+                            i.fas.fa-phone
+                          .item-content
+                            .item-title Call John Smith
+                            .item-subtitle Return request follow-up
+                          .item-action
+                            button.btn.btn-sm.btn-primary Call
+                    .priority-card.today
+                      .priority-header
+                        .priority-icon
+                          i.fas.fa-calendar-day
+                        .priority-title Today's Tasks
+                        .priority-count 8
+                      .priority-list
+                        .priority-item
+                          .item-icon
+                            i.fas.fa-box
+                          .item-content
+                            .item-title Restock Inventory
+                            .item-subtitle 5 items low stock
+                          .item-action
+                            button.btn.btn-sm.btn-warning Review
+                        .priority-item
+                          .item-icon
+                            i.fas.fa-star
+                          .item-content
+                            .item-title Customer Reviews
+                            .item-subtitle 12 pending responses
+                          .item-action
+                            button.btn.btn-sm.btn-info View
+
+                .activity-section
+                  .section-title
+                    h3 Recent Activity
+                    button.btn.btn-text.view-all View All
+                  .activity-feed
+                    .activity-item
+                      .activity-avatar
+                        img(src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=40", alt="Customer")
+                      .activity-content
+                        .activity-text
+                          strong John Smith
+                          span placed a new order
+                          strong #ORD-2024-1237
+                        .activity-time 2 minutes ago
+                      .activity-action
+                        button.btn.btn-sm.btn-outline View Order
+                    .activity-item
+                      .activity-avatar
+                        .avatar-icon
+                          i.fas.fa-truck
+                      .activity-content
+                        .activity-text
+                          span Order
+                          strong #ORD-2024-1230
+                          span was shipped to Sarah Johnson
+                        .activity-time 15 minutes ago
+                      .activity-action
+                        button.btn.btn-sm.btn-outline Track
+                    .activity-item
+                      .activity-avatar
+                        .avatar-icon
                           i.fas.fa-star
-                          span Reviews
-                    .card-content
-                      .satisfaction-metrics
-                        .metric-circle
-                          .circle-progress(data-percentage="96")
-                            .circle-text 96%
-                          .circle-label Overall Rating
-                        .satisfaction-breakdown
-                          .rating-bar
-                            .rating-label 5 Stars
-                            .rating-progress
-                              .progress-fill(style="width: 78%")
-                            .rating-count 78%
-                          .rating-bar
-                            .rating-label 4 Stars
-                            .rating-progress
-                              .progress-fill(style="width: 18%")
-                            .rating-count 18%
-                          .rating-bar
-                            .rating-label 3 Stars
-                            .rating-progress
-                              .progress-fill(style="width: 3%")
-                            .rating-count 3%
-                          .rating-bar
-                            .rating-label 2 Stars
-                            .rating-progress
-                              .progress-fill(style="width: 1%")
-                            .rating-count 1%
+                      .activity-content
+                        .activity-text
+                          strong Mike Wilson
+                          span left a 5-star review
+                        .activity-time 1 hour ago
+                      .activity-action
+                        button.btn.btn-sm.btn-outline View Review
 
-            //-Tools Section
-            section#tools.content-section
+            section#pos.content-section
               .section-header
-                h2 Sales Tools
-                p Helpful tools to streamline your workflow
-              
-              .tools-container
-                .tools-grid
-                  .tool-card
-                    .tool-icon
-                      i.fas.fa-calculator
-                    .tool-content
-                      .tool-title Shipping Calculator
-                      .tool-description Calculate shipping costs and delivery times
-                    .tool-action
-                      button.btn.btn-primary Launch Tool
+                .header-content
+                  h2 Point of Sale
+                  p Process in-store transactions and quick sales
+                .header-actions
+                  button.btn.btn-secondary
+                    i.fas.fa-history
+                    span Transaction History
+                  button.btn.btn-primary
+                    i.fas.fa-plus
+                    span New Transaction
+              .pos-interface
+                .pos-left
+                  .product-search
+                    .search-container
+                      input.search-input#productSearch(type="text", placeholder="Search products or scan barcode...")
+                      button.search-btn
+                        i.fas.fa-search
+                      button.barcode-btn
+                        i.fas.fa-barcode
+                  .product-grid
+                    .product-item(data-product-id="1" data-price="89.99")
+                      .product-image
+                        img(src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=150", alt="White Shirt")
+                      .product-info
+                        .product-name Classic White Shirt
+                        .product-price $89.99
+                        .product-stock In Stock: 24
+                      .product-actions
+                        button.btn.btn-primary.add-to-cart
+                          i.fas.fa-plus
+                    .product-item(data-product-id="2" data-price="129.99")
+                      .product-image
+                        img(src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=150", alt="Denim Jacket")
+                      .product-info
+                        .product-name Denim Jacket
+                        .product-price $129.99
+                        .product-stock In Stock: 15
+                      .product-actions
+                        button.btn.btn-primary.add-to-cart
+                          i.fas.fa-plus
+                .pos-right
+                  .cart-section
+                    .cart-header
+                      h3 Current Sale
+                      button.btn.btn-text.clear-cart Clear All
+                    .cart-items#cartItems
+                      .empty-cart
+                        i.fas.fa-shopping-cart
+                        p Add items to start a sale
+                    .cart-summary
+                      .summary-row
+                        span Subtotal:
+                        span.subtotal $0.00
+                      .summary-row.discount
+                        span Discount:
+                        span.discount-amount -$0.00
+                      .summary-row.tax
+                        span Tax (8.5%):
+                        span.tax-amount $0.00
+                      .summary-row.total
+                        span Total:
+                        span.total-amount $0.00
+                    .payment-section
+                      .payment-methods
+                        button.payment-btn.active(data-method="cash")
+                          i.fas.fa-money-bill
+                          span Cash
+                        button.payment-btn(data-method="card")
+                          i.fas.fa-credit-card
+                          span Card
+                        button.payment-btn(data-method="digital")
+                          i.fas.fa-mobile-alt
+                          span Digital
+                      .payment-input
+                        input.payment-amount(type="number", placeholder="Amount received", step="0.01")
+                        .change-amount
+                          span Change: $0.00
+                      .checkout-actions
+                        button.btn.btn-secondary.hold-sale
+                          i.fas.fa-pause
+                          span Hold Sale
+                        button.btn.btn-primary.complete-sale
+                          i.fas.fa-check
+                          span Complete Sale
 
-                  .tool-card
-                    .tool-icon
-                      i.fas.fa-qrcode
-                    .tool-content
-                      .tool-title QR Code Generator
-                      .tool-description Generate QR codes for orders and products
-                    .tool-action
-                      button.btn.btn-primary Launch Tool
+            section#tasks.content-section
+              .section-header
+                .header-content
+                  h2 Task Management
+                  p Manage your daily tasks and assignments
+                .header-actions
+                  .task-filters
+                    select.filter-select
+                      option(value="all") All Tasks
+                      option(value="urgent") Urgent
+                      option(value="today") Due Today
+                      option(value="completed") Completed
+                  button.btn.btn-primary
+                    i.fas.fa-plus
+                    span New Task
+              .tasks-container
+                .task-overview
+                  .task-stat
+                    .stat-circle.urgent
+                      .stat-number 5
+                    .stat-label Urgent Tasks
+                  .task-stat
+                    .stat-circle.today
+                      .stat-number 12
+                    .stat-label Due Today
+                  .task-stat
+                    .stat-circle.completed
+                      .stat-number 28
+                    .stat-label Completed
+                .task-board
+                  .task-column.urgent
+                    .column-header
+                      .column-title
+                        i.fas.fa-exclamation-triangle
+                        span Urgent Tasks
+                      .column-count 5
+                    .task-list
+                      .task-card.priority-high
+                        .task-header
+                          .task-title Follow up on Order #ORD-2024-1234
+                          .task-menu
+                            i.fas.fa-ellipsis-h
+                        .task-details
+                          .task-description Customer John Smith waiting for missing item update
+                          .task-meta
+                            .task-assignee
+                              i.fas.fa-user
+                              span Assigned to me
+                            .task-due
+                              i.fas.fa-clock
+                              span 2 hours overdue
+                        .task-actions
+                          button.btn.btn-sm.btn-primary
+                            i.fas.fa-phone
+                            span Call Customer
+                          button.btn.btn-sm.btn-secondary
+                            i.fas.fa-check
+                            span Complete
+                  .task-column.today
+                    .column-header
+                      .column-title
+                        i.fas.fa-calendar-day
+                        span Due Today
+                      .column-count 12
+                    .task-list
+                      .task-card
+                        .task-header
+                          .task-title Restock Low Inventory Items
+                          .task-menu
+                            i.fas.fa-ellipsis-h
+                        .task-details
+                          .task-description Check and reorder 23 items that are running low
+                          .task-meta
+                            .task-assignee
+                              i.fas.fa-user
+                              span Assigned to me
+                            .task-due
+                              i.fas.fa-clock
+                              span Due in 4 hours
+                        .task-actions
+                          button.btn.btn-sm.btn-primary
+                            i.fas.fa-eye
+                            span Review Items
+                          button.btn.btn-sm.btn-secondary
+                            i.fas.fa-check
+                            span Complete
+                  .task-column.completed
+                    .column-header
+                      .column-title
+                        i.fas.fa-check-circle
+                        span Completed Today
+                      .column-count 8
+                    .task-list
+                      .task-card.completed
+                        .task-header
+                          .task-title Process Returns Queue
+                          .completion-badge
+                            i.fas.fa-check
+                        .task-details
+                          .task-description Processed 5 return requests and issued refunds
+                          .task-meta
+                            .task-completed
+                              i.fas.fa-check-circle
+                              span Completed at 2:30 PM
 
-                  .tool-card
-                    .tool-icon
-                      i.fas.fa-file-export
-                    .tool-content
-                      .tool-title Bulk Export
-                      .tool-description Export orders, customers, and inventory data
-                    .tool-action
-                      button.btn.btn-primary Launch Tool
+            section#promotions.content-section
+              .section-header
+                .header-content
+                  h2 Promotions & Offers
+                  p Manage active promotions and special offers
+                .header-actions
+                  button.btn.btn-secondary
+                    i.fas.fa-plus
+                    span Create Promotion
+                  button.btn.btn-primary
+                    i.fas.fa-broadcast-tower
+                    span Announce Offer
+              .promotions-container
+                .active-promotions
+                  .promotions-header
+                    h3 Active Promotions
+                    .promotion-count 4 active
+                  .promotions-grid
+                    .promotion-card.featured
+                      .promotion-badge Featured
+                      .promotion-header
+                        .promotion-icon
+                          i.fas.fa-percentage
+                        .promotion-title Summer Sale 2024
+                        .promotion-code SUMMER30
+                      .promotion-details
+                        .promotion-discount 30% OFF
+                        .promotion-description All summer collection items
+                        .promotion-valid Valid until: June 30, 2024
+                      .promotion-stats
+                        .stat-item
+                          .stat-value 234
+                          .stat-label Uses
+                        .stat-item
+                          .stat-value $12.5K
+                          .stat-label Revenue
+                      .promotion-actions
+                        button.btn.btn-primary.share-promotion
+                          i.fas.fa-share
+                          span Share
+                        button.btn.btn-secondary
+                          i.fas.fa-edit
+                          span Edit
+                    .promotion-card
+                      .promotion-header
+                        .promotion-icon
+                          i.fas.fa-gift
+                        .promotion-title Buy 2 Get 1 Free
+                        .promotion-code BUY2GET1
+                      .promotion-details
+                        .promotion-discount BOGO Offer
+                        .promotion-description Selected shirts and accessories
+                        .promotion-valid Valid until: March 31, 2024
+                      .promotion-stats
+                        .stat-item
+                          .stat-value 67
+                          .stat-label Uses
+                        .stat-item
+                          .stat-value $3.2K
+                          .stat-label Revenue
+                      .promotion-actions
+                        button.btn.btn-primary.share-promotion
+                          i.fas.fa-share
+                          span Share
+                        button.btn.btn-secondary
+                          i.fas.fa-edit
+                          span Edit
+                .customer-offers
+                  .offers-header
+                    h3 Customer-Specific Offers
+                    button.btn.btn-text.view-all View All Customers
+                  .offers-list
+                    .offer-item
+                      .customer-info
+                        .customer-avatar
+                          img(src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50", alt="Customer")
+                        .customer-details
+                          .customer-name John Smith
+                          .customer-tier VIP Customer
+                      .offer-details
+                        .offer-title 15% Birthday Discount
+                        .offer-code BIRTHDAY15
+                        .offer-expires Expires in 3 days
+                      .offer-actions
+                        button.btn.btn-sm.btn-primary
+                          i.fas.fa-envelope
+                          span Send Offer
+                        button.btn.btn-sm.btn-secondary
+                          i.fas.fa-eye
+                          span Details
 
-                  .tool-card
-                    .tool-icon
-                      i.fas.fa-tags
-                    .tool-content
-                      .tool-title Label Printer
-                      .tool-description Print shipping labels and product tags
-                    .tool-action
-                      button.btn.btn-primary Launch Tool
+            section#schedule.content-section
+              .section-header
+                .header-content
+                  h2 Work Schedule
+                  p View your shifts, breaks, and store hours
+                .header-actions
+                  .schedule-navigation
+                    button.btn.btn-secondary.prev-week
+                      i.fas.fa-chevron-left
+                      span Previous
+                    .current-week March 15-21, 2024
+                    button.btn.btn-secondary.next-week
+                      span Next
+                      i.fas.fa-chevron-right
+                  button.btn.btn-primary
+                    i.fas.fa-plus
+                    span Request Time Off
+              .schedule-container
+                .schedule-summary
+                  .summary-card
+                    .summary-icon
+                      i.fas.fa-clock
+                    .summary-content
+                      .summary-value 40h
+                      .summary-label This Week
+                  .summary-card
+                    .summary-icon
+                      i.fas.fa-coffee
+                    .summary-content
+                      .summary-value 6
+                      .summary-label Breaks Taken
+                  .summary-card
+                    .summary-icon
+                      i.fas.fa-calendar-check
+                    .summary-content
+                      .summary-value 5/5
+                      .summary-label Days Worked
+                .schedule-calendar
+                  .calendar-header
+                    .day-header Monday
+                    .day-header Tuesday
+                    .day-header Wednesday
+                    .day-header Thursday
+                    .day-header Friday
+                    .day-header Saturday
+                    .day-header Sunday
+                  .calendar-body
+                    .day-schedule.today
+                      .day-date 15
+                      .day-shifts
+                        .shift-block.morning
+                          .shift-time 9:00 AM - 1:00 PM
+                          .shift-type Morning Shift
+                          .shift-break
+                            i.fas.fa-coffee
+                            span 11:00 AM
+                        .shift-block.afternoon
+                          .shift-time 2:00 PM - 6:00 PM
+                          .shift-type Afternoon Shift
+                          .shift-break
+                            i.fas.fa-coffee
+                            span 4:00 PM
+                    .day-schedule
+                      .day-date 16
+                      .day-shifts
+                        .shift-block.full
+                          .shift-time 10:00 AM - 6:00 PM
+                          .shift-type Full Day
+                          .shift-break
+                            i.fas.fa-utensils
+                            span 1:00 PM
+                    .day-schedule
+                      .day-date 17
+                      .day-shifts
+                        .shift-block.morning
+                          .shift-time 9:00 AM - 2:00 PM
+                          .shift-type Morning Shift
+                    .day-schedule
+                      .day-date 18
+                      .day-shifts
+                        .shift-block.afternoon
+                          .shift-time 1:00 PM - 7:00 PM
+                          .shift-type Afternoon Shift
+                    .day-schedule
+                      .day-date 19
+                      .day-shifts
+                        .shift-block.full
+                          .shift-time 9:00 AM - 5:00 PM
+                          .shift-type Full Day
+                    .day-schedule.off
+                      .day-date 20
+                      .day-status Day Off
+                    .day-schedule.off
+                      .day-date 21
+                      .day-status Day Off
 
-    //-Modals and Overlays
-    .modal-overlay#orderModal
-      .modal-content
+            section#training.content-section
+              .section-header
+                .header-content
+                  h2 Training & Resources
+                  p Access training materials and company resources
+                .header-actions
+                  button.btn.btn-secondary
+                    i.fas.fa-bookmark
+                    span My Bookmarks
+                  button.btn.btn-primary
+                    i.fas.fa-graduation-cap
+                    span Start Learning
+              .training-container
+                .training-progress
+                  .progress-header
+                    h3 Your Learning Progress
+                    .completion-rate 78% Complete
+                  .progress-stats
+                    .progress-stat
+                      .stat-circle
+                        .progress-ring
+                          .progress-value 12
+                      .stat-label Courses Completed
+                    .progress-stat
+                      .stat-circle
+                        .progress-ring
+                          .progress-value 45
+                      .stat-label Hours Learned
+                    .progress-stat
+                      .stat-circle
+                        .progress-ring
+                          .progress-value 8
+                      .stat-label Certificates
+                .training-categories
+                  .category-grid
+                    .training-category
+                      .category-icon
+                        i.fas.fa-user-tie
+                      .category-info
+                        .category-title Customer Service
+                        .category-courses 8 courses
+                        .category-progress 85% complete
+                      .category-action
+                        button.btn.btn-primary Continue Learning
+                    .training-category
+                      .category-icon
+                        i.fas.fa-shopping-bag
+                      .category-info
+                        .category-title Product Knowledge
+                        .category-courses 12 courses
+                        .category-progress 65% complete
+                      .category-action
+                        button.btn.btn-primary Continue Learning
+                    .training-category
+                      .category-icon
+                        i.fas.fa-chart-line
+                      .category-info
+                        .category-title Sales Techniques
+                        .category-courses 6 courses
+                        .category-progress 92% complete
+                      .category-action
+                        button.btn.btn-success View Certificate
+                .recent-resources
+                  .resources-header
+                    h3 Recent Resources
+                    button.btn.btn-text.view-all View All
+                  .resources-list
+                    .resource-item
+                      .resource-icon
+                        i.fas.fa-file-pdf
+                      .resource-info
+                        .resource-title Product Catalog Spring 2024
+                        .resource-type PDF Guide
+                        .resource-updated Updated 2 days ago
+                      .resource-actions
+                        button.btn.btn-sm.btn-primary
+                          i.fas.fa-download
+                          span Download
+                        button.btn.btn-sm.btn-secondary
+                          i.fas.fa-eye
+                          span Preview
+                    .resource-item
+                      .resource-icon
+                        i.fas.fa-video
+                      .resource-info
+                        .resource-title Handling Difficult Customers
+                        .resource-type Video Training
+                        .resource-duration 15 minutes
+                      .resource-actions
+                        button.btn.btn-sm.btn-primary
+                          i.fas.fa-play
+                          span Watch
+                        button.btn.btn-sm.btn-secondary
+                          i.fas.fa-bookmark
+                          span Save
+
+            section#settings.content-section
+              .section-header
+                .header-content
+                  h2 Settings
+                  p Manage your account and dashboard preferences
+                .header-actions
+                  button.btn.btn-secondary
+                    i.fas.fa-download
+                    span Export Settings
+                  button.btn.btn-primary
+                    i.fas.fa-save
+                    span Save Changes
+              .settings-container
+                .settings-navigation
+                  .nav-tabs
+                    a.tab-link.active(href="#" data-tab="profile") Profile
+                    a.tab-link(href="#" data-tab="preferences") Preferences
+                    a.tab-link(href="#" data-tab="notifications") Notifications
+                    a.tab-link(href="#" data-tab="security") Security
+                .settings-content
+                  .tab-panel.active#profile-settings
+                    .settings-section
+                      .section-title Personal Information
+                      .form-grid
+                        .form-group
+                          label(for="firstName") First Name
+                          input#firstName(type="text", value="Alex", class="form-input")
+                        .form-group
+                          label(for="lastName") Last Name
+                          input#lastName(type="text", value="Thompson", class="form-input")
+                        .form-group
+                          label(for="email") Email
+                          input#email(type="email", value="alex.thompson@kingscollection.com", class="form-input")
+                        .form-group
+                          label(for="phone") Phone
+                          input#phone(type="tel", value="+1 (555) 123-4567", class="form-input")
+                    .settings-section
+                      .section-title Profile Picture
+                      .profile-upload
+                        .current-avatar
+                          img(src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Current Avatar")
+                        .upload-actions
+                          button.btn.btn-secondary
+                            i.fas.fa-camera
+                            span Change Photo
+                          button.btn.btn-text
+                            i.fas.fa-trash
+                            span Remove
+                  .tab-panel#preferences-settings
+                    .settings-section
+                      .section-title Dashboard Preferences
+                      .preference-group
+                        .preference-item
+                          .preference-info
+                            .preference-title Dark Mode
+                            .preference-description Enable dark theme for the dashboard
+                          .preference-control
+                            .toggle-switch
+                              input(type="checkbox", id="darkMode")
+                              label(for="darkMode")
+                        .preference-item
+                          .preference-info
+                            .preference-title Auto-refresh Data
+                            .preference-description Automatically refresh dashboard data
+                          .preference-control
+                            .toggle-switch
+                              input(type="checkbox", id="autoRefresh", checked)
+                              label(for="autoRefresh")
+
+    .modal-overlay#orderDetailModal
+      .modal-container
         .modal-header
           h3 Order Details
           button.modal-close
             i.fas.fa-times
         .modal-body
-          //-Order details will be populated here
         .modal-footer
-          button.btn.btn-secondary Cancel
-          button.btn.btn-primary Save Changes
+          button.btn.btn-secondary.modal-cancel Cancel
+          button.btn.btn-primary.modal-confirm Confirm
 
-    .modal-overlay#customerModal
-      .modal-content
-        .modal-header
-          h3 Customer Profile
-          button.modal-close
-            i.fas.fa-times
-        .modal-body
-          //-Customer details will be populated here
-        .modal-footer
-          button.btn.btn-secondary Close
-          button.btn.btn-primary Send Message
-
-    //-Toast Notifications
     .toast-container#toastContainer
 
-    script(src="/vanilla-js/sales-dashboard.js")
+    .loading-overlay#loadingOverlay
+      .loading-spinner
+        .spinner
+        .loading-text Loading...
+
+    script(src='/vanilla-js/sales-dashboard.js')

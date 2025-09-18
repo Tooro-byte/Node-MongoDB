@@ -6,13 +6,13 @@ html(lang="en")
     title Kings Collections - Premium Men's Fashion
     link(rel="stylesheet" href="/Styles/index.css")
   body
-    //-Background Blobs
+    //- Background Blobs
     .background-blobs
       .blob.blob-1
       .blob.blob-2
       .blob.blob-3
 
-    //-Navigation
+    //- Navigation
     nav.navbar
       .nav-container
         .nav-brand
@@ -33,7 +33,7 @@ html(lang="en")
         button.mobile-menu-btn
           span.hamburger
 
-        //-Mobile Menu (moved inside nav-container)
+        //- Mobile Menu (moved inside nav-container)
         .mobile-menu
           a(href="#home") Home
           a(href="#collections") Collections
@@ -42,7 +42,7 @@ html(lang="en")
           button.btn-login.mobile-login Login
           button.btn-signup.mobile-signup Sign Up
 
-    //-Hero Section
+    //- Hero Section
     section#home.hero
       .hero-slider
         .hero-slide.active
@@ -77,52 +77,123 @@ html(lang="en")
         span.indicator
         span.indicator
 
-    //-Features Section
+    //- Enhanced Features Section
     section.features
       .container
+        .section-header
+          h2 Why Choose Kings Collections
+          p Experience the future of fashion with our cutting-edge features
         .features-grid
           .feature-card
             .feature-icon
               svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
-                rect(x="1" y="3" width="15" height="13")
-                polygon(points="16,8 20,8 23,11 23,16 16,16 16,8")
-                circle(cx="5.5" cy="18.5" r="2.5")
-                circle(cx="18.5" cy="18.5" r="2.5")
-            h3 Fast Delivery
-            p Quick and reliable shipping worldwide
+                path(d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z")
+            h3 AI Style Assistant
+            p Personalized recommendations powered by advanced AI technology
+          .feature-card
+            .feature-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M15 12a3 3 0 11-6 0 3 3 0 016 0z")
+                path(d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z")
+            h3 Virtual Try-On
+            p See how clothes look on you with AR technology
+          .feature-card
+            .feature-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5")
+            h3 Global Supply Chain
+            p Direct partnerships with premium manufacturers worldwide
+          .feature-card
+            .feature-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2")
+                circle(cx="8.5" cy="7" r="4")
+                path(d="M20 8v6M23 11l-3 3-3-3")
+            h3 VIP Membership
+            p Exclusive access to limited editions and early releases
+          .feature-card
+            .feature-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z")
+                polyline(points="3.27,6.96 12,12.01 20.73,6.96")
+                line(x1="12" y1="22.08" x2="12" y2="12")
+            h3 Sustainability First
+            p Eco-friendly materials and ethical manufacturing practices
           .feature-card
             .feature-icon
               svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
                 path(d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z")
-            h3 Quality Guarantee
-            p 100% authentic products with warranty
-          .feature-card
-            .feature-icon
-              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
-                path(d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2")
-                circle(cx="9" cy="7" r="4")
-                path(d="m22 21-3-3m0 0-3-3m3 3 3-3m-3 3-3 3")
-            h3 Expert Support
-            p 24/7 customer service assistance
+                path(d="M9 12l2 2 4-4")
+            h3 Perfect Fit Guarantee
+            p Advanced sizing technology ensures the perfect fit every time
 
-    //-Login Required Section
+    //- Enhanced Login Required Section with Video and Features
     section.login-required
       .container
-        .login-card
-          .login-icon
-            svg(width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
-              path(d="M9 12l2 2 4-4")
-              path(d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1")
-              path(d="M3 12v6c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-6")
-          h2 Ready to Shop?
-          p.login-message Please Login to buy our products
+        .login-content-grid
+          .video-showcase-card
+            .video-container
+              iframe(
+                src="https://www.youtube.com/embed/WwQIPreQhHo?enablejsapi=1"
+                title="Men's Fashion Collection Showcase"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+              )
+              .video-overlay
+                .play-button
+                  svg(width="48" height="48" viewBox="0 0 24 24" fill="currentColor")
+                    path(d="M8 5v14l11-7z")
+            .video-content
+              h3 Latest Collection From Turkey
+              p Experience premium quality and exceptional craftsmanship in every piece
+              .collection-stats
+                .stat
+                  .stat-number 500+
+                  .stat-label Premium Items
+                .stat
+                  .stat-number 25+
+                  .stat-label Countries
+                .stat
+                  .stat-number 98%
+                  .stat-label Satisfaction Rate
+
+          .features-showcase
+            .premium-feature
+              .premium-icon
+                svg(width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                  path(d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2")
+                  circle(cx="12" cy="7" r="4")
+              .premium-content
+                h4 Personal Stylist
+                p Get expert fashion advice from our professional stylists
+            
+            .premium-feature
+              .premium-icon
+                svg(width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                  path(d="M13 2L3 14h9l-1 8 10-12h-9l1-8z")
+              .premium-content
+                h4 Express Delivery
+                p Same-day delivery available in major cities worldwide
+            
+            .premium-feature
+              .premium-icon
+                svg(width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                  path(d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z")
+              .premium-content
+                h4 Luxury Packaging
+                p Every order comes in premium gift-ready packaging
+
+        .login-call-to-action
+          h2 Ready to Experience Luxury?
+          p Join thousands of satisfied customers and elevate your style today
           .login-buttons
             a(href="/login")
               button.btn-login-large Login Now
             a(href="/signup")
-              button.btn-signup-large Create Account
+              button.btn-signup-large Signup
 
-    //-Section
+    //- Collections Section
     section#collections.collections
       .container
         .section-header
@@ -178,7 +249,7 @@ html(lang="en")
                 span Casual Wear & Accessories
               button.btn-explore Explore Collection
 
-    //-Reviews Section
+    //- Reviews Section
     section#reviews.reviews
       .container
         .section-header
@@ -240,7 +311,7 @@ html(lang="en")
               span.star ★
             p.review-text "I love the variety and authenticity. Each piece tells a story, and the international sourcing really shows in the quality."
 
-    //-Footer
+    //- Footer
     footer.footer
       .container
         .footer-content

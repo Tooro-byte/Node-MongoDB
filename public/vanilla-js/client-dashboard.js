@@ -1,578 +1,870 @@
-// Dashboard Navigation and Functionality
-class CustomerDashboard {
+// Dashboard JavaScript functionality
+class EcommerceDashboard {
   constructor() {
-    this.currentSection = "overview";
-    this.cart = this.loadCart();
-    this.wishlist = this.loadWishlist();
     this.init();
   }
 
   init() {
-    this.setupNavigation();
-    this.setupCartFunctionality();
-    this.setupWishlistFunctionality();
+    this.setupEventListeners();
+    this.startClock();
+    this.initializeCounters();
     this.setupNotifications();
-    this.setupOrderFilters();
-    this.setupAccountForms();
-    this.updateCartCount();
-    this.updateWishlistCount();
+    this.loadDashboardData();
   }
 
-  // Navigation System
+  setupEventListeners() {
+    // Navigation event listeners
+    this.setupNavigation();
+
+    // Cart functionality
+    this.setupCart();
+
+    // Search functionality
+    this.setupSearch();
+
+    // Filter functionality
+    this.setupFilters();
+
+    // User menu
+    this.setupUserMenu();
+
+    // Notifications
+    this.setupNotificationHandlers();
+
+    // Order actions
+    this.setupOrderActions();
+
+    // Message actions
+    this.setupMessageActions();
+  }
+
   setupNavigation() {
-    const navItems = document.querySelectorAll(".nav-item");
+    // Main nav tabs
+    const navTabs = document.querySelectorAll(".nav-tab");
+    const sidebarItems = document.querySelectorAll(".nav-item");
     const contentSections = document.querySelectorAll(".content-section");
 
-    navItems.forEach((item) => {
-      item.addEventListener("click", (e) => {
+    // Handle main nav tab clicks
+    navTabs.forEach((tab) => {
+      tab.addEventListener("click", (e) => {
         e.preventDefault();
-        const targetSection = item.getAttribute("data-section");
-
-        if (targetSection) {
-          this.switchSection(targetSection);
-          this.updateActiveNav(item);
-        }
+        const section = tab.dataset.section;
+        this.switchSection(section, navTabs, contentSections);
       });
     });
 
-    // Handle card links
-    const cardLinks = document.querySelectorAll(".card-link");
-    cardLinks.forEach((link) => {
-      link.addEventListener("click", (e) => {
+    // Handle sidebar nav clicks
+    sidebarItems.forEach((item) => {
+      item.addEventListener("click", (e) => {
+        if (item.classList.contains("logout")) {
+          this.handleLogout(e);
+          return;
+        }
+
         e.preventDefault();
-        const targetSection = link.getAttribute("data-section");
-        if (targetSection) {
-          this.switchSection(targetSection);
-          this.updateActiveNavBySection(targetSection);
+        const section = item.dataset.section;
+        if (section) {
+          this.switchSection(
+            section,
+            [...navTabs, ...sidebarItems],
+            contentSections
+          );
         }
       });
     });
   }
 
-  switchSection(sectionName) {
-    const contentSections = document.querySelectorAll(".content-section");
+  switchSection(section, navElements, contentSections) {
+    // Remove active class from all nav elements
+    navElements.forEach((el) => el.classList.remove("active"));
 
-    contentSections.forEach((section) => {
-      section.classList.remove("active");
-    });
+    // Add active class to clicked element
+    const activeElement = document.querySelector(`[data-section="${section}"]`);
+    if (activeElement) {
+      activeElement.classList.add("active");
+    }
 
-    const targetSection = document.getElementById(sectionName);
+    // Hide all content sections
+    contentSections.forEach((content) => content.classList.remove("active"));
+
+    // Show target section
+    const targetSection = document.getElementById(section);
     if (targetSection) {
       targetSection.classList.add("active");
-      this.currentSection = sectionName;
-
-      // Scroll to top of content
-      targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      this.animateSection(targetSection);
     }
+
+    // Load section-specific data
+    this.loadSectionData(section);
   }
 
-  updateActiveNav(activeItem) {
-    const navItems = document.querySelectorAll(".nav-item");
-    navItems.forEach((item) => item.classList.remove("active"));
-    activeItem.classList.add("active");
+  animateSection(section) {
+    section.style.opacity = "0";
+    section.style.transform = "translateY(20px)";
+
+    setTimeout(() => {
+      section.style.transition = "all 0.5s ease";
+      section.style.opacity = "1";
+      section.style.transform = "translateY(0)";
+    }, 10);
   }
 
-  updateActiveNavBySection(sectionName) {
-    const navItems = document.querySelectorAll(".nav-item");
-    navItems.forEach((item) => {
-      item.classList.remove("active");
-      if (item.getAttribute("data-section") === sectionName) {
-        item.classList.add("active");
-      }
-    });
-  }
+  startClock() {
+    const updateTime = () => {
+      const now = new Date();
 
-  // Cart Functionality
-  setupCartFunctionality() {
-    // Add to cart buttons
-    const addToCartBtns = document.querySelectorAll(".btn-primary");
-    addToCartBtns.forEach((btn) => {
-      if (btn.textContent.includes("Add to Cart")) {
-        btn.addEventListener("click", (e) => {
-          this.addToCart(e.target);
+      // Update time
+      const timeElement = document.getElementById("current-time");
+      if (timeElement) {
+        const timeString = now.toLocaleTimeString("en-US", {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
         });
+        timeElement.textContent = timeString;
       }
-    });
 
-    // Quantity controls
-    const qtyBtns = document.querySelectorAll(".qty-btn");
-    qtyBtns.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.updateQuantity(e.target);
-      });
-    });
-
-    // Remove item buttons
-    const removeItemBtns = document.querySelectorAll(".remove-item");
-    removeItemBtns.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.removeFromCart(e.target);
-      });
-    });
-
-    // Checkout button
-    const checkoutBtn = document.querySelector(".checkout-btn");
-    if (checkoutBtn) {
-      checkoutBtn.addEventListener("click", () => {
-        this.proceedToCheckout();
-      });
-    }
-  }
-
-  addToCart(button) {
-    const productCard =
-      button.closest(".product-card") || button.closest(".wishlist-item");
-    if (!productCard) return;
-
-    const productName = productCard.querySelector("h4").textContent;
-    const productPrice = productCard.querySelector("p").textContent;
-    const productImage = productCard.querySelector("img").src;
-
-    const cartItem = {
-      id: Date.now(),
-      name: productName,
-      price: productPrice,
-      image: productImage,
-      quantity: 1,
+      // Update date
+      const dateElement = document.getElementById("current-date");
+      if (dateElement) {
+        const dateString = now.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        dateElement.textContent = dateString;
+      }
     };
 
-    this.cart.push(cartItem);
-    this.saveCart();
-    this.updateCartCount();
-    this.showNotification(`${productName} added to cart!`, "success");
-
-    // Update cart display if currently viewing cart
-    if (this.currentSection === "cart") {
-      this.renderCartItems();
-    }
+    // Update immediately and then every second
+    updateTime();
+    setInterval(updateTime, 1000);
   }
 
-  updateQuantity(button) {
-    const cartItem = button.closest(".cart-item");
-    const qtyInput = cartItem.querySelector(".qty-input");
-    const currentQty = parseInt(qtyInput.value);
+  initializeCounters() {
+    // Animate counter numbers on page load
+    const counters = document.querySelectorAll(".summary-number, .stat-number");
 
-    if (button.classList.contains("plus")) {
-      qtyInput.value = currentQty + 1;
-    } else if (button.classList.contains("minus") && currentQty > 1) {
-      qtyInput.value = currentQty - 1;
-    }
+    counters.forEach((counter) => {
+      const target = parseInt(counter.textContent.replace(/[^0-9]/g, ""));
+      const prefix = counter.textContent.replace(/[0-9]/g, "");
+      let current = 0;
+      const increment = target / 100;
 
-    this.updateCartItemTotal(cartItem);
-    this.updateCartSummary();
+      const updateCounter = () => {
+        if (current < target) {
+          current += increment;
+          counter.textContent = prefix + Math.ceil(current);
+          requestAnimationFrame(updateCounter);
+        } else {
+          counter.textContent = counter.textContent; // Reset to original
+        }
+      };
+
+      // Start animation after a delay
+      setTimeout(updateCounter, 500);
+    });
   }
 
-  removeFromCart(button) {
-    const cartItem = button.closest(".cart-item");
-    const productName = cartItem.querySelector("h4").textContent;
+  setupCart() {
+    // Quantity controls
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".qty-btn")) {
+        const btn = e.target.closest(".qty-btn");
+        const input = btn.parentNode.querySelector(".qty-input");
+        const isPlus = btn.classList.contains("plus");
 
-    if (confirm(`Remove ${productName} from cart?`)) {
-      cartItem.remove();
-      this.updateCartCount();
-      this.updateCartSummary();
-      this.showNotification(`${productName} removed from cart`, "info");
-    }
+        let quantity = parseInt(input.value);
+        quantity = isPlus ? quantity + 1 : Math.max(1, quantity - 1);
+        input.value = quantity;
+
+        this.updateCartTotal();
+        this.animateButton(btn);
+      }
+    });
+
+    // Remove item from cart
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".remove-item, .action-btn.remove")) {
+        const item = e.target.closest(".cart-item");
+        if (item && confirm("Remove this item from your cart?")) {
+          this.removeCartItem(item);
+        }
+      }
+    });
+
+    // Add to wishlist
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".action-btn.wishlist")) {
+        const btn = e.target.closest(".action-btn.wishlist");
+        this.toggleWishlist(btn);
+      }
+    });
   }
 
-  updateCartItemTotal(cartItem) {
-    const price = parseFloat(
-      cartItem.querySelector(".item-price").textContent.replace("$", "")
-    );
-    const quantity = parseInt(cartItem.querySelector(".qty-input").value);
-    const total = price * quantity;
-
-    cartItem.querySelector(".item-total").textContent = `$${total.toFixed(2)}`;
-  }
-
-  updateCartSummary() {
+  updateCartTotal() {
     const cartItems = document.querySelectorAll(".cart-item");
     let subtotal = 0;
 
     cartItems.forEach((item) => {
-      const total = parseFloat(
-        item.querySelector(".item-total").textContent.replace("$", "")
+      const price = parseFloat(
+        item.querySelector(".item-price").textContent.replace(/[^0-9.]/g, "")
       );
+      const quantity = parseInt(item.querySelector(".qty-input").value);
+      const total = price * quantity;
+
+      const totalElement = item.querySelector(".item-total");
+      if (totalElement) {
+        totalElement.textContent = "$" + total.toFixed(2);
+      }
+
       subtotal += total;
     });
 
-    const shipping = 9.99;
-    const tax = subtotal * 0.08;
-    const total = subtotal + shipping + tax;
+    // Update summary
+    const summaryRows = document.querySelectorAll(".summary-row");
+    summaryRows.forEach((row) => {
+      const label = row.querySelector("span:first-child").textContent;
+      const valueElement = row.querySelector("span:last-child");
 
-    document.querySelector(
-      ".summary-row:nth-child(1) span:last-child"
-    ).textContent = `$${subtotal.toFixed(2)}`;
-    document.querySelector(
-      ".summary-row:nth-child(3) span:last-child"
-    ).textContent = `$${tax.toFixed(2)}`;
-    document.querySelector(
-      ".summary-row.total span:last-child"
-    ).textContent = `$${total.toFixed(2)}`;
+      if (label.includes("Subtotal")) {
+        valueElement.textContent = "$" + subtotal.toFixed(2);
+      } else if (label.includes("Total")) {
+        const tax = subtotal * 0.08; // 8% tax
+        const discount = subtotal * 0.1; // 10% discount
+        const total = subtotal + tax - discount;
+        valueElement.textContent = "$" + total.toFixed(2);
+      }
+    });
   }
 
-  proceedToCheckout() {
-    this.showNotification("Redirecting to checkout...", "info");
-    // In a real app, this would redirect to checkout page
+  removeCartItem(item) {
+    item.style.transition = "all 0.3s ease";
+    item.style.transform = "translateX(-100%)";
+    item.style.opacity = "0";
+
     setTimeout(() => {
-      alert("Checkout functionality would be implemented here");
-    }, 1000);
+      item.remove();
+      this.updateCartTotal();
+      this.updateCartCount();
+    }, 300);
+  }
+
+  toggleWishlist(btn) {
+    const icon = btn.querySelector("i");
+    const isInWishlist = icon.classList.contains("fas");
+
+    if (isInWishlist) {
+      icon.classList.remove("fas");
+      icon.classList.add("far");
+      this.showNotification("Removed from wishlist", "info");
+    } else {
+      icon.classList.remove("far");
+      icon.classList.add("fas");
+      this.showNotification("Added to wishlist", "success");
+    }
+
+    this.animateButton(btn);
   }
 
   updateCartCount() {
-    const cartCount = document.querySelector(".cart-count");
-    const navCartCount = document.querySelector(
-      '.nav-item[data-section="cart"] .count'
+    const cartItems = document.querySelectorAll(".cart-item").length;
+    const countElements = document.querySelectorAll(
+      '.cart-icon .cart-count, .nav-tab[data-section="cart"] .badge, .nav-item[data-section="cart"] .count'
     );
-    const count = this.cart.length;
 
-    if (cartCount) cartCount.textContent = count;
-    if (navCartCount) navCartCount.textContent = count;
+    countElements.forEach((element) => {
+      element.textContent = cartItems;
+    });
   }
 
-  // Wishlist Functionality
-  setupWishlistFunctionality() {
-    // Remove from wishlist buttons
-    const removeWishlistBtns = document.querySelectorAll(".remove-wishlist");
-    removeWishlistBtns.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.removeFromWishlist(e.target);
+  setupSearch() {
+    const searchInput = document.querySelector(".search-box input");
+    if (searchInput) {
+      let searchTimeout;
+
+      searchInput.addEventListener("input", (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          this.performSearch(e.target.value);
+        }, 300);
+      });
+    }
+  }
+
+  performSearch(query) {
+    if (query.length < 2) return;
+
+    // Simulate search functionality
+    console.log("Searching for:", query);
+
+    // Show search results or suggestions
+    this.showSearchResults(query);
+  }
+
+  showSearchResults(query) {
+    // Create search results dropdown
+    let dropdown = document.querySelector(".search-results");
+    if (!dropdown) {
+      dropdown = document.createElement("div");
+      dropdown.className = "search-results";
+      dropdown.style.cssText = `
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border-radius: 0.5rem;
+                box-shadow: var(--shadow-lg);
+                max-height: 300px;
+                overflow-y: auto;
+                z-index: 1000;
+                margin-top: 0.5rem;
+                padding: 1rem;
+            `;
+      document.querySelector(".search-box").style.position = "relative";
+      document.querySelector(".search-box").appendChild(dropdown);
+    }
+
+    // Sample search results
+    dropdown.innerHTML = `
+            <div class="search-result-item" style="padding: 0.5rem; cursor: pointer; border-radius: 0.25rem; margin-bottom: 0.5rem;">
+                <div style="font-weight: 600;">Premium Cotton Shirt</div>
+                <div style="color: var(--text-secondary); font-size: 0.875rem;">$89.99</div>
+            </div>
+            <div class="search-result-item" style="padding: 0.5rem; cursor: pointer; border-radius: 0.25rem;">
+                <div style="font-weight: 600;">Designer Denim Jacket</div>
+                <div style="color: var(--text-secondary); font-size: 0.875rem;">$199.99</div>
+            </div>
+        `;
+
+    // Add click handlers for results
+    dropdown.querySelectorAll(".search-result-item").forEach((item) => {
+      item.addEventListener("click", () => {
+        dropdown.remove();
+        this.showNotification("Product added to cart!", "success");
+      });
+
+      item.addEventListener("mouseenter", () => {
+        item.style.background = "var(--bg-secondary)";
+      });
+
+      item.addEventListener("mouseleave", () => {
+        item.style.background = "transparent";
       });
     });
 
-    // Share wishlist button
-    const shareBtn = document.querySelector(".wishlist-actions .btn-primary");
-    if (shareBtn && shareBtn.textContent.includes("Share")) {
-      shareBtn.addEventListener("click", () => {
-        this.shareWishlist();
+    // Remove dropdown when clicking outside
+    setTimeout(() => {
+      document.addEventListener(
+        "click",
+        (e) => {
+          if (
+            !dropdown.contains(e.target) &&
+            !document.querySelector(".search-box").contains(e.target)
+          ) {
+            dropdown.remove();
+          }
+        },
+        { once: true }
+      );
+    }, 100);
+  }
+
+  setupFilters() {
+    // Order filters
+    const orderFilters = document.querySelectorAll(".filter-select");
+    orderFilters.forEach((filter) => {
+      filter.addEventListener("change", (e) => {
+        this.filterOrders(e.target.value);
+      });
+    });
+
+    // Message filters
+    const messageFilters = document.querySelectorAll(".filter-btn");
+    messageFilters.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        messageFilters.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        this.filterMessages(btn.dataset.filter);
+      });
+    });
+  }
+
+  filterOrders(status) {
+    const orders = document.querySelectorAll(".order-card, .order-item");
+
+    orders.forEach((order) => {
+      const orderStatus = order.querySelector(".order-status span");
+      if (status === "all" || !orderStatus) {
+        order.style.display = "block";
+      } else {
+        const shouldShow =
+          orderStatus.textContent.toLowerCase() === status.toLowerCase();
+        order.style.display = shouldShow ? "block" : "none";
+      }
+    });
+  }
+
+  filterMessages(filter) {
+    const messages = document.querySelectorAll(".message-item");
+
+    messages.forEach((message) => {
+      switch (filter) {
+        case "unread":
+          message.style.display = message.classList.contains("unread")
+            ? "flex"
+            : "none";
+          break;
+        case "orders":
+          message.style.display = message.textContent
+            .toLowerCase()
+            .includes("order")
+            ? "flex"
+            : "none";
+          break;
+        case "promotions":
+          message.style.display =
+            message.textContent.toLowerCase().includes("offer") ||
+            message.textContent.toLowerCase().includes("promotion")
+              ? "flex"
+              : "none";
+          break;
+        default:
+          message.style.display = "flex";
+      }
+    });
+  }
+
+  setupUserMenu() {
+    const userMenu = document.querySelector(".user-menu");
+    const dropdown = document.querySelector(".dropdown-menu");
+
+    if (userMenu && dropdown) {
+      dropdown.style.display = "none";
+      dropdown.style.position = "absolute";
+      dropdown.style.top = "100%";
+      dropdown.style.right = "0";
+      dropdown.style.background = "white";
+      dropdown.style.borderRadius = "0.5rem";
+      dropdown.style.boxShadow = "var(--shadow-lg)";
+      dropdown.style.padding = "0.5rem";
+      dropdown.style.minWidth = "200px";
+      dropdown.style.zIndex = "1000";
+
+      userMenu.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.style.display =
+          dropdown.style.display === "none" ? "block" : "none";
+      });
+
+      document.addEventListener("click", () => {
+        dropdown.style.display = "none";
       });
     }
-
-    // Clear all wishlist button
-    const clearBtn = document.querySelector(".wishlist-actions .btn-outline");
-    if (clearBtn && clearBtn.textContent.includes("Clear")) {
-      clearBtn.addEventListener("click", () => {
-        this.clearWishlist();
-      });
-    }
   }
 
-  removeFromWishlist(button) {
-    const wishlistItem = button.closest(".wishlist-item");
-    const productName = wishlistItem.querySelector("h4").textContent;
-
-    if (confirm(`Remove ${productName} from wishlist?`)) {
-      wishlistItem.remove();
-      this.updateWishlistCount();
-      this.showNotification(`${productName} removed from wishlist`, "info");
-    }
-  }
-
-  shareWishlist() {
-    if (navigator.share) {
-      navigator.share({
-        title: "My MenStyle Wishlist",
-        text: "Check out my wishlist on MenStyle!",
-        url: window.location.href,
-      });
-    } else {
-      // Fallback for browsers that don't support Web Share API
-      const url = window.location.href;
-      navigator.clipboard.writeText(url).then(() => {
-        this.showNotification("Wishlist link copied to clipboard!", "success");
-      });
-    }
-  }
-
-  clearWishlist() {
-    if (confirm("Are you sure you want to clear your entire wishlist?")) {
-      const wishlistItems = document.querySelectorAll(".wishlist-item");
-      wishlistItems.forEach((item) => item.remove());
-      this.wishlist = [];
-      this.saveWishlist();
-      this.updateWishlistCount();
-      this.showNotification("Wishlist cleared", "info");
-    }
-  }
-
-  updateWishlistCount() {
-    const navWishlistCount = document.querySelector(
-      '.nav-item[data-section="wishlist"] .count'
-    );
-    const count = document.querySelectorAll(".wishlist-item").length;
-
-    if (navWishlistCount) navWishlistCount.textContent = count;
-  }
-
-  // Notifications System
   setupNotifications() {
-    const closeNotificationBtns = document.querySelectorAll(
-      ".close-notification"
-    );
-    closeNotificationBtns.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        this.closeNotification(e.target);
-      });
-    });
+    // Initialize notification system
+    this.createNotificationContainer();
 
-    // Auto-hide notifications after 5 seconds
-    const notifications = document.querySelectorAll(".notification");
-    notifications.forEach((notification) => {
-      setTimeout(() => {
-        this.closeNotification(
-          notification.querySelector(".close-notification")
-        );
-      }, 5000);
+    // Mark notifications as read
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".notification-btn")) {
+        this.showNotificationDropdown();
+      }
     });
   }
 
-  showNotification(message, type = "info") {
-    const notificationsContainer = document.querySelector(".notifications");
+  createNotificationContainer() {
+    if (document.querySelector(".notification-container")) return;
+
+    const container = document.createElement("div");
+    container.className = "notification-container";
+    container.style.cssText = `
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 10000;
+            pointer-events: none;
+        `;
+    document.body.appendChild(container);
+  }
+
+  showNotification(message, type = "info", duration = 3000) {
+    const container = document.querySelector(".notification-container");
+    if (!container) return;
 
     const notification = document.createElement("div");
-    notification.className = `notification ${type}`;
+    notification.className = `notification notification-${type}`;
+    notification.style.cssText = `
+            background: ${
+              type === "success"
+                ? "var(--success)"
+                : type === "error"
+                ? "var(--error)"
+                : "var(--primary)"
+            };
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            cursor: pointer;
+            max-width: 350px;
+            word-wrap: break-word;
+        `;
+
     notification.innerHTML = `
-      <i class="fas ${this.getNotificationIcon(type)}"></i>
-      <span>${message}</span>
-      <button class="close-notification">
-        <i class="fas fa-times"></i>
-      </button>
-    `;
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <i class="fas fa-${
+                  type === "success"
+                    ? "check-circle"
+                    : type === "error"
+                    ? "exclamation-circle"
+                    : "info-circle"
+                }"></i>
+                <span>${message}</span>
+                <button style="background: none; border: none; color: white; cursor: pointer; margin-left: auto;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
 
-    notificationsContainer.appendChild(notification);
+    container.appendChild(notification);
 
-    // Setup close button
-    const closeBtn = notification.querySelector(".close-notification");
-    closeBtn.addEventListener("click", () => {
-      this.closeNotification(closeBtn);
-    });
-
-    // Auto-hide after 5 seconds
+    // Animate in
     setTimeout(() => {
-      this.closeNotification(closeBtn);
-    }, 5000);
+      notification.style.transform = "translateX(0)";
+    }, 10);
+
+    // Auto dismiss
+    const dismissTimer = setTimeout(() => {
+      this.dismissNotification(notification);
+    }, duration);
+
+    // Manual dismiss
+    notification.addEventListener("click", () => {
+      clearTimeout(dismissTimer);
+      this.dismissNotification(notification);
+    });
   }
 
-  getNotificationIcon(type) {
-    const icons = {
-      success: "fa-check-circle",
-      error: "fa-exclamation-circle",
-      warning: "fa-exclamation-triangle",
-      info: "fa-info-circle",
-    };
-    return icons[type] || icons.info;
+  dismissNotification(notification) {
+    notification.style.transform = "translateX(100%)";
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 300);
   }
 
-  closeNotification(button) {
-    const notification = button.closest(".notification");
-    if (notification) {
-      notification.style.opacity = "0";
-      notification.style.transform = "translateX(100%)";
+  showNotificationDropdown() {
+    // Create and show notification dropdown
+    const dropdown = document.createElement("div");
+    dropdown.style.cssText = `
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-xl);
+            padding: 1rem;
+            min-width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            margin-top: 0.5rem;
+        `;
+
+    dropdown.innerHTML = `
+            <div style="margin-bottom: 1rem;">
+                <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Notifications</h4>
+                <button class="btn btn-text" style="font-size: 0.75rem;">Mark all as read</button>
+            </div>
+            <div class="notification-list">
+                <div class="notification-item" style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); cursor: pointer;">
+                    <div style="font-weight: 600; font-size: 0.875rem;">Order Shipped</div>
+                    <div style="color: var(--text-secondary); font-size: 0.75rem; margin: 0.25rem 0;">Your order #KC-2024-001 is on its way</div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">2 hours ago</div>
+                </div>
+                <div class="notification-item" style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); cursor: pointer;">
+                    <div style="font-weight: 600; font-size: 0.875rem;">Special Offer</div>
+                    <div style="color: var(--text-secondary); font-size: 0.75rem; margin: 0.25rem 0;">25% off on selected items</div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">1 day ago</div>
+                </div>
+            </div>
+        `;
+
+    const notificationBtn = document.querySelector(".notification-btn");
+    notificationBtn.parentNode.style.position = "relative";
+    notificationBtn.parentNode.appendChild(dropdown);
+
+    // Remove dropdown when clicking outside
+    setTimeout(() => {
+      document.addEventListener(
+        "click",
+        (e) => {
+          if (
+            !dropdown.contains(e.target) &&
+            !notificationBtn.contains(e.target)
+          ) {
+            dropdown.remove();
+          }
+        },
+        { once: true }
+      );
+    }, 100);
+  }
+
+  setupNotificationHandlers() {
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".close-notification")) {
+        const notification = e.target.closest(".notification");
+        if (notification) {
+          notification.style.transform = "translateX(100%)";
+          setTimeout(() => notification.remove(), 300);
+        }
+      }
+    });
+  }
+
+  setupOrderActions() {
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+
+      const btnText = btn.textContent.trim();
+
+      switch (true) {
+        case btnText.includes("Track Order"):
+          this.trackOrder(btn);
+          break;
+        case btnText.includes("View Details"):
+        case btnText.includes("View Invoice"):
+          this.viewOrderDetails(btn);
+          break;
+        case btnText.includes("Reorder"):
+          this.reorderItems(btn);
+          break;
+        case btnText.includes("Leave Review"):
+          this.leaveReview(btn);
+          break;
+        case btnText.includes("Return Item"):
+          this.returnItem(btn);
+          break;
+        case btnText.includes("Export Orders"):
+          this.exportOrders();
+          break;
+      }
+    });
+  }
+
+  trackOrder(btn) {
+    this.showNotification("Opening order tracking...", "info");
+    // Simulate opening tracking page
+    setTimeout(() => {
+      this.showNotification("Order is currently in transit", "success");
+    }, 1000);
+  }
+
+  viewOrderDetails(btn) {
+    this.showNotification("Loading order details...", "info");
+    this.animateButton(btn);
+  }
+
+  reorderItems(btn) {
+    this.showNotification("Items added to cart!", "success");
+    this.updateCartCount();
+    this.animateButton(btn);
+  }
+
+  leaveReview(btn) {
+    this.showNotification("Opening review form...", "info");
+    this.animateButton(btn);
+  }
+
+  returnItem(btn) {
+    if (confirm("Are you sure you want to return this item?")) {
+      this.showNotification("Return request submitted", "success");
+      this.animateButton(btn);
+    }
+  }
+
+  exportOrders() {
+    this.showNotification("Preparing export...", "info");
+    setTimeout(() => {
+      this.showNotification("Orders exported successfully!", "success");
+    }, 2000);
+  }
+
+  setupMessageActions() {
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".message-actions button")) {
+        const btn = e.target.closest("button");
+        const btnText = btn.textContent.trim();
+        const messageItem = btn.closest(".message-item");
+
+        switch (true) {
+          case btnText.includes("Mark as Read"):
+            this.markMessageAsRead(messageItem);
+            break;
+          case btnText.includes("Track Order"):
+            this.trackOrder(btn);
+            break;
+          case btnText.includes("Shop Now"):
+            this.showNotification("Redirecting to shop...", "info");
+            break;
+        }
+      }
+    });
+  }
+
+  markMessageAsRead(messageItem) {
+    messageItem.classList.remove("unread");
+    const btn = messageItem.querySelector("button");
+    if (btn && btn.textContent.includes("Mark as Read")) {
+      btn.style.display = "none";
+    }
+    this.updateMessageCount();
+  }
+
+  updateMessageCount() {
+    const unreadCount = document.querySelectorAll(
+      ".message-item.unread"
+    ).length;
+    const countElements = document.querySelectorAll(
+      '.nav-tab[data-section="messages"] .badge, .nav-item[data-section="messages"] .count'
+    );
+
+    countElements.forEach((element) => {
+      element.textContent = unreadCount;
+      element.classList.toggle("new", unreadCount > 0);
+    });
+  }
+
+  animateButton(btn) {
+    btn.style.transform = "scale(0.95)";
+    setTimeout(() => {
+      btn.style.transform = "scale(1)";
+    }, 150);
+  }
+
+  handleLogout(e) {
+    e.preventDefault();
+    if (confirm("Are you sure you want to logout?")) {
+      this.showNotification("Logging out...", "info");
       setTimeout(() => {
-        notification.remove();
-      }, 300);
+        // Simulate logout
+        window.location.href = "/login";
+      }, 1500);
     }
   }
 
-  // Order Filters
-  setupOrderFilters() {
-    const filterSelect = document.querySelector(".filter-select");
-    const searchInput = document.querySelector(".search-input");
+  loadSectionData(section) {
+    // Simulate loading data for different sections
+    console.log(`Loading data for section: ${section}`);
 
-    if (filterSelect) {
-      filterSelect.addEventListener("change", () => {
-        this.filterOrders();
-      });
+    // Add any section-specific initialization here
+    switch (section) {
+      case "dashboard":
+        this.loadDashboardData();
+        break;
+      case "orders":
+        this.loadOrdersData();
+        break;
+      case "messages":
+        this.loadMessagesData();
+        break;
+      case "cart":
+        this.updateCartTotal();
+        break;
     }
-
-    if (searchInput) {
-      searchInput.addEventListener("input", () => {
-        this.filterOrders();
-      });
-    }
   }
 
-  filterOrders() {
-    const filterValue = document.querySelector(".filter-select").value;
-    const searchValue = document
-      .querySelector(".search-input")
-      .value.toLowerCase();
-    const orderItems = document.querySelectorAll(".order-item");
-
-    orderItems.forEach((item) => {
-      const orderStatus = item
-        .querySelector(".order-status")
-        .textContent.toLowerCase();
-      const orderNumber = item
-        .querySelector(".order-info h4")
-        .textContent.toLowerCase();
-
-      const matchesFilter =
-        filterValue === "all" || orderStatus.includes(filterValue);
-      const matchesSearch =
-        orderNumber.includes(searchValue) || searchValue === "";
-
-      if (matchesFilter && matchesSearch) {
-        item.style.display = "block";
-      } else {
-        item.style.display = "none";
-      }
-    });
+  loadDashboardData() {
+    // Simulate loading dashboard metrics
+    this.animateCounters();
   }
 
-  // Account Forms
-  setupAccountForms() {
-    // Edit buttons
-    const editBtns = document.querySelectorAll(".account-card .btn-outline");
-    editBtns.forEach((btn) => {
-      if (btn.textContent.includes("Edit")) {
-        btn.addEventListener("click", (e) => {
-          this.editAccountInfo(e.target);
-        });
-      }
-    });
-
-    // Add new buttons
-    const addBtns = document.querySelectorAll(".account-card .btn-outline");
-    addBtns.forEach((btn) => {
-      if (btn.textContent.includes("Add New")) {
-        btn.addEventListener("click", (e) => {
-          this.addNewItem(e.target);
-        });
-      }
-    });
+  loadOrdersData() {
+    // Simulate loading orders
+    this.showNotification("Orders updated", "info", 1000);
   }
 
-  editAccountInfo(button) {
-    const cardHeader = button.closest(".card-header");
-    const cardTitle = cardHeader.querySelector("h3").textContent;
-
-    this.showNotification(
-      `Edit ${cardTitle} functionality would be implemented here`,
-      "info"
-    );
+  loadMessagesData() {
+    // Simulate loading messages
+    this.updateMessageCount();
   }
 
-  addNewItem(button) {
-    const cardHeader = button.closest(".card-header");
-    const cardTitle = cardHeader.querySelector("h3").textContent;
-
-    this.showNotification(
-      `Add new ${cardTitle} functionality would be implemented here`,
-      "info"
-    );
-  }
-
-  // Local Storage Management
-  loadCart() {
-    const saved = localStorage.getItem("menstyle_cart");
-    return saved ? JSON.parse(saved) : [];
-  }
-
-  saveCart() {
-    localStorage.setItem("menstyle_cart", JSON.stringify(this.cart));
-  }
-
-  loadWishlist() {
-    const saved = localStorage.getItem("menstyle_wishlist");
-    return saved ? JSON.parse(saved) : [];
-  }
-
-  saveWishlist() {
-    localStorage.setItem("menstyle_wishlist", JSON.stringify(this.wishlist));
-  }
-
-  // Utility Methods
-  formatPrice(price) {
-    return `$${parseFloat(price).toFixed(2)}`;
-  }
-
-  formatDate(date) {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  animateCounters() {
+    // Re-animate counters when dashboard loads
+    const counters = document.querySelectorAll("#dashboard .stat-number");
+    counters.forEach((counter, index) => {
+      setTimeout(() => {
+        counter.style.transform = "scale(1.1)";
+        setTimeout(() => {
+          counter.style.transform = "scale(1)";
+        }, 200);
+      }, index * 100);
     });
   }
 }
 
-// Initialize Dashboard when DOM is loaded
+// Initialize dashboard when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
-  const dashboard = new CustomerDashboard();
+  window.dashboard = new EcommerceDashboard();
 
-  // Make dashboard globally available for debugging
-  window.dashboard = dashboard;
+  // Show welcome message
+  setTimeout(() => {
+    window.dashboard.showNotification(
+      "Welcome back, John! 👋",
+      "success",
+      4000
+    );
+  }, 1000);
 });
 
-// Additional Interactive Features
-document.addEventListener("DOMContentLoaded", () => {
-  // Smooth scrolling for anchor links
-  const anchorLinks = document.querySelectorAll('a[href^="#"]');
-  anchorLinks.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const target = document.querySelector(link.getAttribute("href"));
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth" });
-      }
+// Add smooth scrolling for better UX
+document.documentElement.style.scrollBehavior = "smooth";
+
+// Add loading states for better perceived performance
+window.addEventListener("beforeunload", () => {
+  document.body.style.opacity = "0.7";
+});
+
+// Handle responsive navigation
+function handleResponsiveNav() {
+  const nav = document.querySelector(".main-nav");
+  const toggleBtn = document.createElement("button");
+
+  if (window.innerWidth <= 768 && !document.querySelector(".nav-toggle")) {
+    toggleBtn.className = "nav-toggle";
+    toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+    toggleBtn.style.cssText = `
+            display: block;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        `;
+
+    document.querySelector(".header-content").insertBefore(toggleBtn, nav);
+
+    toggleBtn.addEventListener("click", () => {
+      nav.classList.toggle("mobile-open");
+      nav.style.display = nav.style.display === "none" ? "flex" : "none";
     });
-  });
-
-  // Image lazy loading
-  const images = document.querySelectorAll("img");
-  const imageObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        img.src = img.src; // Trigger loading
-        img.classList.add("loaded");
-        observer.unobserve(img);
-      }
-    });
-  });
-
-  images.forEach((img) => imageObserver.observe(img));
-
-  // Add loading states to buttons
-  const buttons = document.querySelectorAll(".btn");
-  buttons.forEach((btn) => {
-    btn.addEventListener("click", function () {
-      if (!this.classList.contains("loading")) {
-        this.classList.add("loading");
-        setTimeout(() => {
-          this.classList.remove("loading");
-        }, 1000);
-      }
-    });
-  });
-
-  // Enhanced hover effects for product cards
-  const productCards = document.querySelectorAll(
-    ".product-card, .wishlist-item"
-  );
-  productCards.forEach((card) => {
-    card.addEventListener("mouseenter", function () {
-      this.style.transform = "translateY(-8px)";
-    });
-
-    card.addEventListener("mouseleave", function () {
-      this.style.transform = "translateY(0)";
-    });
-  });
-
-  // Dynamic greeting based on time of day
-  const welcomeText = document.querySelector(".welcome-text h1");
-  if (welcomeText) {
-    const hour = new Date().getHours();
-    let greeting = "Welcome back";
-
-    if (hour < 12) {
-      greeting = "Good morning";
-    } else if (hour < 18) {
-      greeting = "Good afternoon";
-    } else {
-      greeting = "Good evening";
-    }
-
-    welcomeText.textContent = `${greeting}, John!`;
   }
-});
+}
+
+// Handle responsive behavior
+window.addEventListener("resize", handleResponsiveNav);
+window.addEventListener("load", handleResponsiveNav);
