@@ -1,12 +1,4 @@
 // <<<<<<<<< Cofiguring the different DOTENV Files >>>>>>>>>>
-// const envFile =
-//   process.env.NODE_ENV === "production"
-//     ? ".env.production"
-//     : ".env.development";
-
-// require("dotenv").config({
-//   path: envFile,
-// });
 require("dotenv").config();
 require("./config/passport");
 
@@ -33,16 +25,39 @@ const userSigup = require("./routes/userAuth");
 const authRoutes = require("./routes/auth");
 const clientPage = require("./routes/client");
 const salesPage = require("./routes/salesAgent");
+const categoryRouter = require("./routes/categoryRoutes");
+const indexRouter = require("./routes/indexRoute");
 
 // >>>>>>>>>Handling JSON Objects with the Express Middleware <<<<<<<
 app.use(express.json());
 
 // >>>>>>>>>>>Setting up templating Engines <<<<<<<<<<
 app.set("view engine", "pug");
-app.set("views", "./views"); // Fixed: Correctly set views directory
+app.set("views", "./views");
 
 // >>>>>>>>>>> More Middlewares <<<<<<<<<<
-app.use(helmet());
+// Corrected: Configure helmet's Content Security Policy to allow external scripts and inline scripts.
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: [
+        "'self'",
+        "https://cdn.tailwindcss.com",
+        "https://kit.fontawesome.com",
+        "'unsafe-inline'", // This allows the inline <script> tag in your Pug file
+      ],
+      styleSrc: [
+        "'self'",
+        "https://cdn.tailwindcss.com",
+        "https://fonts.googleapis.com",
+        "'unsafe-inline'", // This allows the inline <style> tag in your Pug file
+      ],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+    },
+  })
+);
+
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("public"));
 
@@ -57,10 +72,15 @@ if (process.env.NODE_ENV === "development") {
   console.log("Morgan on It");
 }
 // >>>>>>>Connecting to MongoDB Service<<<<<<
-mongoose
-  .connect(process.env.DATABASE)
-  .then(() => console.log(" MongoDB Connection was Sucessfull"))
-  .catch((err) => console.error(err.message));
+async function connectToDatabase() {
+  try {
+    await mongoose.connect(process.env.DATABASE);
+    console.log("MongoDB Connection was successful");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error.message);
+  }
+}
+connectToDatabase();
 
 // >>>>>>>>Passport Configurations <<<<<<<<<<
 passport.use(User.createStrategy());
@@ -68,16 +88,14 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 // >>>>>>> Use the already imported Routes <<<<<<<<<
+app.use("/", indexRouter);
+
+// Follow with all other routes.
 app.use("/", userSigup);
 app.use("/api/auth", authRoutes);
 app.use("/", clientPage);
 app.use("/", salesPage);
-
-// Placeholder dashboard route
-app.get("/dashboard", (req, res) => {
-  console.log("Dashboard route reached");
-  res.send("Dashboard Reached"); // Replace with your actual dashboard view
-});
+app.use("/", categoryRouter);
 
 //Handling Non -existing routes.
 app.use((req, res) => {

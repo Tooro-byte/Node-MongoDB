@@ -1,0 +1,285 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Kings Collections - Premium Men's Fashion
+    link(rel="stylesheet" href="/Styles/index.css")
+  body
+    //-Background Blobs
+    .background-blobs
+      .blob.blob-1
+      .blob.blob-2
+      .blob.blob-3
+
+    //-Navigation
+    nav.navbar
+      .nav-container
+        .nav-brand
+          .logo-icon
+            img(src="Images/logo1.png" alt="Kings Collections Logo" class="logo-image-1")
+          span.brand-text Kings Collections
+
+        .nav-links.desktop-nav
+          a(href="#home") Home
+          a(href="#collections") Collections
+          a(href="#about") About
+          a(href="#reviews") Reviews
+          a(href="/login")
+            button.btn-login Login
+          a(href="/signup")
+            button.btn-signup Sign Up
+
+        button.mobile-menu-btn
+          span.hamburger
+
+        //-Mobile Menu (moved inside nav-container)
+        .mobile-menu
+          a(href="#home") Home
+          a(href="#collections") Collections
+          a(href="#about") About
+          a(href="#reviews") Reviews
+          button.btn-login.mobile-login Login
+          button.btn-signup.mobile-signup Sign Up
+
+    //-Hero Section
+    section#home.hero
+      .hero-slider
+        .hero-slide.active
+          img(src="Images/jeans.jpg" alt="Premium Men's Fashion")
+          .hero-overlay
+          .hero-content
+            h1 Premium Men's Fashion
+            p Discover the latest trends
+        .hero-slide
+          img(src="Images/T-shirt-1.webp" alt="Luxury Collections")
+          .hero-overlay
+          .hero-content
+            h1 Luxury Collections
+            p Imported from the finest sources
+        .hero-slide
+          img(src="Images/shoes.jpg" alt="Style That Speaks")
+          .hero-overlay
+          .hero-content
+            h1 Style That Speaks
+            p Elevate your wardrobe
+
+      .hero-controls
+        button.hero-btn.prev-btn
+          svg(width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            polyline(points="15,18 9,12 15,6")
+        button.hero-btn.next-btn
+          svg(width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+            polyline(points="9,18 15,12 9,6")
+
+      .hero-indicators
+        span.indicator.active
+        span.indicator
+        span.indicator
+
+    //-Features Section
+    section.features
+      .container
+        .features-grid
+          .feature-card
+            .feature-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                rect(x="1" y="3" width="15" height="13")
+                polygon(points="16,8 20,8 23,11 23,16 16,16 16,8")
+                circle(cx="5.5" cy="18.5" r="2.5")
+                circle(cx="18.5" cy="18.5" r="2.5")
+            h3 Fast Delivery
+            p Quick and reliable shipping worldwide
+          .feature-card
+            .feature-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z")
+            h3 Quality Guarantee
+            p 100% authentic products with warranty
+          .feature-card
+            .feature-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2")
+                circle(cx="9" cy="7" r="4")
+                path(d="m22 21-3-3m0 0-3-3m3 3 3-3m-3 3-3 3")
+            h3 Expert Support
+            p 24/7 customer service assistance
+
+    //-Login Required Section
+    section.login-required
+      .container
+        .login-card
+          .login-icon
+            svg(width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+              path(d="M9 12l2 2 4-4")
+              path(d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1")
+              path(d="M3 12v6c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-6")
+          h2 Ready to Shop?
+          p.login-message Please Login to buy our products
+          .login-buttons
+            a(href="/login")
+              button.btn-login-large Login Now
+            a(href="/signup")
+              button.btn-signup-large Create Account
+
+    //-Section
+    section#collections.collections
+      .container
+        .section-header
+          h2 Global Collections
+          p Discover premium men's fashion imported from the world's fashion capitals
+
+        .collections-grid
+          .collection-card
+            .card-image
+              img(src="Images/china.webp" alt="Dubai Collection")
+              .location-badge
+                svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                  path(d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z")
+                  circle(cx="12" cy="10" r="3")
+                span Dubai
+            .card-content
+              h3 Dubai Collection
+              p Luxury fashion hub with premium materials and exquisite craftsmanship
+              .specialty
+                strong Specialty: 
+                span Premium Suits & Formal Wear
+              button.btn-explore Explore Collection
+
+          .collection-card
+            .card-image
+              img(src="Images/london.webp" alt="London Collection")
+              .location-badge
+                svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                  path(d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z")
+                  circle(cx="12" cy="10" r="3")
+                span London
+            .card-content
+              h3 London Collection
+              p Traditional British tailoring meets contemporary style
+              .specialty
+                strong Specialty: 
+                span Tailored Jackets & Coats
+              button.btn-explore Explore Collection
+
+          .collection-card
+            .card-image
+              img(src="Images/ship.webp" alt="China Collection")
+              .location-badge
+                svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                  path(d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z")
+                  circle(cx="12" cy="10" r="3")
+                span China
+            .card-content
+              h3 China Collection
+              p Modern manufacturing with innovative designs and quality materials
+              .specialty
+                strong Specialty: 
+                span Casual Wear & Accessories
+              button.btn-explore Explore Collection
+
+    //-Reviews Section
+    section#reviews.reviews
+      .container
+        .section-header
+          h2 What Our Customers Say
+          p Real experiences from satisfied customers worldwide
+
+        .reviews-grid
+          .review-card
+            .quote-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z")
+                path(d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z")
+            .reviewer-info
+              img.reviewer-avatar(src="Images/reviews1.jpeg" alt="Marcus Johnson")
+              .reviewer-details
+                h4 Bwambale Moris
+                p Business Executive
+            .rating
+              span.star ★
+              span.star ★
+              span.star ★
+              span.star ★
+              span.star ★
+            p.review-text "Outstanding quality and exceptional service. The suits from their Dubai collection are absolutely perfect for my business meetings."
+
+          .review-card
+            .quote-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z")
+                path(d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z")
+            .reviewer-info
+              img.reviewer-avatar(src="Images/reviews2.jpeg" alt="David Chen")
+              .reviewer-details
+                h4 Thembo Israel
+                p Fashion Enthusiast
+            .rating
+              span.star ★
+              span.star ★
+              span.star ★
+              span.star ★
+              span.star ★
+            p.review-text "Kings Collections has transformed my wardrobe. The attention to detail and quality of their imported pieces is unmatched."
+
+          .review-card
+            .quote-icon
+              svg(width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2")
+                path(d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z")
+                path(d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z")
+            .reviewer-info
+              img.reviewer-avatar(src="Images/reviews3.jpeg" alt="Alexander Brown")
+              .reviewer-details
+                h4 Abdu Razaka Ismail
+                p Creative Director
+            .rating
+              span.star ★
+              span.star ★
+              span.star ★
+              span.star ★
+              span.star ★
+            p.review-text "I love the variety and authenticity. Each piece tells a story, and the international sourcing really shows in the quality."
+
+    //-Footer
+    footer.footer
+      .container
+        .footer-content
+          .footer-brand
+            .footer-brand-logo
+              .logo-icon
+                img(src="Images/logo1.png" alt="Kings Collections Logo" class="logo-image-2")
+              span.brand-text Kings Collections
+            p.brand-description Premium men's fashion from around the world. Quality, style, and authenticity in every piece.
+            .social-links
+              a.social-link(href="#")
+                span f
+              a.social-link(href="#")
+                span t
+              a.social-link(href="#")
+                span in
+
+          .footer-links
+            .footer-column
+              h3 Quick Links
+              ul
+                li: a(href="#home") Home
+                li: a(href="#collections") Collections
+                li: a(href="#about") About Us
+                li: a(href="#reviews") Reviews
+
+            .footer-column
+              h3 Support
+              ul
+                li: a(href="#") Contact Us
+                li: a(href="#") Size Guide
+                li: a(href="#") Shipping Info
+                li: a(href="#") Returns
+
+        .footer-bottom
+          p © 2025 Kings Collections. All rights reserved.
+          .footer-legal
+            a(href="#") Privacy Policy
+            a(href="#") Terms of Service
+            a(href="#") Cookie Policy
+
+    script(src="/vanilla-js/index.js")

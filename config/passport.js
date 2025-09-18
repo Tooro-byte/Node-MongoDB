@@ -2,6 +2,7 @@ const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth2").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 const User = require("../models/users");
+const https = require("https");
 
 passport.use(
   new GoogleStrategy(
@@ -106,16 +107,12 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-//>>>>>>>>> Incorporating Facebook in the application >>>>>>>>>>
-if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-  console.log("Initializing Facebook Strategy with:", {
-    clientID: process.env.FACEBOOK_APP_ID ? "Present" : "Missing",
-    clientSecret: process.env.FACEBOOK_APP_SECRET ? "Present" : "Missing",
-    callbackURL:
-      process.env.FACEBOOK_CALLBACK_URL ||
-      "http://localhost:3005/api/auth/facebook/callback",
-  });
+// >>>>>>>>> Incorporating Facebook in the application >>>>>>>>>>
 
+if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+  console.log("Initializing Facebook Strategy");
+
+  // A simplified, standard Facebook strategy setup
   passport.use(
     new FacebookStrategy(
       {
@@ -124,93 +121,56 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
         callbackURL:
           process.env.FACEBOOK_CALLBACK_URL ||
           "http://localhost:3005/api/auth/facebook/callback",
-        profileFields: [
-          "id",
-          "emails",
-          "name",
-          "displayName",
-          "picture.type(large)",
-        ],
-        enableProof: false, // Set to false for easier debugging
-        authType: "rerequest", // Forces permission dialog
-        display: "popup",
+        profileFields: ["id", "emails", "displayName"],
+        passReqToCallback: true, // This is a good practice to keep
       },
-      async function (accessToken, refreshToken, profile, done) {
+      async function (req, accessToken, refreshToken, profile, done) {
         try {
           console.log("=== FACEBOOK STRATEGY CALLBACK ===");
-          console.log(
-            "Access Token received:",
-            accessToken ? "Present" : "Missing"
-          );
-          console.log("Profile received:", {
-            id: profile.id,
-            email: profile.emails?.[0]?.value || "No email",
-            name: profile.displayName,
-            profileData: profile._json,
-          });
 
-          // Handle case where no email is provided by Facebook
           let email = profile.emails?.[0]?.value;
-
-          // If no email from Facebook, create a placeholder email
           if (!email) {
             email = `facebook_${profile.id}@placeholder.local`;
             console.warn("No email from Facebook, using placeholder:", email);
           }
 
-          // Check if user already exists
           let user = await User.findOne({
             $or: [{ email: email }, { facebookId: profile.id }],
           });
 
           if (user) {
             console.log("Existing user found:", user._id);
-            // Update Facebook ID and email if not set
-            let updated = false;
             if (!user.facebookId) {
               user.facebookId = profile.id;
-              updated = true;
-            }
-            if (!user.email || user.email.includes("placeholder.local")) {
-              user.email = email;
-              updated = true;
-            }
-
-            user.lastLogin = new Date();
-            updated = true;
-
-            if (updated) {
               await user.save();
-              console.log("Updated existing user with Facebook data");
+              console.log("Updated existing user with Facebook ID");
+            }
+            if (!user.email) {
+              user.email = email;
+              await user.save();
+              console.log("Updated existing user with Facebook email");
             }
             return done(null, user);
           }
 
-          // Create new user
           console.log("Creating new Facebook user");
           user = new User({
-            name:
-              profile.displayName ||
-              profile.name?.givenName + " " + profile.name?.familyName,
+            name: profile.displayName,
             email: email,
             facebookId: profile.id,
-            role: "client", // Default role
+            role: "client",
             lastLogin: new Date(),
-            // Skip password requirement for social auth
-            skipPasswordValidation: true,
           });
 
           await user.save();
           console.log("New Facebook user created:", user._id);
           return done(null, user);
         } catch (error) {
-          console.error("Facebook Strategy Error:", error);
-          console.error("Error details:", {
+          console.error("Facebook Strategy Error:", {
             message: error.message,
             stack: error.stack,
-            code: error.code,
           });
-          return done(error, null);
+          return done(error);
         }
       }
     )
@@ -220,5 +180,4 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
     "Facebook authentication disabled: Missing FACEBOOK_APP_ID or FACEBOOK_APP_SECRET environment variables"
   );
 }
-
 module.exports = passport;

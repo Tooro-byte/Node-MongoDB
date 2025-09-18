@@ -76,7 +76,7 @@ router.get("/auth-success", (req, res) => {
           align-items: center;
           min-height: 100vh;
           margin: 0;
-          background-color: rgba(252, 4, 210, 1);
+          background-color: teal;
         }
         .container {
           text-align: center;

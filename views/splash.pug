@@ -1,0 +1,432 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Kings Collection - The mark of a well-dressed man
+    script(src="https://cdn.tailwindcss.com")
+    script(src="https://kit.fontawesome.com/a076d05399.js")
+    link(rel="preconnect", href="https://fonts.googleapis.com")
+    link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
+    link(href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@400;700&display=swap", rel="stylesheet")
+    style.
+      body {
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #0c1c3c 0%, #1e3a8a 25%, #1e40af 50%, #2563eb 75%, #0c1c3c 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 8s ease-in-out infinite;
+        color: white;
+        overflow-x: hidden;
+      }
+      
+      @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+      }
+      
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+      }
+      
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: float 15s infinite linear;
+      }
+      
+      @keyframes float {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-10vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+      
+      .content {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+        max-width: 4xl;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      
+      .logo-animation {
+        font-family: 'Playfair Display', serif;
+        animation: logoGlow 3s ease-in-out infinite alternate;
+      }
+      
+      @keyframes logoGlow {
+        0% {
+          text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+        100% {
+          text-shadow: 0 0 30px rgba(212, 175, 55, 0.6), 0 0 40px rgba(212, 175, 55, 0.4);
+        }
+      }
+      
+      .crown-icon {
+        font-size: 4rem;
+        color: #d4af37;
+        margin-bottom: 1rem;
+        animation: crownGlow 2s ease-in-out infinite alternate;
+      }
+      
+      @keyframes crownGlow {
+        from { text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+        to { text-shadow: 0 0 30px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.3); }
+      }
+      
+      .spinner-container {
+        position: relative;
+        width: 140px;
+        height: 140px;
+        margin: 2rem auto;
+      }
+      
+      .spinner-ring {
+        position: absolute;
+        border-radius: 50%;
+        border: 3px solid transparent;
+      }
+      
+      .ring-1 {
+        width: 140px;
+        height: 140px;
+        border-top: 4px solid #d4af37;
+        border-right: 4px solid #d4af37;
+        animation: spin 2.5s linear infinite;
+        filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5));
+      }
+      
+      .ring-2 {
+        width: 110px;
+        height: 110px;
+        top: 15px;
+        left: 15px;
+        border-top: 3px solid #f4d03f;
+        border-left: 3px solid #f4d03f;
+        animation: spin 2s linear infinite reverse;
+        filter: drop-shadow(0 0 8px rgba(244, 208, 63, 0.4));
+      }
+      
+      .ring-3 {
+        width: 80px;
+        height: 80px;
+        top: 30px;
+        left: 30px;
+        border-top: 3px solid #ffd700;
+        border-bottom: 3px solid #ffd700;
+        animation: spin 1.5s linear infinite;
+        filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.3));
+      }
+      
+      .ring-4 {
+        width: 50px;
+        height: 50px;
+        top: 45px;
+        left: 45px;
+        border: 2px solid transparent;
+        border-top: 2px solid #fff8dc;
+        border-right: 2px solid #fff8dc;
+        animation: spin 1s linear infinite reverse;
+        filter: drop-shadow(0 0 4px rgba(255, 248, 220, 0.2));
+      }
+      
+      .ring-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(45deg, #d4af37, #f4d03f, #ffd700);
+        border-radius: 50%;
+        animation: pulse 2s ease-in-out infinite;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          transform: translate(-50%, -50%) scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.3);
+          opacity: 0.8;
+        }
+      }
+      
+      .progress-bar {
+        width: 320px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 2rem auto;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #d4af37, #f4d03f, #ffd700);
+        border-radius: 3px;
+        animation: progress 6s ease-in-out forwards;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+      }
+      
+      @keyframes progress {
+        0% { width: 0%; }
+        100% { width: 100%; }
+      }
+      
+      .fade-in {
+        animation: fadeInUp 1s ease-out forwards;
+        opacity: 0;
+      }
+      
+      .fade-in-delay-1 { animation-delay: 0.3s; }
+      .fade-in-delay-2 { animation-delay: 0.6s; }
+      .fade-in-delay-3 { animation-delay: 0.9s; }
+      
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+      }
+      
+      .loading-dots {
+        display: inline-flex;
+        gap: 6px;
+        margin-left: 8px;
+      }
+      
+      .dot {
+        width: 8px;
+        height: 8px;
+        background: #d4af37;
+        border-radius: 50%;
+        animation: dotBounce 1.4s ease-in-out infinite both;
+        box-shadow: 0 0 4px rgba(212, 175, 55, 0.4);
+      }
+      
+      .dot:nth-child(1) { animation-delay: -0.32s; }
+      .dot:nth-child(2) { animation-delay: -0.16s; }
+      
+      @keyframes dotBounce {
+        0%, 80%, 100% {
+          transform: scale(0);
+        }
+        40% {
+          transform: scale(1);
+        }
+      }
+      
+      .fade-out {
+        animation: fadeOutSplash 0.8s ease-in-out forwards;
+      }
+      
+      @keyframes fadeOutSplash {
+        to {
+          opacity: 0;
+          transform: scale(1.05);
+        }
+      }
+      
+      .slogan {
+        font-style: italic;
+        color: #d4af37;
+        font-weight: 300;
+      }
+      
+      @media (max-width: 768px) {
+        .logo-animation {
+          font-size: 3rem;
+        }
+        
+        .crown-icon {
+          font-size: 3rem;
+        }
+        
+        .spinner-container {
+          width: 120px;
+          height: 120px;
+        }
+        
+        .ring-1 { width: 120px; height: 120px; }
+        .ring-2 { width: 95px; height: 95px; top: 12.5px; left: 12.5px; }
+        .ring-3 { width: 70px; height: 70px; top: 25px; left: 25px; }
+        .ring-4 { width: 45px; height: 45px; top: 37.5px; left: 37.5px; }
+        
+        .progress-bar {
+          width: 280px;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .logo-animation {
+          font-size: 2.5rem;
+        }
+        
+        .crown-icon {
+          font-size: 2.5rem;
+        }
+        
+        .progress-bar {
+          width: 240px;
+        }
+      }
+
+  body(class=['flex', 'flex-col', 'items-center', 'justify-center', 'min-h-screen', 'p-4', 'relative'])
+    //- Animated background particles
+    .particles#particles
+    
+    .content
+      //- Crown and Logo section
+      .fade-in
+        .crown-icon ♔
+        h1(class=['text-5xl', 'sm:text-6xl', 'lg:text-7xl', 'font-bold', 'logo-animation', 'tracking-tight', 'mb-4']) Kings Collection
+        p(class=['text-lg', 'sm:text-xl', 'font-medium', 'slogan', 'mb-8']) The mark of a well-dressed man
+      
+      //- Advanced Spinner Rings
+      .fade-in.fade-in-delay-1
+        .spinner-container
+          .spinner-ring.ring-1
+          .spinner-ring.ring-2
+          .spinner-ring.ring-3
+          .spinner-ring.ring-4
+          .ring-center
+      
+      //- Loading text with animated dots
+      .fade-in.fade-in-delay-2
+        .flex(class=['items-center', 'justify-center', 'mb-4'])
+          span(class=['text-xl', 'font-medium']) Preparing your experience
+          .loading-dots
+            .dot
+            .dot
+            .dot
+        p(class=['text-sm', 'text-gray-300', 'font-medium']) Please wait...
+      
+      //- Progress bar
+      .fade-in.fade-in-delay-3
+        .progress-bar
+          .progress-fill
+
+  script.
+    // Generate particles dynamically
+    function createInitialParticles() {
+      const particlesContainer = document.getElementById('particles');
+      if (!particlesContainer) {
+        console.error('Particles container not found');
+        return;
+      }
+      for (let i = 0; i < 60; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+    
+    // Add continuous particle generation
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.animationDelay = '0s';
+      particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+      const particlesContainer = document.getElementById('particles');
+      if (particlesContainer) {
+        particlesContainer.appendChild(particle);
+        setTimeout(() => {
+          if (particle.parentNode) {
+            particle.remove();
+          }
+        }, 25000);
+      }
+    }
+    
+    // Dynamic loading text updates
+    function updateLoadingText() {
+      const loadingTexts = [
+        'Preparing your experience',
+        'Curating premium collections',
+        'Setting up your wardrobe',
+        'Loading luxury items',
+        'Almost ready'
+      ];
+      
+      const textElement = document.querySelector('.content span');
+      let textIndex = 0;
+      
+      const textInterval = setInterval(() => {
+        textIndex = (textIndex + 1) % loadingTexts.length;
+        if (textElement) {
+          textElement.style.opacity = '0';
+          setTimeout(() => {
+            textElement.textContent = loadingTexts[textIndex];
+            textElement.style.opacity = '1';
+          }, 300);
+        }
+      }, 1200);
+      
+      // Clear interval before redirect
+      setTimeout(() => {
+        clearInterval(textInterval);
+      }, 6500); // Corrected: Matched with new redirect delay
+    }
+    
+    // Initialize everything on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Kings Collection splash page loaded');
+      createInitialParticles();
+      updateLoadingText();
+      
+      // Create additional particles every 2 seconds
+      const particleInterval = setInterval(createParticle, 2000);
+      
+      // Redirect after 7 seconds with fade out effect
+      setTimeout(() => {
+        console.log('Fading out and redirecting to main application');
+        document.body.classList.add('fade-out');
+        clearInterval(particleInterval);
+        setTimeout(() => {
+          window.location.href = '/index';
+        }, 800);
+      }, 7000); // Corrected: Redirect after 7 seconds
+    });
