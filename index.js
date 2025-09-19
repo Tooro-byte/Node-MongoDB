@@ -25,8 +25,10 @@ const userSigup = require("./routes/userAuth");
 const authRoutes = require("./routes/auth");
 const clientPage = require("./routes/client");
 const salesPage = require("./routes/salesAgent");
+const adminPage = require("./routes/admin");
 const categoryRouter = require("./routes/categoryRoutes");
 const indexRouter = require("./routes/indexRoute");
+const sideBarSales = require("./routes/salesSideBarRoutes");
 
 // >>>>>>>>> Handling JSON Objects with the Express Middleware <<<<<<<
 app.use(express.json());
@@ -104,7 +106,9 @@ app.use("/", userSigup);
 app.use("/api/auth", authRoutes);
 app.use("/", clientPage);
 app.use("/", salesPage);
+app.use("/", adminPage);
 app.use("/", categoryRouter);
+app.use("/", sideBarSales);
 
 // Handling Non-existing routes.
 app.use((req, res) => {

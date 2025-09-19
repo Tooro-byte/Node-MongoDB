@@ -1,0 +1,119 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Point of Sale - Kings Collection
+    link(rel="stylesheet", href="/styles/sales-dashboard.css")
+    link(rel="stylesheet", href="/styles/pos.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
+    script(src="/vanilla-js/sales-dashboard.js")
+    script(src="/vanilla-js/pos.js")
+
+  body
+    header.header
+      .header-background
+      .container
+        .header-content
+          .header-row
+            .header-column.header-logo
+              .logo-section
+                .logo-icon
+                  i.fas.fa-crown
+                .logo-text
+                  .brand-name Kings Collection
+                  .brand-tagline Premium Fashion Dashboard
+            .header-column.header-actions
+              .header-actions
+                a.btn.btn-secondary(href="/dashboard")
+                  i.fas.fa-arrow-left
+                  span Back to Dashboard
+                button.btn.btn-primary#newTransaction
+                  i.fas.fa-plus
+                  span New Transaction
+
+    main.main-content
+      .container
+        .section-header
+          .header-content
+            h2 Point of Sale
+            p Process in-store transactions and quick sales
+          .header-actions
+            .customer-lookup
+              input.search-input#customerSearch(type="text", placeholder="Search customer by name or ID...")
+              button.search-btn
+                i.fas.fa-user
+            button.btn.btn-secondary#transactionHistory
+              i.fas.fa-history
+              span Transaction History
+
+        .pos-interface
+          .pos-left
+            .product-search
+              .search-container
+                input.search-input#productSearch(type="text", placeholder="Search products or scan barcode...")
+                button.search-btn
+                  i.fas.fa-search
+                button.barcode-btn
+                  i.fas.fa-barcode
+            .product-filters
+              select#categoryFilter
+                option(value="all") All Categories
+                option(value="clothing") Clothing
+                option(value="accessories") Accessories
+                option(value="footwear") Footwear
+            .product-grid#productGrid
+              //- Products populated dynamically via JavaScript
+
+          .pos-right
+            .cart-section
+              .cart-header
+                h3 Current Sale
+                button.btn.btn-text.clear-cart Clear All
+              .cart-items#cartItems
+                .empty-cart
+                  i.fas.fa-shopping-cart
+                  p Add items to start a sale
+              .cart-summary
+                .summary-row
+                  span Customer:
+                  span.customer-name None
+                .summary-row
+                  span Subtotal:
+                  span.subtotal UGX 0
+                .summary-row.discount
+                  span Discount:
+                  span.discount-amount UGX 0
+                .summary-row.tax
+                  span Tax (8.5%):
+                  span.tax-amount UGX 0
+                .summary-row.total
+                  span Total:
+                  span.total-amount UGX 0
+              .payment-section
+                .payment-methods
+                  button.payment-btn.active(data-method="cash")
+                    i.fas.fa-money-bill
+                    span Cash
+                  button.payment-btn(data-method="card")
+                    i.fas.fa-credit-card
+                    span Card
+                  button.payment-btn(data-method="digital")
+                    i.fas.fa-mobile-alt
+                    span Digital
+                .payment-input
+                  input.payment-amount(type="number", placeholder="Amount received", step="0.01")
+                  .change-amount
+                    span Change: UGX 0
+                .checkout-actions
+                  button.btn.btn-secondary.hold-sale
+                    i.fas.fa-pause
+                    span Hold Sale
+                  button.btn.btn-primary.complete-sale
+                    i.fas.fa-check
+                    span Complete Sale
+                  button.btn.btn-secondary.generate-receipt
+                    i.fas.fa-receipt
+                    span Generate Receipt
+
+    .toast-container#toastContainer

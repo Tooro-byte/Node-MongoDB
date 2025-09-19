@@ -277,31 +277,32 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Password toggle visibility
-  const passwordToggle = document.querySelector(".password-toggle");
-  if (passwordToggle) {
-    passwordToggle.addEventListener("click", () => {
-      togglePassword("password-email");
-    });
-  }
-
-  // Password toggle function
-  function togglePassword(inputId) {
-    const passwordField = document.getElementById(inputId);
-    if (!passwordField) return;
+  // Password toggle visibility for both password and confirm password
+  function togglePasswordVisibility(inputId) {
+    const inputField = document.getElementById(inputId);
+    if (!inputField) return;
 
     const toggleButton =
-      passwordField.parentNode.querySelector(".password-toggle i");
+      inputField.parentNode.querySelector(".password-toggle i");
     if (!toggleButton) return;
 
-    if (passwordField.type === "password") {
-      passwordField.type = "text";
+    if (inputField.type === "password") {
+      inputField.type = "text";
       toggleButton.className = "fas fa-eye-slash";
     } else {
-      passwordField.type = "password";
+      inputField.type = "password";
       toggleButton.className = "fas fa-eye";
     }
   }
+
+  // Add event listeners for password toggle buttons
+  const passwordToggles = document.querySelectorAll(".password-toggle");
+  passwordToggles.forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      togglePasswordVisibility("password-email");
+      togglePasswordVisibility("confirm-password-email");
+    });
+  });
 
   // Form utility functions
   function clearErrors(form) {

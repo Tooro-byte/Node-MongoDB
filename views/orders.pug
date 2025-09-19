@@ -1,0 +1,68 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Orders - Kings Collection
+    link(rel="stylesheet", href="/Styles/sales-dashboard.css")
+    link(rel="stylesheet", href="/Styles/orders.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
+    script(src="/vanilla-js/sales-dashboard.js")
+    script(src="/vanilla-js/orders.js")
+
+  body
+    header.header
+      .header-background
+      .container
+        .header-content
+          .header-row
+            .header-column.header-logo
+              .logo-section
+                .logo-icon
+                  i.fas.fa-crown
+                .logo-text
+                  .brand-name Kings Collection
+                  .brand-tagline Premium Fashion Dashboard
+            .header-column.header-actions
+              .header-actions
+                a.btn.btn-secondary(href="/dashboard")
+                  i.fas.fa-arrow-left
+                  span Back to Dashboard
+                a.btn.btn-primary(href="/orders/new")
+                  i.fas.fa-plus
+                  span New Order
+
+    main.main-content
+      .container
+        .section-header
+          .header-content
+            h2 Orders
+            p View and manage customer orders
+          .header-actions
+            .search-container
+              input.search-input#orderSearch(type="text", placeholder="Search orders by ID, customer, or status...")
+              button.search-btn
+                i.fas.fa-search
+            button.btn.btn-secondary#filterOrders
+              i.fas.fa-filter
+              span Filter
+        .orders-table
+          table#ordersTable
+            thead
+              tr
+                th.sortable(data-sort="orderId") Order ID
+                th.sortable(data-sort="customer") Customer
+                th.sortable(data-sort="date") Date
+                th.sortable(data-sort="total") Total
+                th.sortable(data-sort="status") Status
+                th Actions
+            tbody
+              // Orders populated dynamically via JavaScript
+        .pagination
+          button.btn.btn-secondary#prevPage
+            i.fas.fa-chevron-left
+          span#pageInfo Page 1
+          button.btn.btn-secondary#nextPage
+            i.fas.fa-chevron-right
+
+    .toast-container#toastContainer

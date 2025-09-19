@@ -3,7 +3,7 @@ const router = express.Router();
 const user = require("../models/users");
 
 router.get("/admin-page", async (req, res) => {
-  res.render("");
+  res.render("admin-dashboard");
 });
 
 router.post("/admin-page", async (req, res) => {});

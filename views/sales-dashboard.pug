@@ -4,14 +4,14 @@ html(lang="en")
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Sales Agent Dashboard - Kings Collection
-    link(rel="stylesheet", href="/styles/sales-dashboard.css")
+    link(rel="stylesheet", href="/Styles/sales-dashboard.css")
     link(rel="preconnect", href="https://fonts.googleapis.com")
     link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin)
     link(href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap", rel="stylesheet")
     link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
 
   body
-    //- New Top Navigation Bar for Notifications, Urgent Orders, and Customer Inquiries
+    //- Top Navigation Bar
     nav.top-nav
       .container
         .nav-content
@@ -73,7 +73,7 @@ html(lang="en")
                   .notification-title Sarah Johnson
                   .notification-time 15 min ago
 
-    //- Refined Header with Branding, Welcome, Clock, Stats, and User Actions
+    //- Refined Header
     header.header
       .header-background
       .container
@@ -112,9 +112,9 @@ html(lang="en")
                   .stat-trend.up +5%
                 .stat-card.revenue
                   .stat-icon
-                    i.fas.fa-dollar-sign
+                    i.fas.fa-money-bill
                   .stat-content
-                    .stat-number $3.2K
+                    .stat-number UGX 3.2M
                     .stat-label Today's Sales
                   .stat-trend.up +12%
                 .stat-card.customers
@@ -150,17 +150,17 @@ html(lang="en")
                       i.fas.fa-sign-out-alt
                       span Logout
 
-    //- Main Content Area (unchanged)
+    //- Main Content Area
     main.main-content
       .container
         .quick-actions-bar
           .quick-actions-left
             .action-group.primary-actions
-              button.action-btn.primary.new-order
+              a.action-btn.primary.new-order(href="/orders")
                 i.fas.fa-plus-circle
                 span New Order
                 .action-shortcut Ctrl+N
-              button.action-btn.secondary.pos
+              a.action-btn.secondary.pos(href="/api/pos")
                 i.fas.fa-cash-register
                 span Quick Sale
                 .action-shortcut F1
@@ -168,22 +168,22 @@ html(lang="en")
                 i.fas.fa-search-plus
                 span Find Customer
                 .action-shortcut Ctrl+F
-          .action-group.secondary-actions
-            button.action-btn.secondary
-              i.fas.fa-barcode
-              span Scan Item
-            button.action-btn.secondary
-              i.fas.fa-print
-              span Print Labels
-            button.action-btn.secondary
-              i.fas.fa-download
-              span Export Data
+            .action-group.order-actions
+              button.action-btn.secondary.approve-order
+                i.fas.fa-check-circle
+                span Approve
+              button.action-btn.secondary.reject-order
+                i.fas.fa-times-circle
+                span Reject
+              button.action-btn.secondary.cancel-order
+                i.fas.fa-ban
+                span Cancel
           .quick-stats
             .quick-stat
               .stat-value 156
               .stat-label Orders Today
             .quick-stat
-              .stat-value $24.5K
+              .stat-value UGX 24.5M
               .stat-label Revenue
             .quick-stat
               .stat-value 4.8★
@@ -198,31 +198,31 @@ html(lang="en")
             nav.sidebar-nav
               .nav-section
                 .section-title Core Functions
-                a.nav-item.active(href="#" data-section="dashboard")
+                a.nav-item.active(href="/sales-", data-section="dashboard")
                   .nav-icon
                     i.fas.fa-tachometer-alt
                   .nav-content
                     span Dashboard
                     .nav-badge 3
-                a.nav-item(href="#" data-section="orders")
+                a.nav-item(href="/orders", data-section="orders")
                   .nav-icon
                     i.fas.fa-shopping-cart
                   .nav-content
                     span Orders
                     .nav-badge.urgent 24
-                a.nav-item(href="#" data-section="pos")
+                a.nav-item(href="/pos", data-section="pos")
                   .nav-icon
                     i.fas.fa-cash-register
                   .nav-content
                     span Point of Sale
                     .nav-shortcut F2
-                a.nav-item(href="#" data-section="customers")
+                a.nav-item(href="/customers", data-section="customers")
                   .nav-icon
                     i.fas.fa-users
                   .nav-content
                     span Customers
                     .nav-badge 8
-                a.nav-item(href="#" data-section="inventory")
+                a.nav-item(href="/inventory", data-section="inventory")
                   .nav-icon
                     i.fas.fa-warehouse
                   .nav-content
@@ -230,25 +230,25 @@ html(lang="en")
                     .nav-badge.warning 23
               .nav-section
                 .section-title Management
-                a.nav-item(href="#" data-section="returns")
+                a.nav-item(href="/returns", data-section="returns")
                   .nav-icon
                     i.fas.fa-undo-alt
                   .nav-content
                     span Returns
                     .nav-badge 5
-                a.nav-item(href="#" data-section="tasks")
+                a.nav-item(href="/tasks", data-section="tasks")
                   .nav-icon
                     i.fas.fa-tasks
                   .nav-content
                     span Tasks
                     .nav-badge.urgent 12
-                a.nav-item(href="#" data-section="messages")
+                a.nav-item(href="/messages", data-section="messages")
                   .nav-icon
                     i.fas.fa-comments
                   .nav-content
                     span Messages
                     .nav-badge 7
-                a.nav-item(href="#" data-section="promotions")
+                a.nav-item(href="/promotions", data-section="promotions")
                   .nav-icon
                     i.fas.fa-tags
                   .nav-content
@@ -256,29 +256,29 @@ html(lang="en")
                     .nav-badge.active 4
               .nav-section
                 .section-title Analytics & Reports
-                a.nav-item(href="#" data-section="reports")
+                a.nav-item(href="/reports", data-section="reports")
                   .nav-icon
                     i.fas.fa-chart-line
                   .nav-content
                     span Reports
-                a.nav-item(href="#" data-section="analytics")
+                a.nav-item(href="/analytics", data-section="analytics")
                   .nav-icon
                     i.fas.fa-analytics
                   .nav-content
                     span Analytics
               .nav-section
                 .section-title Personal
-                a.nav-item(href="#" data-section="schedule")
+                a.nav-item(href="/schedule", data-section="schedule")
                   .nav-icon
                     i.fas.fa-calendar-alt
                   .nav-content
                     span Schedule
-                a.nav-item(href="#" data-section="training")
+                a.nav-item(href="/training", data-section="training")
                   .nav-icon
                     i.fas.fa-graduation-cap
                   .nav-content
                     span Training
-                a.nav-item(href="#" data-section="settings")
+                a.nav-item(href="/settings", data-section="settings")
                   .nav-icon
                     i.fas.fa-cog
                   .nav-content
@@ -309,7 +309,7 @@ html(lang="en")
                       .card-title Today's Performance
                     .card-content
                       .primary-metric
-                        .metric-value $24,580
+                        .metric-value UGX 24,580,000
                         .metric-label Revenue
                         .metric-change +12.5%
                       .secondary-metrics
@@ -317,7 +317,7 @@ html(lang="en")
                           .metric-number 156
                           .metric-text Orders
                         .metric-item
-                          .metric-number $157.69
+                          .metric-number UGX 157,692
                           .metric-text Avg Order
                     .card-chart
                       canvas#salesChart
@@ -485,27 +485,8 @@ html(lang="en")
                         i.fas.fa-search
                       button.barcode-btn
                         i.fas.fa-barcode
-                  .product-grid
-                    .product-item(data-product-id="1" data-price="89.99")
-                      .product-image
-                        img(src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=150", alt="White Shirt")
-                      .product-info
-                        .product-name Classic White Shirt
-                        .product-price $89.99
-                        .product-stock In Stock: 24
-                      .product-actions
-                        button.btn.btn-primary.add-to-cart
-                          i.fas.fa-plus
-                    .product-item(data-product-id="2" data-price="129.99")
-                      .product-image
-                        img(src="https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=150", alt="Denim Jacket")
-                      .product-info
-                        .product-name Denim Jacket
-                        .product-price $129.99
-                        .product-stock In Stock: 15
-                      .product-actions
-                        button.btn.btn-primary.add-to-cart
-                          i.fas.fa-plus
+                  .product-grid#productGrid
+                    //-Products populated dynamically via JavaScript
                 .pos-right
                   .cart-section
                     .cart-header
@@ -518,16 +499,16 @@ html(lang="en")
                     .cart-summary
                       .summary-row
                         span Subtotal:
-                        span.subtotal $0.00
+                        span.subtotal UGX 0
                       .summary-row.discount
                         span Discount:
-                        span.discount-amount -$0.00
+                        span.discount-amount UGX 0
                       .summary-row.tax
                         span Tax (8.5%):
-                        span.tax-amount $0.00
+                        span.tax-amount UGX 0
                       .summary-row.total
                         span Total:
-                        span.total-amount $0.00
+                        span.total-amount UGX 0
                     .payment-section
                       .payment-methods
                         button.payment-btn.active(data-method="cash")
@@ -542,7 +523,7 @@ html(lang="en")
                       .payment-input
                         input.payment-amount(type="number", placeholder="Amount received", step="0.01")
                         .change-amount
-                          span Change: $0.00
+                          span Change: UGX 0
                       .checkout-actions
                         button.btn.btn-secondary.hold-sale
                           i.fas.fa-pause
@@ -551,479 +532,5 @@ html(lang="en")
                           i.fas.fa-check
                           span Complete Sale
 
-            section#tasks.content-section
-              .section-header
-                .header-content
-                  h2 Task Management
-                  p Manage your daily tasks and assignments
-                .header-actions
-                  .task-filters
-                    select.filter-select
-                      option(value="all") All Tasks
-                      option(value="urgent") Urgent
-                      option(value="today") Due Today
-                      option(value="completed") Completed
-                  button.btn.btn-primary
-                    i.fas.fa-plus
-                    span New Task
-              .tasks-container
-                .task-overview
-                  .task-stat
-                    .stat-circle.urgent
-                      .stat-number 5
-                    .stat-label Urgent Tasks
-                  .task-stat
-                    .stat-circle.today
-                      .stat-number 12
-                    .stat-label Due Today
-                  .task-stat
-                    .stat-circle.completed
-                      .stat-number 28
-                    .stat-label Completed
-                .task-board
-                  .task-column.urgent
-                    .column-header
-                      .column-title
-                        i.fas.fa-exclamation-triangle
-                        span Urgent Tasks
-                      .column-count 5
-                    .task-list
-                      .task-card.priority-high
-                        .task-header
-                          .task-title Follow up on Order #ORD-2024-1234
-                          .task-menu
-                            i.fas.fa-ellipsis-h
-                        .task-details
-                          .task-description Customer John Smith waiting for missing item update
-                          .task-meta
-                            .task-assignee
-                              i.fas.fa-user
-                              span Assigned to me
-                            .task-due
-                              i.fas.fa-clock
-                              span 2 hours overdue
-                        .task-actions
-                          button.btn.btn-sm.btn-primary
-                            i.fas.fa-phone
-                            span Call Customer
-                          button.btn.btn-sm.btn-secondary
-                            i.fas.fa-check
-                            span Complete
-                  .task-column.today
-                    .column-header
-                      .column-title
-                        i.fas.fa-calendar-day
-                        span Due Today
-                      .column-count 12
-                    .task-list
-                      .task-card
-                        .task-header
-                          .task-title Restock Low Inventory Items
-                          .task-menu
-                            i.fas.fa-ellipsis-h
-                        .task-details
-                          .task-description Check and reorder 23 items that are running low
-                          .task-meta
-                            .task-assignee
-                              i.fas.fa-user
-                              span Assigned to me
-                            .task-due
-                              i.fas.fa-clock
-                              span Due in 4 hours
-                        .task-actions
-                          button.btn.btn-sm.btn-primary
-                            i.fas.fa-eye
-                            span Review Items
-                          button.btn.btn-sm.btn-secondary
-                            i.fas.fa-check
-                            span Complete
-                  .task-column.completed
-                    .column-header
-                      .column-title
-                        i.fas.fa-check-circle
-                        span Completed Today
-                      .column-count 8
-                    .task-list
-                      .task-card.completed
-                        .task-header
-                          .task-title Process Returns Queue
-                          .completion-badge
-                            i.fas.fa-check
-                        .task-details
-                          .task-description Processed 5 return requests and issued refunds
-                          .task-meta
-                            .task-completed
-                              i.fas.fa-check-circle
-                              span Completed at 2:30 PM
-
-            section#promotions.content-section
-              .section-header
-                .header-content
-                  h2 Promotions & Offers
-                  p Manage active promotions and special offers
-                .header-actions
-                  button.btn.btn-secondary
-                    i.fas.fa-plus
-                    span Create Promotion
-                  button.btn.btn-primary
-                    i.fas.fa-broadcast-tower
-                    span Announce Offer
-              .promotions-container
-                .active-promotions
-                  .promotions-header
-                    h3 Active Promotions
-                    .promotion-count 4 active
-                  .promotions-grid
-                    .promotion-card.featured
-                      .promotion-badge Featured
-                      .promotion-header
-                        .promotion-icon
-                          i.fas.fa-percentage
-                        .promotion-title Summer Sale 2024
-                        .promotion-code SUMMER30
-                      .promotion-details
-                        .promotion-discount 30% OFF
-                        .promotion-description All summer collection items
-                        .promotion-valid Valid until: June 30, 2024
-                      .promotion-stats
-                        .stat-item
-                          .stat-value 234
-                          .stat-label Uses
-                        .stat-item
-                          .stat-value $12.5K
-                          .stat-label Revenue
-                      .promotion-actions
-                        button.btn.btn-primary.share-promotion
-                          i.fas.fa-share
-                          span Share
-                        button.btn.btn-secondary
-                          i.fas.fa-edit
-                          span Edit
-                    .promotion-card
-                      .promotion-header
-                        .promotion-icon
-                          i.fas.fa-gift
-                        .promotion-title Buy 2 Get 1 Free
-                        .promotion-code BUY2GET1
-                      .promotion-details
-                        .promotion-discount BOGO Offer
-                        .promotion-description Selected shirts and accessories
-                        .promotion-valid Valid until: March 31, 2024
-                      .promotion-stats
-                        .stat-item
-                          .stat-value 67
-                          .stat-label Uses
-                        .stat-item
-                          .stat-value $3.2K
-                          .stat-label Revenue
-                      .promotion-actions
-                        button.btn.btn-primary.share-promotion
-                          i.fas.fa-share
-                          span Share
-                        button.btn.btn-secondary
-                          i.fas.fa-edit
-                          span Edit
-                .customer-offers
-                  .offers-header
-                    h3 Customer-Specific Offers
-                    button.btn.btn-text.view-all View All Customers
-                  .offers-list
-                    .offer-item
-                      .customer-info
-                        .customer-avatar
-                          img(src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=50", alt="Customer")
-                        .customer-details
-                          .customer-name John Smith
-                          .customer-tier VIP Customer
-                      .offer-details
-                        .offer-title 15% Birthday Discount
-                        .offer-code BIRTHDAY15
-                        .offer-expires Expires in 3 days
-                      .offer-actions
-                        button.btn.btn-sm.btn-primary
-                          i.fas.fa-envelope
-                          span Send Offer
-                        button.btn.btn-sm.btn-secondary
-                          i.fas.fa-eye
-                          span Details
-
-            section#schedule.content-section
-              .section-header
-                .header-content
-                  h2 Work Schedule
-                  p View your shifts, breaks, and store hours
-                .header-actions
-                  .schedule-navigation
-                    button.btn.btn-secondary.prev-week
-                      i.fas.fa-chevron-left
-                      span Previous
-                    .current-week March 15-21, 2024
-                    button.btn.btn-secondary.next-week
-                      span Next
-                      i.fas.fa-chevron-right
-                  button.btn.btn-primary
-                    i.fas.fa-plus
-                    span Request Time Off
-              .schedule-container
-                .schedule-summary
-                  .summary-card
-                    .summary-icon
-                      i.fas.fa-clock
-                    .summary-content
-                      .summary-value 40h
-                      .summary-label This Week
-                  .summary-card
-                    .summary-icon
-                      i.fas.fa-coffee
-                    .summary-content
-                      .summary-value 6
-                      .summary-label Breaks Taken
-                  .summary-card
-                    .summary-icon
-                      i.fas.fa-calendar-check
-                    .summary-content
-                      .summary-value 5/5
-                      .summary-label Days Worked
-                .schedule-calendar
-                  .calendar-header
-                    .day-header Monday
-                    .day-header Tuesday
-                    .day-header Wednesday
-                    .day-header Thursday
-                    .day-header Friday
-                    .day-header Saturday
-                    .day-header Sunday
-                  .calendar-body
-                    .day-schedule.today
-                      .day-date 15
-                      .day-shifts
-                        .shift-block.morning
-                          .shift-time 9:00 AM - 1:00 PM
-                          .shift-type Morning Shift
-                          .shift-break
-                            i.fas.fa-coffee
-                            span 11:00 AM
-                        .shift-block.afternoon
-                          .shift-time 2:00 PM - 6:00 PM
-                          .shift-type Afternoon Shift
-                          .shift-break
-                            i.fas.fa-coffee
-                            span 4:00 PM
-                    .day-schedule
-                      .day-date 16
-                      .day-shifts
-                        .shift-block.full
-                          .shift-time 10:00 AM - 6:00 PM
-                          .shift-type Full Day
-                          .shift-break
-                            i.fas.fa-utensils
-                            span 1:00 PM
-                    .day-schedule
-                      .day-date 17
-                      .day-shifts
-                        .shift-block.morning
-                          .shift-time 9:00 AM - 2:00 PM
-                          .shift-type Morning Shift
-                    .day-schedule
-                      .day-date 18
-                      .day-shifts
-                        .shift-block.afternoon
-                          .shift-time 1:00 PM - 7:00 PM
-                          .shift-type Afternoon Shift
-                    .day-schedule
-                      .day-date 19
-                      .day-shifts
-                        .shift-block.full
-                          .shift-time 9:00 AM - 5:00 PM
-                          .shift-type Full Day
-                    .day-schedule.off
-                      .day-date 20
-                      .day-status Day Off
-                    .day-schedule.off
-                      .day-date 21
-                      .day-status Day Off
-
-            section#training.content-section
-              .section-header
-                .header-content
-                  h2 Training & Resources
-                  p Access training materials and company resources
-                .header-actions
-                  button.btn.btn-secondary
-                    i.fas.fa-bookmark
-                    span My Bookmarks
-                  button.btn.btn-primary
-                    i.fas.fa-graduation-cap
-                    span Start Learning
-              .training-container
-                .training-progress
-                  .progress-header
-                    h3 Your Learning Progress
-                    .completion-rate 78% Complete
-                  .progress-stats
-                    .progress-stat
-                      .stat-circle
-                        .progress-ring
-                          .progress-value 12
-                      .stat-label Courses Completed
-                    .progress-stat
-                      .stat-circle
-                        .progress-ring
-                          .progress-value 45
-                      .stat-label Hours Learned
-                    .progress-stat
-                      .stat-circle
-                        .progress-ring
-                          .progress-value 8
-                      .stat-label Certificates
-                .training-categories
-                  .category-grid
-                    .training-category
-                      .category-icon
-                        i.fas.fa-user-tie
-                      .category-info
-                        .category-title Customer Service
-                        .category-courses 8 courses
-                        .category-progress 85% complete
-                      .category-action
-                        button.btn.btn-primary Continue Learning
-                    .training-category
-                      .category-icon
-                        i.fas.fa-shopping-bag
-                      .category-info
-                        .category-title Product Knowledge
-                        .category-courses 12 courses
-                        .category-progress 65% complete
-                      .category-action
-                        button.btn.btn-primary Continue Learning
-                    .training-category
-                      .category-icon
-                        i.fas.fa-chart-line
-                      .category-info
-                        .category-title Sales Techniques
-                        .category-courses 6 courses
-                        .category-progress 92% complete
-                      .category-action
-                        button.btn.btn-success View Certificate
-                .recent-resources
-                  .resources-header
-                    h3 Recent Resources
-                    button.btn.btn-text.view-all View All
-                  .resources-list
-                    .resource-item
-                      .resource-icon
-                        i.fas.fa-file-pdf
-                      .resource-info
-                        .resource-title Product Catalog Spring 2024
-                        .resource-type PDF Guide
-                        .resource-updated Updated 2 days ago
-                      .resource-actions
-                        button.btn.btn-sm.btn-primary
-                          i.fas.fa-download
-                          span Download
-                        button.btn.btn-sm.btn-secondary
-                          i.fas.fa-eye
-                          span Preview
-                    .resource-item
-                      .resource-icon
-                        i.fas.fa-video
-                      .resource-info
-                        .resource-title Handling Difficult Customers
-                        .resource-type Video Training
-                        .resource-duration 15 minutes
-                      .resource-actions
-                        button.btn.btn-sm.btn-primary
-                          i.fas.fa-play
-                          span Watch
-                        button.btn.btn-sm.btn-secondary
-                          i.fas.fa-bookmark
-                          span Save
-
-            section#settings.content-section
-              .section-header
-                .header-content
-                  h2 Settings
-                  p Manage your account and dashboard preferences
-                .header-actions
-                  button.btn.btn-secondary
-                    i.fas.fa-download
-                    span Export Settings
-                  button.btn.btn-primary
-                    i.fas.fa-save
-                    span Save Changes
-              .settings-container
-                .settings-navigation
-                  .nav-tabs
-                    a.tab-link.active(href="#" data-tab="profile") Profile
-                    a.tab-link(href="#" data-tab="preferences") Preferences
-                    a.tab-link(href="#" data-tab="notifications") Notifications
-                    a.tab-link(href="#" data-tab="security") Security
-                .settings-content
-                  .tab-panel.active#profile-settings
-                    .settings-section
-                      .section-title Personal Information
-                      .form-grid
-                        .form-group
-                          label(for="firstName") First Name
-                          input#firstName(type="text", value="Alex", class="form-input")
-                        .form-group
-                          label(for="lastName") Last Name
-                          input#lastName(type="text", value="Thompson", class="form-input")
-                        .form-group
-                          label(for="email") Email
-                          input#email(type="email", value="alex.thompson@kingscollection.com", class="form-input")
-                        .form-group
-                          label(for="phone") Phone
-                          input#phone(type="tel", value="+1 (555) 123-4567", class="form-input")
-                    .settings-section
-                      .section-title Profile Picture
-                      .profile-upload
-                        .current-avatar
-                          img(src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=100", alt="Current Avatar")
-                        .upload-actions
-                          button.btn.btn-secondary
-                            i.fas.fa-camera
-                            span Change Photo
-                          button.btn.btn-text
-                            i.fas.fa-trash
-                            span Remove
-                  .tab-panel#preferences-settings
-                    .settings-section
-                      .section-title Dashboard Preferences
-                      .preference-group
-                        .preference-item
-                          .preference-info
-                            .preference-title Dark Mode
-                            .preference-description Enable dark theme for the dashboard
-                          .preference-control
-                            .toggle-switch
-                              input(type="checkbox", id="darkMode")
-                              label(for="darkMode")
-                        .preference-item
-                          .preference-info
-                            .preference-title Auto-refresh Data
-                            .preference-description Automatically refresh dashboard data
-                          .preference-control
-                            .toggle-switch
-                              input(type="checkbox", id="autoRefresh", checked)
-                              label(for="autoRefresh")
-
-    .modal-overlay#orderDetailModal
-      .modal-container
-        .modal-header
-          h3 Order Details
-          button.modal-close
-            i.fas.fa-times
-        .modal-body
-        .modal-footer
-          button.btn.btn-secondary.modal-cancel Cancel
-          button.btn.btn-primary.modal-confirm Confirm
-
     .toast-container#toastContainer
-
-    .loading-overlay#loadingOverlay
-      .loading-spinner
-        .spinner
-        .loading-text Loading...
-
     script(src='/vanilla-js/sales-dashboard.js')

@@ -1,10 +1,3 @@
-/**
- * Kings Collection Sales Dashboard
- * Enhanced JavaScript functionality with modern ES6+ features
- * Version: 2.0.3
- * Updated: Added click-based dropdown toggling for user menu and nav bar, improved accessibility, fixed hover issue
- */
-
 class SalesDashboard {
   constructor() {
     this.currentSection = "dashboard";
@@ -14,7 +7,8 @@ class SalesDashboard {
     this.tasks = [];
     this.promotions = [];
     this.taxRate = 0.085; // Configurable tax rate
-    this.locale = "en-US"; // Configurable locale
+    this.locale = "en-UG"; // Updated for Ugandan locale
+    this.currency = "UGX"; // Added for currency formatting
 
     this.init();
   }
@@ -24,8 +18,7 @@ class SalesDashboard {
     this.initializeNavigation();
     this.initializeQuickActions();
     this.initializePOS();
-    this.initializeModals();
-    this.initializeDropdowns(); // Replaced initializeNotifications
+    this.initializeDropdowns();
     this.initializeCharts();
     this.initializeEventListeners();
     this.loadDashboardData();
@@ -94,7 +87,12 @@ class SalesDashboard {
       item.addEventListener("click", (e) => {
         e.preventDefault();
         const targetSection = item.getAttribute("data-section");
-        this.switchSection(targetSection);
+        const href = item.getAttribute("href");
+        if (href && href !== "#") {
+          window.location.href = href; // Navigate to actual page
+        } else {
+          this.switchSection(targetSection);
+        }
       });
     });
 
@@ -160,15 +158,14 @@ class SalesDashboard {
   }
 
   /**
-   * Dropdown System (User Menu and Nav Bar)
+   * Dropdown System
    */
   initializeDropdowns() {
-    // User Menu Dropdown
     const userMenu = document.querySelector(".user-menu");
     const userDropdown = document.querySelector(".dropdown-menu");
 
     if (userMenu && userDropdown) {
-      userMenu.setAttribute("tabindex", "0"); // Make focusable
+      userMenu.setAttribute("tabindex", "0");
       userMenu.addEventListener("click", (e) => {
         e.stopPropagation();
         this.toggleDropdown(userDropdown);
@@ -180,7 +177,6 @@ class SalesDashboard {
         }
       });
 
-      // Handle user menu item clicks
       const dropdownItems = userDropdown.querySelectorAll("[data-action]");
       dropdownItems.forEach((item) => {
         item.addEventListener("click", (e) => {
@@ -194,12 +190,11 @@ class SalesDashboard {
       console.warn("User menu or dropdown not found");
     }
 
-    // Navigation Bar Dropdowns
     const navItems = document.querySelectorAll(".top-nav .nav-item");
     navItems.forEach((item) => {
       const dropdown = item.querySelector(".nav-dropdown");
       if (dropdown) {
-        item.setAttribute("tabindex", "0"); // Make focusable
+        item.setAttribute("tabindex", "0");
         item.addEventListener("click", (e) => {
           e.stopPropagation();
           this.toggleDropdown(dropdown);
@@ -211,7 +206,6 @@ class SalesDashboard {
           }
         });
 
-        // Handle nav dropdown item clicks
         const notificationItems =
           dropdown.querySelectorAll(".notification-item");
         notificationItems.forEach((notifItem) => {
@@ -227,7 +221,6 @@ class SalesDashboard {
       }
     });
 
-    // Close dropdowns when clicking outside
     document.addEventListener("click", (e) => {
       const dropdowns = document.querySelectorAll(
         ".dropdown-menu, .nav-dropdown"
@@ -242,7 +235,6 @@ class SalesDashboard {
       });
     });
 
-    // Prevent dropdown closure when clicking inside
     const allDropdowns = document.querySelectorAll(
       ".dropdown-menu, .nav-dropdown"
     );
@@ -275,16 +267,20 @@ class SalesDashboard {
    * Quick Actions
    */
   initializeQuickActions() {
-    const quickActions = document.querySelectorAll(".action-btn");
+    const quickActions = document.querySelectorAll(
+      ".action-btn:not(.new-order):not(.pos)"
+    );
     quickActions.forEach((action) => {
       action.addEventListener("click", (e) => {
         e.preventDefault();
-        if (action.classList.contains("new-order")) {
-          this.handleNewOrder();
-        } else if (action.classList.contains("pos")) {
-          this.switchSection("pos");
-        } else if (action.classList.contains("customer-lookup")) {
+        if (action.classList.contains("customer-lookup")) {
           this.handleCustomerLookup();
+        } else if (action.classList.contains("approve-order")) {
+          this.handleOrderAction("approve");
+        } else if (action.classList.contains("reject-order")) {
+          this.handleOrderAction("reject");
+        } else if (action.classList.contains("cancel-order")) {
+          this.handleOrderAction("cancel");
         } else {
           const actionName =
             action.querySelector("span")?.textContent || "Action";
@@ -294,10 +290,6 @@ class SalesDashboard {
     });
   }
 
-  handleNewOrder() {
-    this.showModal("orderModal", "Create New Order", this.getNewOrderContent());
-  }
-
   handleCustomerLookup() {
     const searchTerm = prompt("Enter customer name, email, or order number:");
     if (searchTerm) {
@@ -305,17 +297,47 @@ class SalesDashboard {
     }
   }
 
+  handleOrderAction(action) {
+    const orderId = prompt(`Enter Order ID to ${action}:`);
+    if (orderId) {
+      this.processOrderAction(orderId, action);
+    }
+  }
+
+  processOrderAction(orderId, action) {
+    fetch(`/api/orders/${orderId}/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          this.showToast(
+            "success",
+            `Order ${action.charAt(0).toUpperCase() + action.slice(1)}`,
+            `Order #${orderId} has been ${action}ed`
+          );
+          this.loadDashboardData(); // Refresh dashboard
+        } else {
+          this.showToast(
+            "error",
+            "Order Action Failed",
+            `Failed to ${action} order #${orderId}`
+          );
+        }
+      })
+      .catch((error) => {
+        this.showToast("error", "Error", `Error: ${error.message}`);
+      });
+  }
+
   searchCustomers(searchTerm) {
-    this.showLoading();
-    setTimeout(() => {
-      this.hideLoading();
-      this.switchSection("customers");
-      this.showToast(
-        "success",
-        "Customer Search",
-        `Found customers matching "${searchTerm}"`
-      );
-    }, 1500);
+    this.switchSection("customers");
+    this.showToast(
+      "success",
+      "Customer Search",
+      `Found customers matching "${searchTerm}"`
+    );
   }
 
   /**
@@ -323,7 +345,7 @@ class SalesDashboard {
    */
   initializePOS() {
     this.initializeProductSearch();
-    this.initializeProductGrid();
+    this.loadProducts();
     this.initializeCart();
     this.initializePaymentMethods();
   }
@@ -349,6 +371,58 @@ class SalesDashboard {
     }
   }
 
+  async loadProducts() {
+    const productGrid = document.getElementById("productGrid");
+    if (!productGrid) {
+      console.warn("Product grid not found");
+      return;
+    }
+
+    productGrid.innerHTML =
+      '<div class="loading-products">Loading products...</div>';
+
+    try {
+      const response = await fetch("/api/products");
+      const products = await response.json();
+      productGrid.innerHTML = "";
+      products.forEach((product) => this.addProductToGrid(product));
+      this.initializeProductGrid();
+    } catch (error) {
+      productGrid.innerHTML =
+        '<div class="error-products">Failed to load products</div>';
+      this.showToast("error", "Products", `Failed to load: ${error.message}`);
+    }
+  }
+
+  addProductToGrid(product) {
+    const productGrid = document.getElementById("productGrid");
+    if (!productGrid) return;
+
+    const productHTML = `
+      <div class="product-item" data-product-id="${product.id}" data-price="${
+      product.price
+    }">
+        <div class="product-image">
+          <img src="${
+            product.image ||
+            "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=150"
+          }" alt="${product.name}">
+        </div>
+        <div class="product-info">
+          <div class="product-name">${product.name}</div>
+          <div class="product-price">${this.formatCurrency(product.price)}</div>
+          <div class="product-stock">In Stock: ${product.stock}</div>
+        </div>
+        <div class="product-actions">
+          <button class="btn btn-primary add-to-cart">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    productGrid.insertAdjacentHTML("beforeend", productHTML);
+  }
+
   filterProducts(searchTerm) {
     const products = document.querySelectorAll(".product-item");
     products.forEach((product) => {
@@ -360,16 +434,27 @@ class SalesDashboard {
   }
 
   handleBarcodeSearch(barcode) {
-    this.showToast("info", "Barcode Scan", `Scanning barcode: ${barcode}`);
-    setTimeout(() => {
-      const mockProduct = {
-        id: barcode,
-        name: "Scanned Product",
-        price: 99.99,
-        stock: 12,
-      };
-      this.addToCart(mockProduct);
-    }, 500);
+    fetch(`/api/products/barcode/${barcode}`)
+      .then((response) => response.json())
+      .then((product) => {
+        if (product) {
+          this.addToCart(product);
+          this.showToast(
+            "success",
+            "Barcode Scan",
+            `Added ${product.name} to cart`
+          );
+        } else {
+          this.showToast(
+            "warning",
+            "Barcode Scan",
+            `No product found for barcode: ${barcode}`
+          );
+        }
+      })
+      .catch((error) => {
+        this.showToast("error", "Barcode Scan", `Error: ${error.message}`);
+      });
   }
 
   initializeProductGrid() {
@@ -497,7 +582,7 @@ class SalesDashboard {
             </div>
             <div class="item-details">
               <div class="item-name">${item.name}</div>
-              <div class="item-price">$${item.price.toFixed(2)}</div>
+              <div class="item-price">${this.formatCurrency(item.price)}</div>
             </div>
           </div>
           <div class="item-controls">
@@ -510,7 +595,7 @@ class SalesDashboard {
                 <i class="fas fa-plus"></i>
               </button>
             </div>
-            <div class="item-total">$${item.total.toFixed(2)}</div>
+            <div class="item-total">${this.formatCurrency(item.total)}</div>
             <button class="remove-item" data-product-id="${id}">
               <i class="fas fa-trash"></i>
             </button>
@@ -525,23 +610,30 @@ class SalesDashboard {
     this.updateCartTotals(subtotal, tax, total);
   }
 
+  formatCurrency(amount) {
+    return new Intl.NumberFormat(this.locale, {
+      style: "currency",
+      currency: this.currency,
+    }).format(amount);
+  }
+
   updateCartTotals(subtotal, tax, total) {
     const subtotalElement = document.querySelector(".subtotal");
     const taxElement = document.querySelector(".tax-amount");
     const totalElement = document.querySelector(".total-amount");
 
     if (subtotalElement) {
-      subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+      subtotalElement.textContent = this.formatCurrency(subtotal);
     } else {
       console.warn("Subtotal element not found");
     }
     if (taxElement) {
-      taxElement.textContent = `$${tax.toFixed(2)}`;
+      taxElement.textContent = this.formatCurrency(tax);
     } else {
       console.warn("Tax element not found");
     }
     if (totalElement) {
-      totalElement.textContent = `$${total.toFixed(2)}`;
+      totalElement.textContent = this.formatCurrency(total);
     } else {
       console.warn("Total element not found");
     }
@@ -576,7 +668,7 @@ class SalesDashboard {
         const change = Math.max(0, amountPaid - totalAmount);
         const changeElement = document.querySelector(".change-amount");
         if (changeElement) {
-          changeElement.textContent = `Change: $${change.toFixed(2)}`;
+          changeElement.textContent = `Change: ${this.formatCurrency(change)}`;
         } else {
           console.warn("Change amount element not found");
         }
@@ -617,24 +709,31 @@ class SalesDashboard {
       document.querySelector(".payment-btn.active")?.textContent.trim() ||
       "Cash";
 
-    this.showLoading();
-    setTimeout(() => {
-      this.hideLoading();
-      const receiptData = {
-        id: "RCP-" + Date.now(),
+    fetch("/api/sales/complete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         items: Array.from(this.cartItems.values()),
         total: totalAmount,
-        paymentMethod: paymentMethod,
-        timestamp: new Date(),
-      };
-      this.clearCart();
-      this.showToast(
-        "success",
-        "Sale Complete",
-        `Transaction completed - $${totalAmount.toFixed(2)}`
-      );
-      this.showReceiptModal(receiptData);
-    }, 2000);
+        paymentMethod,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          this.clearCart();
+          this.showToast(
+            "success",
+            "Sale Complete",
+            `Transaction completed - ${this.formatCurrency(totalAmount)}`
+          );
+        } else {
+          this.showToast("error", "Sale Error", "Failed to complete sale");
+        }
+      })
+      .catch((error) => {
+        this.showToast("error", "Sale Error", `Error: ${error.message}`);
+      });
   }
 
   holdSale() {
@@ -654,163 +753,37 @@ class SalesDashboard {
   }
 
   saveHeldSale(saleData) {
-    let heldSales = JSON.parse(localStorage.getItem("heldSales") || "[]");
-    heldSales.push(saleData);
-    localStorage.setItem("heldSales", JSON.stringify(heldSales));
-  }
-
-  showReceiptModal(receiptData) {
-    const receiptContent = this.generateReceiptContent(receiptData);
-    this.showModal("receiptModal", "Transaction Receipt", receiptContent);
-  }
-
-  generateReceiptContent(data) {
-    let itemsHTML = "";
-    data.items.forEach((item) => {
-      itemsHTML += `
-        <div class="receipt-item">
-          <span class="item-name">${item.name}</span>
-          <span class="item-qty">x${item.quantity}</span>
-          <span class="item-total">$${item.total.toFixed(2)}</span>
-        </div>
-      `;
-    });
-
-    return `
-      <div class="receipt-content">
-        <div class="receipt-header">
-          <h4>Kings Collection</h4>
-          <p>Receipt #${data.id}</p>
-          <p>${data.timestamp.toLocaleString()}</p>
-        </div>
-        <div class="receipt-items">
-          ${itemsHTML}
-        </div>
-        <div class="receipt-total">
-          <strong>Total: $${data.total.toFixed(2)}</strong>
-        </div>
-        <div class="receipt-payment">
-          <p>Paid with: ${data.paymentMethod}</p>
-        </div>
-        <div class="receipt-footer">
-          <p>Thank you for your business!</p>
-        </div>
-      </div>
-    `;
-  }
-
-  /**
-   * Modal System
-   */
-  initializeModals() {
-    const modalOverlays = document.querySelectorAll(".modal-overlay");
-    modalOverlays.forEach((modal) => {
-      const closeBtn = modal.querySelector(".modal-close");
-      const cancelBtn = modal.querySelector(".modal-cancel");
-
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) this.hideModal(modal.id);
+    fetch("/api/sales/hold", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(saleData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.success) {
+          this.showToast("error", "Hold Sale", "Failed to hold sale");
+        }
+      })
+      .catch((error) => {
+        this.showToast("error", "Hold Sale", `Error: ${error.message}`);
       });
-
-      if (closeBtn) {
-        closeBtn.addEventListener("click", () => this.hideModal(modal.id));
-      }
-      if (cancelBtn) {
-        cancelBtn.addEventListener("click", () => this.hideModal(modal.id));
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        const activeModal = document.querySelector(".modal-overlay.active");
-        if (activeModal) this.hideModal(activeModal.id);
-      }
-    });
-  }
-
-  showModal(modalId, title, content) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-      const titleElement = modal.querySelector(".modal-header h3");
-      const bodyElement = modal.querySelector(".modal-body");
-
-      if (titleElement) {
-        titleElement.textContent = title;
-        titleElement.setAttribute("id", `${modalId}-title`);
-        modal.setAttribute("aria-labelledby", `${modalId}-title`);
-      }
-      if (bodyElement) bodyElement.innerHTML = content;
-
-      modal.setAttribute("role", "dialog");
-      modal.setAttribute("aria-modal", "true");
-      modal.classList.add("active");
-
-      const firstFocusable = modal.querySelector(
-        "button, input, select, textarea"
-      );
-      if (firstFocusable) firstFocusable.focus();
-    } else {
-      console.warn(`Modal ${modalId} not found`);
-    }
-  }
-
-  hideModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.remove("active");
-  }
-
-  getNewOrderContent() {
-    return `
-      <div class="order-form">
-        <div class="form-group">
-          <label for="customerSelect">Customer</label>
-          <select id="customerSelect" class="form-input">
-            <option value="">Select Customer</option>
-            <option value="1">John Smith</option>
-            <option value="2">Sarah Johnson</option>
-            <option value="3">Mike Wilson</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="orderType">Order Type</label>
-          <select id="orderType" class="form-input">
-            <option value="standard">Standard Delivery</option>
-            <option value="express">Express Delivery</option>
-            <option value="pickup">Store Pickup</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="orderNotes">Order Notes</label>
-          <textarea id="orderNotes" class="form-input" rows="3" placeholder="Special instructions..."></textarea>
-        </div>
-      </div>
-    `;
   }
 
   /**
    * Notification System
    */
-  loadNotifications() {
-    // Mock data; replace with API call for production
-    this.notifications = [
-      {
-        id: 1,
-        type: "urgent",
-        title: "Urgent Order",
-        message: "Order #ORD-2024-1234 is overdue",
-        time: new Date(Date.now() - 5 * 60 * 1000),
-        read: false,
-      },
-      {
-        id: 2,
-        type: "message",
-        title: "Customer Inquiry",
-        message: "New message from John Smith",
-        time: new Date(Date.now() - 12 * 60 * 1000),
-        read: false,
-      },
-    ];
-    this.updateNotificationBadge();
+  async loadNotifications() {
+    try {
+      const response = await fetch("/api/notifications");
+      this.notifications = await response.json();
+      this.updateNotificationBadge();
+    } catch (error) {
+      this.showToast(
+        "error",
+        "Notifications",
+        `Failed to load: ${error.message}`
+      );
+    }
   }
 
   updateNotificationBadge() {
@@ -871,162 +844,189 @@ class SalesDashboard {
   }
 
   /**
-   * Loading States
-   */
-  showLoading() {
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    if (loadingOverlay) {
-      loadingOverlay.classList.add("active");
-    } else {
-      console.warn("Loading overlay not found");
-    }
-  }
-
-  hideLoading() {
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    if (loadingOverlay) {
-      loadingOverlay.classList.remove("active");
-    }
-  }
-
-  /**
    * Chart Initialization
    */
   initializeCharts() {
-    // Requires Chart.js: <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     this.initializeSalesChart();
     this.initializeCustomerChart();
     this.initializePerformanceChart();
   }
 
-  initializeSalesChart() {
+  async initializeSalesChart() {
     const canvas = document.getElementById("salesChart");
     if (!canvas) {
       console.warn("Sales chart canvas not found");
       return;
     }
-    // Mock Chart.js implementation; replace with real data
-    new Chart(canvas, {
-      type: "line",
-      data: {
-        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-        datasets: [
-          {
-            label: "Sales Trend",
-            data: [1200, 1900, 3000, 2500, 4000, 3500],
-            borderColor: "#c64ff0",
-            backgroundColor: "rgba(198, 79, 240, 0.3)",
-            fill: true,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true } },
-      },
-    });
+    try {
+      const response = await fetch("/api/charts/sales");
+      const data = await response.json();
+      new Chart(canvas, {
+        type: "line",
+        data: {
+          labels: data.labels || [],
+          datasets: [
+            {
+              label: "Sales Trend",
+              data: data.values || [],
+              borderColor: "#c64ff0",
+              backgroundColor: "rgba(198, 79, 240, 0.3)",
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } },
+        },
+      });
+    } catch (error) {
+      this.showToast(
+        "error",
+        "Sales Chart",
+        `Failed to load: ${error.message}`
+      );
+    }
   }
 
-  initializeCustomerChart() {
+  async initializeCustomerChart() {
     const canvas = document.getElementById("customerChart");
     if (!canvas) {
       console.warn("Customer chart canvas not found");
       return;
     }
-    // Mock Chart.js implementation; replace with real data
-    new Chart(canvas, {
-      type: "bar",
-      data: {
-        labels: ["Q1", "Q2", "Q3", "Q4"],
-        datasets: [
-          {
-            label: "Customer Growth",
-            data: [150, 300, 450, 600],
-            backgroundColor: "rgba(198, 79, 240, 0.5)",
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true } },
-      },
-    });
+    try {
+      const response = await fetch("/api/charts/customers");
+      const data = await response.json();
+      new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels: data.labels || [],
+          datasets: [
+            {
+              label: "Customer Growth",
+              data: data.values || [],
+              backgroundColor: "rgba(198, 79, 240, 0.5)",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } },
+        },
+      });
+    } catch (error) {
+      this.showToast(
+        "error",
+        "Customer Chart",
+        `Failed to load: ${error.message}`
+      );
+    }
   }
 
-  initializePerformanceChart() {
+  async initializePerformanceChart() {
     const canvas = document.getElementById("performanceChart");
     if (!canvas) {
       console.warn("Performance chart canvas not found");
       return;
     }
-    // Mock Chart.js implementation; replace with real data
-    new Chart(canvas, {
-      type: "line",
-      data: {
-        labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
-        datasets: [
-          {
-            label: "Performance",
-            data: [80, 85, 90, 88, 92],
-            borderColor: "#c64ff0",
-            backgroundColor: "rgba(198, 79, 240, 0.3)",
-            fill: true,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        scales: { y: { beginAtZero: true } },
-      },
-    });
+    try {
+      const response = await fetch("/api/charts/performance");
+      const data = await response.json();
+      new Chart(canvas, {
+        type: "line",
+        data: {
+          labels: data.labels || [],
+          datasets: [
+            {
+              label: "Performance",
+              data: data.values || [],
+              borderColor: "#c64ff0",
+              backgroundColor: "rgba(198, 79, 240, 0.3)",
+              fill: true,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } },
+        },
+      });
+    } catch (error) {
+      this.showToast(
+        "error",
+        "Performance Chart",
+        `Failed to load: ${error.message}`
+      );
+    }
   }
 
   /**
    * Data Loading and Management
    */
-  loadDashboardData() {
-    this.updateDashboardStats();
-    this.loadRecentActivity();
-    this.loadPriorityTasks();
-  }
-
-  loadSectionData(sectionId) {
-    switch (sectionId) {
-      case "orders":
-        this.loadOrdersData();
-        break;
-      case "customers":
-        this.loadCustomersData();
-        break;
-      case "inventory":
-        this.loadInventoryData();
-        break;
-      case "tasks":
-        this.loadTasksData();
-        break;
-      case "promotions":
-        this.loadPromotionsData();
-        break;
-      // Admin-specific sections (placeholder for owner dashboard)
-      case "analytics":
-        this.loadAnalyticsData();
-        break;
-      case "employees":
-        this.loadEmployeeData();
-        break;
-      case "financials":
-        this.loadFinancialData();
-        break;
-      case "marketing":
-        this.loadMarketingData();
-        break;
-      default:
-        break;
+  async loadDashboardData() {
+    try {
+      const response = await fetch("/api/dashboard");
+      const data = await response.json();
+      this.updateDashboardStats(data.stats || {});
+      this.loadRecentActivity(data.activities || []);
+      this.loadPriorityTasks(data.tasks || []);
+    } catch (error) {
+      this.showToast("error", "Dashboard", `Failed to load: ${error.message}`);
     }
   }
 
-  updateDashboardStats() {
-    this.animateCounter(".stat-number", [24, 3200, 18]);
+  async loadSectionData(sectionId) {
+    try {
+      const response = await fetch(`/api/${sectionId}`);
+      const data = await response.json();
+      switch (sectionId) {
+        case "orders":
+          this.updateOrders(data);
+          break;
+        case "customers":
+          this.updateCustomers(data);
+          break;
+        case "inventory":
+          this.updateInventory(data);
+          break;
+        case "tasks":
+          this.updateTasks(data);
+          break;
+        case "promotions":
+          this.updatePromotions(data);
+          break;
+        case "analytics":
+          this.updateAnalytics(data);
+          break;
+        case "employees":
+          this.updateEmployeeData(data);
+          break;
+        case "financials":
+          this.updateFinancialData(data);
+          break;
+        case "marketing":
+          this.updateMarketingData(data);
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      this.showToast(
+        "error",
+        `${this.formatSectionName(sectionId)}`,
+        `Failed to load: ${error.message}`
+      );
+    }
+  }
+
+  updateDashboardStats(stats) {
+    const values = [
+      stats.pendingOrders || 0,
+      stats.todaysSales || 0,
+      stats.newCustomers || 0,
+    ];
+    this.animateCounter(".stat-number", values);
   }
 
   animateCounter(selector, values) {
@@ -1043,125 +1043,142 @@ class SalesDashboard {
             clearInterval(timer);
           }
           element.textContent = selector.includes("revenue")
-            ? "$" + Math.floor(current).toLocaleString()
+            ? this.formatCurrency(Math.floor(current))
             : Math.floor(current);
         }, 20);
       }
     });
   }
 
-  loadRecentActivity() {
-    // Mock data; replace with API call
-    const activities = [
-      {
-        type: "order",
-        customer: "John Smith",
-        action: "placed a new order",
-        orderId: "#ORD-2024-1237",
-        time: "2 minutes ago",
-        avatar:
-          "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=40",
-      },
-      {
-        type: "shipping",
-        customer: "Sarah Johnson",
-        action: "was shipped to",
-        orderId: "#ORD-2024-1230",
-        time: "15 minutes ago",
-        icon: "fa-truck",
-      },
-      {
-        type: "review",
-        customer: "Mike Wilson",
-        action: "left a 5-star review",
-        time: "1 hour ago",
-        icon: "fa-star",
-      },
-    ];
-    // Update DOM with activities
+  updateRecentActivity(activities) {
+    const activityFeed = document.querySelector(".activity-feed");
+    if (!activityFeed) {
+      console.warn("Activity feed not found");
+      return;
+    }
+    activityFeed.innerHTML = "";
+    activities.forEach((activity) => {
+      const activityHTML = `
+        <div class="activity-item">
+          <div class="activity-avatar">
+            ${
+              activity.avatar
+                ? `<img src="${activity.avatar}" alt="Customer">`
+                : `<div class="avatar-icon"><i class="fas ${
+                    activity.icon || "fa-user"
+                  }"></i></div>`
+            }
+          </div>
+          <div class="activity-content">
+            <div class="activity-text">
+              <strong>${activity.customer || "Unknown"}</strong>
+              <span>${activity.action}</span>
+              ${activity.orderId ? `<strong>${activity.orderId}</strong>` : ""}
+            </div>
+            <div class="activity-time">${activity.time}</div>
+          </div>
+          <div class="activity-action">
+            <button class="btn btn-sm btn-outline">View ${
+              activity.type === "order"
+                ? "Order"
+                : activity.type === "shipping"
+                ? "Tracking"
+                : "Review"
+            }</button>
+          </div>
+        </div>
+      `;
+      activityFeed.insertAdjacentHTML("beforeend", activityHTML);
+    });
   }
 
-  loadPriorityTasks() {
-    this.tasks = [
-      {
-        id: 1,
-        title: "Follow up on Order #ORD-2024-1234",
-        description: "Customer John Smith waiting for missing item update",
-        priority: "high",
-        dueDate: new Date(Date.now() + 2 * 60 * 60 * 1000),
-        status: "urgent",
-        assignee: "me",
-      },
-      {
-        id: 2,
-        title: "Restock Low Inventory Items",
-        description: "Check and reorder 23 items that are running low",
-        priority: "medium",
-        dueDate: new Date(Date.now() + 4 * 60 * 60 * 1000),
-        status: "today",
-        assignee: "me",
-      },
-    ];
+  updatePriorityTasks(tasks) {
+    this.tasks = tasks;
+    const urgentList = document.querySelector(
+      ".priority-card.urgent .priority-list"
+    );
+    const todayList = document.querySelector(
+      ".priority-card.today .priority-list"
+    );
+    if (urgentList) urgentList.innerHTML = "";
+    if (todayList) todayList.innerHTML = "";
+
+    tasks.forEach((task) => {
+      const taskHTML = `
+        <div class="priority-item">
+          <div class="item-icon">
+            <i class="fas ${task.icon || "fa-task"}"></i>
+          </div>
+          <div class="item-content">
+            <div class="item-title">${task.title}</div>
+            <div class="item-subtitle">${task.subtitle || ""}</div>
+          </div>
+          <div class="item-action">
+            <button class="btn btn-sm ${
+              task.priority === "high" ? "btn-danger" : "btn-primary"
+            }">${task.action || "Process"}</button>
+          </div>
+        </div>
+      `;
+      if (task.status === "urgent" && urgentList) {
+        urgentList.insertAdjacentHTML("beforeend", taskHTML);
+      } else if (task.status === "today" && todayList) {
+        todayList.insertAdjacentHTML("beforeend", taskHTML);
+      }
+    });
+
+    const urgentCount = tasks.filter((t) => t.status === "urgent").length;
+    const todayCount = tasks.filter((t) => t.status === "today").length;
+    const urgentCounter = document.querySelector(
+      ".priority-card.urgent .priority-count"
+    );
+    const todayCounter = document.querySelector(
+      ".priority-card.today .priority-count"
+    );
+    if (urgentCounter) urgentCounter.textContent = urgentCount;
+    if (todayCounter) todayCounter.textContent = todayCount;
   }
 
-  loadOrdersData() {
-    console.log("Loading orders data..."); // Replace with API call
+  updateOrders(data) {
+    // Update orders section with API data
+    console.log("Updating orders with:", data);
   }
 
-  loadCustomersData() {
-    console.log("Loading customers data..."); // Replace with API call
+  updateCustomers(data) {
+    // Update customers section with API data
+    console.log("Updating customers with:", data);
   }
 
-  loadInventoryData() {
-    console.log("Loading inventory data..."); // Replace with API call
+  updateInventory(data) {
+    // Update inventory section with API data
+    console.log("Updating inventory with:", data);
   }
 
-  loadTasksData() {
-    console.log("Loading tasks data..."); // Replace with API call
+  updateTasks(data) {
+    // Update tasks section with API data
+    console.log("Updating tasks with:", data);
   }
 
-  loadPromotionsData() {
-    this.promotions = [
-      {
-        id: 1,
-        title: "Summer Sale 2024",
-        code: "SUMMER30",
-        discount: "30% OFF",
-        description: "All summer collection items",
-        validUntil: "2024-06-30",
-        uses: 234,
-        revenue: 12500,
-        featured: true,
-      },
-      {
-        id: 2,
-        title: "Buy 2 Get 1 Free",
-        code: "BUY2GET1",
-        discount: "BOGO Offer",
-        description: "Selected shirts and accessories",
-        validUntil: "2024-03-31",
-        uses: 67,
-        revenue: 3200,
-        featured: false,
-      },
-    ];
+  updatePromotions(data) {
+    this.promotions = data;
+    // Update promotions section with API data
+    console.log("Updating promotions with:", data);
   }
 
-  // Admin-specific methods (placeholders for owner dashboard)
-  loadAnalyticsData() {
-    console.log("Loading analytics data..."); // Replace with API call
+  updateAnalytics(data) {
+    console.log("Updating analytics with:", data);
   }
 
-  loadEmployeeData() {
-    console.log("Loading employee data..."); // Replace with API call
+  updateEmployeeData(data) {
+    console.log("Updating employee data with:", data);
   }
 
-  loadFinancialData() {
-    console.log("Loading financial data..."); // Replace with API call
+  updateFinancialData(data) {
+    console.log("Updating financial data with:", data);
   }
 
-  loadMarketingData() {
-    console.log("Loading marketing data..."); // Replace with API call
+  updateMarketingData(data) {
+    console.log("Updating marketing data with:", data);
   }
 
   /**
@@ -1218,7 +1235,7 @@ class SalesDashboard {
         }, 100);
         break;
       case "help":
-        this.showHelpModal();
+        window.location.href = "/help";
         break;
       case "logout":
         this.handleLogout();
@@ -1227,23 +1244,11 @@ class SalesDashboard {
   }
 
   handleRefresh() {
-    this.showLoading();
-    setTimeout(() => {
-      this.loadDashboardData();
-      this.hideLoading();
-      this.showToast("success", "Refresh", "Dashboard data updated");
-    }, 1000);
+    this.loadDashboardData();
+    this.showToast("success", "Refresh", "Dashboard data updated");
   }
 
   handleKeyboardShortcuts(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === "n") {
-      e.preventDefault();
-      this.handleNewOrder();
-    }
-    if (e.key === "F1") {
-      e.preventDefault();
-      this.switchSection("pos");
-    }
     if ((e.ctrlKey || e.metaKey) && e.key === "f") {
       e.preventDefault();
       this.handleCustomerLookup();
@@ -1265,37 +1270,11 @@ class SalesDashboard {
     }
   }
 
-  showHelpModal() {
-    const helpContent = `
-      <div class="help-content">
-        <h4>Keyboard Shortcuts</h4>
-        <ul>
-          <li><kbd>Ctrl+N</kbd> - New Order</li>
-          <li><kbd>F1</kbd> - Open POS</li>
-          <li><kbd>Ctrl+F</kbd> - Search Customers</li>
-          <li><kbd>Ctrl+D</kbd> - Dashboard</li>
-          <li><kbd>Esc</kbd> - Close Modals</li>
-        </ul>
-        <h4>Support</h4>
-        <p>For technical support, contact:</p>
-        <ul>
-          <li>Email: support@kingscollection.com</li>
-          <li>Phone: +1 (555) 123-4567</li>
-          <li>Hours: 9 AM - 6 PM EST</li>
-        </ul>
-      </div>
-    `;
-    this.showModal("helpModal", "Help & Support", helpContent);
-  }
-
   handleLogout() {
     if (confirm("Are you sure you want to logout?")) {
-      this.showLoading();
-      setTimeout(() => {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "/login";
-      }, 1500);
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = "/index";
     }
   }
 }

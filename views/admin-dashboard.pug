@@ -1,0 +1,483 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title Kings Collection Admin Dashboard
+    link(rel='stylesheet', href='/Styles/admin-dashboard.css')
+    link(rel='preconnect', href='https://fonts.googleapis.com')
+    link(rel='preconnect', href='https://fonts.gstatic.com', crossorigin='')
+    link(href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap', rel='stylesheet')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css')
+
+  body
+    //- Top Navigation Bar
+    nav.top-nav
+      .container
+        .nav-content
+          a.nav-tab.active(href='#', data-section='dashboard')
+            i.fas.fa-tachometer-alt
+            span Dashboard Home
+          a.nav-tab(href='#', data-section='sales')
+            i.fas.fa-chart-line
+            span Sales
+            span.badge 12
+          a.nav-tab(href='#', data-section='orders')
+            i.fas.fa-box
+            span Orders
+            span.badge.urgent 15
+          a.nav-tab(href='#', data-section='inventory')
+            i.fas.fa-warehouse
+            span Inventory
+            span.badge.warning 8
+          .nav-actions
+            button.btn.btn-primary.add-product
+              i.fas.fa-plus-circle
+              span Add New Product
+
+    //- Header
+    header.header
+      .header-background
+      .container
+        .header-content
+          .header-row
+            .header-column.header-logo
+              .logo-section
+                .logo-icon
+                  i.fas.fa-crown
+                .logo-text
+                  .brand-name Kings Collection
+                  .brand-tagline Admin Control Panel
+            .header-column.header-welcome
+              .welcome-section
+                .welcome-message
+                  .greeting-text Welcome,
+                  .user-name Admin User
+                  .role-badge
+                    i.fas.fa-shield-alt
+                    span Administrator
+            .header-column.header-stats
+              .header-stats
+                .stat-card.revenue
+                  .stat-icon
+                    i.fas.fa-money-bill
+                  .stat-content
+                    .stat-number UGX 12.5M
+                    .stat-label Monthly Revenue
+                    .stat-trend.up +10%
+                .stat-card.orders
+                  .stat-icon
+                    i.fas.fa-shopping-cart
+                  .stat-content
+                    .stat-number 245
+                    .stat-label Pending Orders
+                    .stat-trend.up +5%
+                .stat-card.traffic
+                  .stat-icon
+                    i.fas.fa-users
+                  .stat-content
+                    .stat-number 1.2K
+                    .stat-label Website Visits
+                    .stat-trend.up +15%
+            .header-column.header-actions
+              .header-actions
+                .user-menu
+                  .user-avatar
+                    img(src='https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=60', alt='Admin Avatar')
+                    .status-indicator.online
+                  .dropdown-menu
+                    .dropdown-header
+                      .user-info
+                        .user-name Admin User
+                        .user-email admin@kingscollection.com
+                    .dropdown-divider
+                    a.dropdown-item(href='#', data-action='profile')
+                      i.fas.fa-user
+                      span Profile Settings
+                    a.dropdown-item(href='#', data-action='security')
+                      i.fas.fa-shield-alt
+                      span Security Settings
+                    a.dropdown-item(href='#', data-action='help')
+                      i.fas.fa-question-circle
+                      span Help & Support
+                    .dropdown-divider
+                    a.dropdown-item.logout(href='#', data-action='logout')
+                      i.fas.fa-sign-out-alt
+                      span Logout
+
+    //- Main Content Area
+    main.main-content
+      .container
+        .dashboard-layout
+          aside.sidebar
+            .sidebar-header
+              .sidebar-title Navigation
+              .sidebar-toggle
+                i.fas.fa-bars
+            nav.sidebar-nav
+              .nav-section
+                .section-title Management
+                a.nav-item(href='#', data-section='customers')
+                  .nav-icon
+                    i.fas.fa-users
+                  .nav-content
+                    span Customers
+                    .nav-badge 20
+                a.nav-item(href='#', data-section='employees')
+                  .nav-icon
+                    i.fas.fa-user-tie
+                  .nav-content
+                    span Employees
+                    .nav-badge 10
+                a.nav-item(href='#', data-section='marketing')
+                  .nav-icon
+                    i.fas.fa-tags
+                  .nav-content
+                    span Marketing
+                    .nav-badge.active 3
+                a.nav-item(href='#', data-section='products')
+                  .nav-icon
+                    i.fas.fa-box-open
+                  .nav-content
+                    span Products
+              .nav-section
+                .section-title Operations
+                a.nav-item(href='#', data-section='payments')
+                  .nav-icon
+                    i.fas.fa-credit-card
+                  .nav-content
+                    span Payments
+                a.nav-item(href='#', data-section='website')
+                  .nav-icon
+                    i.fas.fa-globe
+                  .nav-content
+                    span Website Management
+                a.nav-item(href='#', data-section='support')
+                  .nav-icon
+                    i.fas.fa-headset
+                  .nav-content
+                    span Support Tickets
+                    .nav-badge.urgent 5
+              .nav-section
+                .section-title Insights
+                a.nav-item(href='#', data-section='analytics')
+                  .nav-icon
+                    i.fas.fa-chart-bar
+                  .nav-content
+                    span Analytics
+                a.nav-item(href='#', data-section='financials')
+                  .nav-icon
+                    i.fas.fa-dollar-sign
+                  .nav-content
+                    span Financials
+              .nav-section
+                .section-title Admin
+                a.nav-item(href='#', data-section='security')
+                  .nav-icon
+                    i.fas.fa-shield-alt
+                  .nav-content
+                    span Security
+                a.nav-item(href='#', data-section='settings')
+                  .nav-icon
+                    i.fas.fa-cog
+                  .nav-content
+                    span Settings
+                a.nav-item.logout(href='#logout')
+                  .nav-icon
+                    i.fas.fa-sign-out-alt
+                  .nav-content
+                    span Logout
+
+          .content-area
+            section#dashboard.content-section.active
+              .section-header
+                .header-content
+                  h2 Dashboard Overview
+                  p Monitor and manage your e-commerce operations.
+                .header-actions
+                  .time-filter
+                    select.filter-select
+                      option(value='today') Today
+                      option(value='week') This Week
+                      option(value='month') This Month
+                  button.btn.btn-primary.refresh-btn
+                    i.fas.fa-sync-alt
+                    span Refresh
+              .dashboard-grid
+                .metrics-row
+                  .metric-card.revenue
+                    .card-header
+                      .card-icon
+                        i.fas.fa-money-bill
+                      .card-title Revenue Overview
+                    .card-content
+                      .primary-metric
+                        .metric-value UGX 12.5M
+                        .metric-label Monthly Revenue
+                        .metric-change +10.2%
+                      .secondary-metrics
+                        .metric-item
+                          .metric-number UGX 412K
+                          .metric-text Daily Avg
+                        .metric-item
+                          .metric-number 1,245
+                          .metric-text Transactions
+                    .card-chart
+                      canvas#revenueChart
+                  .metric-card.orders
+                    .card-header
+                      .card-icon
+                        i.fas.fa-shopping-cart
+                      .card-title Order Summary
+                    .card-content
+                      .order-breakdown
+                        .order-status
+                          .status-indicator.new
+                          .status-info
+                            .status-count 245
+                            .status-label New Orders
+                        .order-status
+                          .status-indicator.processing
+                          .status-info
+                            .status-count 180
+                            .status-label Processing
+                        .order-status
+                          .status-indicator.shipped
+                          .status-info
+                            .status-count 320
+                            .status-label Shipped
+                    .card-action
+                      button.btn.btn-outline
+                        span View All Orders
+                        i.fas.fa-arrow-right
+                  .metric-card.inventory
+                    .card-header
+                      .card-icon
+                        i.fas.fa-warehouse
+                      .card-title Inventory Status
+                    .card-content
+                      .inventory-stats
+                        .stat-row
+                          .stat-label Low Stock
+                          .stat-value 8
+                          .stat-trend.warning +2
+                        .stat-row
+                          .stat-label Out of Stock
+                          .stat-value 3
+                          .stat-trend.danger +1
+                        .stat-row
+                          .stat-label Total Products
+                          .stat-value 1,500
+                          .stat-trend.neutral
+                    .card-action
+                      button.btn.btn-outline
+                        span Manage Inventory
+                        i.fas.fa-arrow-right
+                .priority-section
+                  .section-title
+                    h3 Critical Alerts
+                    .task-counter
+                      span 8 pending
+                  .priority-grid
+                    .priority-card.urgent
+                      .priority-header
+                        .priority-icon
+                          i.fas.fa-exclamation-triangle
+                        .priority-title Urgent Actions
+                        .priority-count 3
+                      .priority-list
+                        .priority-item
+                          .item-icon
+                            i.fas.fa-box
+                          .item-content
+                            .item-title Low Stock Alert
+                            .item-subtitle 8 items critically low
+                          .item-action
+                            button.btn.btn-sm.btn-danger Restock Now
+                        .priority-item
+                          .item-icon
+                            i.fas.fa-headset
+                          .item-content
+                            .item-title Support Ticket
+                            .item-subtitle Customer escalation
+                          .item-action
+                            button.btn.btn-sm.btn-primary Review
+                    .priority-card.performance
+                      .priority-header
+                        .priority-icon
+                          i.fas.fa-chart-line
+                        .priority-title Performance Alerts
+                        .priority-count 5
+                      .priority-list
+                        .priority-item
+                          .item-icon
+                            i.fas.fa-users
+                          .item-content
+                            .item-title Traffic Spike
+                            .item-subtitle +20% visitors today
+                          .item-action
+                            button.btn.btn-sm.btn-info Analyze
+                        .priority-item
+                          .item-icon
+                            i.fas.fa-dollar-sign
+                          .item-content
+                            .item-title Sales Drop
+                            .item-subtitle -5% in category X
+                          .item-action
+                            button.btn.btn-sm.btn-warning Review
+                .activity-section
+                  .section-title
+                    h3 Recent Activity
+                    button.btn.btn-text.view-all View All
+                  .activity-feed
+                    .activity-item
+                      .activity-avatar
+                        img(src='https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=40', alt='Admin')
+                      .activity-content
+                        .activity-text
+                          strong Admin
+                          span added new product
+                          strong Premium Jacket
+                        .activity-time 10 minutes ago
+                      .activity-action
+                        button.btn.btn-sm.btn-outline View Product
+                    .activity-item
+                      .activity-avatar
+                        .avatar-icon
+                          i.fas.fa-truck
+                      .activity-content
+                        .activity-text
+                          span Order
+                          strong #ORD-2024-1250
+                          span was shipped
+                        .activity-time 1 hour ago
+                      .activity-action
+                        button.btn.btn-sm.btn-outline Track
+                    .activity-item
+                      .activity-avatar
+                        .avatar-icon
+                          i.fas.fa-headset
+                      .activity-content
+                        .activity-text
+                          strong Support Team
+                          span resolved ticket
+                          strong #TCK-2024-009
+                        .activity-time 2 hours ago
+                      .activity-action
+                        button.btn.btn-sm.btn-outline View Ticket
+
+            section#sales.content-section
+              .section-header
+                .header-content
+                  h2 Sales Analytics
+                  p Track sales performance and trends
+                .header-actions
+                  button.btn.btn-primary
+                    i.fas.fa-download
+                    span Export Report
+              .sales-content
+                .sales-grid
+                  .sales-card
+                    .card-header
+                      .card-title Sales Performance
+                    .card-content
+                      canvas#salesTrendChart
+                    .card-footer
+                      button.btn.btn-outline View Detailed Report
+                  .sales-card
+                    .card-header
+                      .card-title Top Products
+                    .card-content
+                      .product-list
+                        .product-item
+                          .product-info
+                            .product-name Premium Cotton Shirt
+                            .product-sales UGX 2.3M
+                          .product-progress
+                            progress(value='75', max='100')
+                        .product-item
+                          .product-info
+                            .product-name Designer Denim Jacket
+                            .product-sales UGX 1.8M
+                          .product-progress
+                            progress(value='60', max='100')
+                    .card-footer
+                      button.btn.btn-outline View All Products
+                  .sales-card
+                    .card-header
+                      .card-title Sales by Category
+                    .card-content
+                      canvas#categoryChart
+                    .card-footer
+                      button.btn.btn-outline View Category Details
+
+            section#orders.content-section
+              .section-header
+                .header-content
+                  h2 Order Management
+                  p Monitor and manage all orders
+                .header-actions
+                  button.btn.btn-primary
+                    i.fas.fa-download
+                    span Export Orders
+              .orders-content
+                .order-filters
+                  select.filter-select
+                    option(value='all') All Orders
+                    option(value='pending') Pending
+                    option(value='processing') Processing
+                    option(value='shipped') Shipped
+                  input.search-input(type='text', placeholder='Search orders...')
+                .orders-list
+                  .order-card
+                    .order-header
+                      .order-info
+                        h4 Order #ORD-2024-1250
+                        p October 18, 2025
+                      .order-status.shipped
+                        i.fas.fa-truck
+                        span Shipped
+                      .order-total UGX 299.99
+                    .order-items
+                      .order-item
+                        img(src='https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Product')
+                        .item-details
+                          h5 Premium Cotton Shirt
+                          p Size: L, Color: White | Qty: 1
+                          span.item-price UGX 89.99
+                    .order-actions
+                      button.btn.btn-outline Track Order
+                      button.btn.btn-outline View Invoice
+
+            section#inventory.content-section
+              .section-header
+                .header-content
+                  h2 Inventory Management
+                  p Manage stock levels and products
+                .header-actions
+                  button.btn.btn-primary.add-product
+                    i.fas.fa-plus-circle
+                    span Add New Product
+              .inventory-content
+                .inventory-filters
+                  select.filter-select
+                    option(value='all') All Products
+                    option(value='low') Low Stock
+                    option(value='out') Out of Stock
+                  input.search-input(type='text', placeholder='Search products...')
+                .inventory-list
+                  .inventory-item
+                    .item-image
+                      img(src='https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Product')
+                    .item-details
+                      h4 Premium Cotton Shirt
+                      p SKU: KC-SHIRT-001 | Category: Apparel
+                      .item-stock
+                        span Stock: 12
+                        span.status.low Low
+                    .item-actions
+                      button.btn.btn-outline Edit
+                      button.btn.btn-outline Restock
+
+    .toast-container#toastContainer
+    script(src='/vanilla-js/admin-dashboard.js')

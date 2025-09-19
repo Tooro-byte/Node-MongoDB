@@ -1,0 +1,55 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Customers - Kings Collection
+    link(rel="stylesheet", href="/Styles/sales-dashboard.css")
+    link(rel="stylesheet", href="/Styles/customers.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
+    script(src="/vanilla-js/sales-dashboard.js")
+    script(src="/vanilla-js/customers.js")
+
+  body
+    header.header
+      .header-background
+      .container
+        .header-content
+          .header-row
+            .header-column.header-logo
+              .logo-section
+                .logo-icon
+                  i.fas.fa-crown
+                .logo-text
+                  .brand-name Kings Collection
+                  .brand-tagline Premium Fashion Dashboard
+            .header-column.header-actions
+              .header-actions
+                a.btn.btn-secondary(href="/dashboard")
+                  i.fas.fa-arrow-left
+                  span Back to Dashboard
+                button.btn.btn-primary#addCustomer
+                  i.fas.fa-user-plus
+                  span Add Customer
+
+    main.main-content
+      .container
+        .section-header
+          .header-content
+            h2 Customers
+            p Manage customer profiles and view purchase history
+          .header-actions
+            .search-container
+              input.search-input#customerSearch(type="text", placeholder="Search customers by name or email...")
+              button.search-btn
+                i.fas.fa-search
+        .customers-list#customersList
+          // Customers populated dynamically via JavaScript
+        .pagination
+          button.btn.btn-secondary#prevPage
+            i.fas.fa-chevron-left
+          span#pageInfo Page 1
+          button.btn.btn-secondary#nextPage
+            i.fas.fa-chevron-right
+
+    .toast-container#toastContainer

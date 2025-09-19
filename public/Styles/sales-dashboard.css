@@ -115,7 +115,7 @@ body {
 
 /* ===== TOP NAVIGATION BAR STYLES ===== */
 .top-nav {
-  background: gold;
+  background: goldenrod;
   border-bottom: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
   position: sticky;

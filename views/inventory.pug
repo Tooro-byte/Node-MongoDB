@@ -1,0 +1,67 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Inventory - Kings Collection
+    link(rel="stylesheet", href="/Styles/sales-dashboard.css")
+    link(rel="stylesheet", href="/Styles/inventory.css")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css")
+    script(src="/vanilla-js/sales-dashboard.js")
+    script(src="/vanilla-js/inventory.js")
+
+  body
+    header.header
+      .header-background
+      .container
+        .header-content
+          .header-row
+            .header-column.header-logo
+              .logo-section
+                .logo-icon
+                  i.fas.fa-crown
+                .logo-text
+                  .brand-name Kings Collection
+                  .brand-tagline Premium Fashion Dashboard
+            .header-column.header-actions
+              .header-actions
+                a.btn.btn-secondary(href="/dashboard")
+                  i.fas.fa-arrow-left
+                  span Back to Dashboard
+                button.btn.btn-primary#addProduct
+                  i.fas.fa-plus
+                  span Add Product
+
+    main.main-content
+      .container
+        .section-header
+          .header-content
+            h2 Inventory
+            p Manage stock levels and restocking
+          .header-actions
+            .search-container
+              input.search-input#inventorySearch(type="text", placeholder="Search products by name or ID...")
+              button.search-btn
+                i.fas.fa-search
+            button.btn.btn-secondary#filterLowStock
+              i.fas.fa-exclamation-triangle
+              span Low Stock
+        .inventory-table
+          table#inventoryTable
+            thead
+              tr
+                th.sortable(data-sort="id") Product ID
+                th.sortable(data-sort="name") Product Name
+                th.sortable(data-sort="stock") Stock
+                th.sortable(data-sort="price") Price
+                th Actions
+            tbody
+              // Inventory populated dynamically via JavaScript
+        .pagination
+          button.btn.btn-secondary#prevPage
+            i.fas.fa-chevron-left
+          span#pageInfo Page 1
+          button.btn.btn-secondary#nextPage
+            i.fas.fa-chevron-right
+
+    .toast-container#toastContainer
