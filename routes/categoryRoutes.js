@@ -32,10 +32,7 @@ const upload = multer({
   },
 });
 //>>>> Define Route for Adding New Category >>>>>
-router.post("/", upload.single("icon"), async (req, res) => {
-  // >>>>> Store Icon Image With the name of Category >>>>
-  // >>>>> Install Multer package,  npm install multer@1.4.5-lts.1
-
+router.post("/api/category", upload.single("icon"), async (req, res) => {
   if (!req.body.name || !req.file) {
     return res.status(400).json({ message: "Name and Icon Are Required" });
   }
@@ -49,7 +46,7 @@ router.post("/", upload.single("icon"), async (req, res) => {
     .json({ message: "Category Created Sucessfully", category: "newCategory" });
 });
 
-router.get("/", async (req, res) => {
+router.get("/api/category", async (req, res) => {
   const categories = await category.find().sort("name");
   res.json(categories);
 });

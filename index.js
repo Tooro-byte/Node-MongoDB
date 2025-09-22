@@ -9,7 +9,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const passport = require("passport");
 const expressSession = require("express-session")({
-  secret: "Tooro-byte",
+  secret: process.env.SESSION_SECRET || "Tooro-byte", // Use env variable for secret
   resave: false,
   saveUninitialized: false,
 });
@@ -28,17 +28,19 @@ const salesPage = require("./routes/salesAgent");
 const adminPage = require("./routes/admin");
 const categoryRouter = require("./routes/categoryRoutes");
 const indexRouter = require("./routes/indexRoute");
-const sideBarSales = require("./routes/salesSideBarRoutes");
+const sideBarSales = require("./routes/salesSideBarRoutes"); // Consider renaming for clarity
+const addNewProuct = require("./routes/addNewProduct");
 
 // >>>>>>>>> Handling JSON Objects with the Express Middleware <<<<<<<
 app.use(express.json());
+app.use("/upload/category", express.static("upload/category"));
 
-// >>>>>>>>>>> Setting up templating Engines <<<<<<<<<<
+// >>>>>>>>>>> Setting up Templating Engines <<<<<<<<<<
 app.set("view engine", "pug");
 app.set("views", "./views");
 
 // >>>>>>>>>>> More Middlewares <<<<<<<<<<
-// Updated: Configure helmet's Content Security Policy to allow YouTube iframes, scripts, and styles
+// Updated: Configure helmet's Content Security Policy to allow Font Awesome, YouTube, Google, and Facebook
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -47,24 +49,40 @@ app.use(
         "'self'",
         "https://cdn.tailwindcss.com",
         "https://kit.fontawesome.com",
-        "'unsafe-inline'", // Allows inline scripts in your Pug file
-        "https://www.youtube.com", // Added for YouTube embed scripts
-        "https://s.ytimg.com", // Added for YouTube iframe player scripts
+        "'unsafe-inline'", // Allows inline scripts in Pug files
+        "https://www.youtube.com", // For YouTube embed scripts
+        "https://s.ytimg.com", // For YouTube iframe player scripts
       ],
       styleSrc: [
         "'self'",
         "https://cdn.tailwindcss.com",
         "https://fonts.googleapis.com",
-        "'unsafe-inline'", // Allows inline styles in your Pug file
+        "https://cdnjs.cloudflare.com", // Added for Font Awesome CSS
+        "'unsafe-inline'", // Allows inline styles in Pug files
       ],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      fontSrc: [
+        "'self'",
+        "https://fonts.gstatic.com",
+        "https://cdnjs.cloudflare.com", // Added for Font Awesome font files
+      ],
       frameSrc: [
         "'self'",
-        "https://www.youtube.com", // Added to allow YouTube iframes
-        "https://www.youtube-nocookie.com", // Optional: For privacy-enhanced mode
+        "https://www.youtube.com", // For YouTube iframes
+        "https://www.youtube-nocookie.com", // For privacy-enhanced YouTube mode
       ],
-      imgSrc: ["'self'", "data:", "https://i.ytimg.com"], // Added for YouTube thumbnails
-      connectSrc: ["'self'", "https://www.youtube.com"], // Optional: For YouTube API connections
+      imgSrc: [
+        "'self'",
+        "data:", // For base64-encoded images
+        "https://i.ytimg.com", // For YouTube thumbnails
+      ],
+      connectSrc: [
+        "'self'",
+        "https://www.youtube.com", // For YouTube API connections
+        "https://accounts.google.com", // For Google OAuth
+        "https://www.googleapis.com", // For Google API
+        "https://www.facebook.com", // For Facebook OAuth
+        "https://graph.facebook.com", // For Facebook API
+      ],
     },
   })
 );
@@ -80,15 +98,17 @@ app.use(passport.session());
 // >>>>>>>> Adding Morgan Middleware to Log HTTP Requests <<<<<<<<<<
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
-  console.log("Morgan on It");
+  console.log("Morgan enabled for development");
 }
+
 // >>>>>>> Connecting to MongoDB Service <<<<<<
 async function connectToDatabase() {
   try {
-    await mongoose.connect(process.env.DATABASE);
-    console.log("MongoDB Connection was successful");
+    await mongoose.connect(process.env.DATABASE, {});
+    console.log("MongoDB connection successful");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error.message);
+    process.exit(1); // Exit on DB connection failure
   }
 }
 connectToDatabase();
@@ -100,8 +120,6 @@ passport.deserializeUser(User.deserializeUser());
 
 // >>>>>>> Use the already imported Routes <<<<<<<<<
 app.use("/", indexRouter);
-
-// Follow with all other routes.
 app.use("/", userSigup);
 app.use("/api/auth", authRoutes);
 app.use("/", clientPage);
@@ -109,20 +127,23 @@ app.use("/", salesPage);
 app.use("/", adminPage);
 app.use("/", categoryRouter);
 app.use("/", sideBarSales);
+app.use("/", addNewProuct);
 
-// Handling Non-existing routes.
+// Handling Non-existing routes
 app.use((req, res) => {
   console.log("404 - Route not found:", req.originalUrl);
-  res.status(404).send("Error, Page not found");
+  res.status(404).send("Bad Request, Page Not Found");
 });
 
 // Error Handler
 app.use((err, req, res, next) => {
   console.error("Server error:", err.message, err.stack);
-  res.status(500).send("Internal Server Error");
+  res
+    .status(500)
+    .render("error", { title: "Server Error", error: err.message }); // Consider rendering a Pug template for errors
 });
 
 // >>>>>>>>>>>>> Bootstrapping the Server <<<<<<<<<<
 app.listen(PORT, () => {
-  console.log(`Secure connection on ${PORT} `);
+  console.log(`Server running on port ${PORT}`);
 });
