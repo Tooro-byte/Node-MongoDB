@@ -10,34 +10,34 @@ html(lang='en')
     link(href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap', rel='stylesheet')
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
   body
-    //-Header
+    //- Header
     header.header
       .container
         .header-content
           .logo
             i.fas.fa-crown
             span Kings Collection
-          //-Main Navigation Tabs
+          //- Main Navigation Tabs
           nav.main-nav
-            a.nav-tab.active(href='#', data-section='dashboard')
+            a.nav-tab.active(href='/client-page', data-section='dashboard')
               i.fas.fa-home
               span Dashboard
-            a.nav-tab(href='#', data-section='orders')
+            a.nav-tab(href='/orders', data-section='orders')
               i.fas.fa-box
               span My Orders
               span.badge 3
-            a.nav-tab(href='#', data-section='products')
+            a.nav-tab(href='/products', data-section='products')
               i.fas.fa-tags
               span Products
-            a.nav-tab(href='#', data-section='cart')
+            a.nav-tab(href='/cart', data-section='cart')
               i.fas.fa-shopping-cart
               span Cart
               span.badge 5
-            a.nav-tab(href='#', data-section='messages')
+            a.nav-tab(href='/messages', data-section='messages')
               i.fas.fa-envelope
               span Messages
               span.badge.new 2
-            a.nav-tab(href='#', data-section='payment-methods')
+            a.nav-tab(href='/payment-methods', data-section='payment-methods')
               i.fas.fa-credit-card
               span Payment
           .header-actions
@@ -55,19 +55,19 @@ html(lang='en')
                 span.user-name John Doe
                 span.user-status Premium Member
               .dropdown-menu
-                a(href='#', data-section='account')
+                a(href='/account', data-section='account')
                   i.fas.fa-user
-                                                Profile Settings
-                a(href='#', data-section='support')
+                  | Profile Settings
+                a(href='/support', data-section='support')
                   i.fas.fa-life-ring
-                                                Help &amp; Support
-                a(href='#logout')
+                  | Help & Support
+                a(href='/logout')
                   i.fas.fa-sign-out-alt
-                                                Logout
-    //-Main Content
+                  | Logout
+    //- Main Content
     main.main-content
       .container
-        //-Welcome Section with Digital Clock
+        //- Welcome Section with Digital Clock
         section.welcome-section
           .welcome-card
             .welcome-text
@@ -104,87 +104,87 @@ html(lang='en')
                 .summary-content
                   .summary-number 2,450
                   .summary-label Loyalty Points
-        //-Dashboard Grid
+        //- Dashboard Grid
         .dashboard-grid
-          //-Enhanced Sidebar Navigation
+          //- Enhanced Sidebar Navigation
           aside.sidebar
             nav.sidebar-nav
               .nav-section
                 h4 Main
-                a.nav-item.active(href='#', data-section='dashboard')
+                a.nav-item.active(href='/client-page', data-section='dashboard')
                   i.fas.fa-home
                   span Dashboard Home
-                a.nav-item(href='#', data-section='orders')
+                a.nav-item(href='/orders', data-section='orders')
                   i.fas.fa-box
                   span My Orders
                   span.count 3
-                a.nav-item(href='#', data-section='products')
+                a.nav-item(href='/products', data-section='products')
                   i.fas.fa-tags
                   span Products
               .nav-section
                 h4 Account
-                a.nav-item(href='#', data-section='account')
+                a.nav-item(href='/account', data-section='account')
                   i.fas.fa-user-cog
                   span Account Details
-                a.nav-item(href='#', data-section='addresses')
+                a.nav-item(href='/addresses', data-section='addresses')
                   i.fas.fa-map-marker-alt
                   span Addresses
-                a.nav-item(href='#', data-section='payment-methods')
+                a.nav-item(href='/payment-methods', data-section='payment-methods')
                   i.fas.fa-credit-card
                   span Payment Methods
               .nav-section
                 h4 Shopping
-                a.nav-item(href='#', data-section='wishlist')
+                a.nav-item(href='/wishlist', data-section='wishlist')
                   i.fas.fa-heart
                   span Wishlist
                   span.count 8
-                a.nav-item(href='#', data-section='cart')
+                a.nav-item(href='/cart', data-section='cart')
                   i.fas.fa-shopping-cart
                   span Cart
                   span.count 5
-                a.nav-item(href='#', data-section='reviews')
+                a.nav-item(href='/reviews', data-section='reviews')
                   i.fas.fa-star
                   span Reviews
               .nav-section
                 h4 Communication
-                a.nav-item(href='#', data-section='messages')
+                a.nav-item(href='/messages', data-section='messages')
                   i.fas.fa-envelope
                   span Messages
                   span.count.new 2
-                a.nav-item(href='#', data-section='notifications')
+                a.nav-item(href='/notifications', data-section='notifications')
                   i.fas.fa-bell
                   span Notifications
                   span.count 4
               .nav-section
                 h4 Services
-                a.nav-item(href='#', data-section='loyalty')
+                a.nav-item(href='/loyalty', data-section='loyalty')
                   i.fas.fa-gift
-                  span Loyalty &amp; Rewards
-                a.nav-item(href='#', data-section='subscriptions')
+                  span Loyalty & Rewards
+                a.nav-item(href='/subscriptions', data-section='subscriptions')
                   i.fas.fa-sync-alt
                   span Subscriptions
-                a.nav-item(href='#', data-section='referrals')
+                a.nav-item(href='/referrals', data-section='referrals')
                   i.fas.fa-users
                   span Referrals
               .nav-section
                 h4 Support
-                a.nav-item(href='#', data-section='settings')
+                a.nav-item(href='/settings', data-section='settings')
                   i.fas.fa-cog
                   span Settings
-                a.nav-item(href='#', data-section='support')
+                a.nav-item(href='/support', data-section='support')
                   i.fas.fa-life-ring
-                  span Support &amp; Help
-                a.nav-item.logout(href='#logout')
+                  span Support & Help
+                a.nav-item.logout(href='/logout')
                   i.fas.fa-sign-out-alt
                   span Logout
-          //-Main Dashboard Content
+          //- Main Dashboard Content
           .dashboard-content
-            //-Dashboard Home Section
+            //- Dashboard Home Section
             section#dashboard.content-section.active
               .section-header
                 h2 Dashboard Overview
                 p Your personalized shopping experience at a glance
-              //-Quick Stats
+              //- Quick Stats
               .stats-grid
                 .stat-card
                   .stat-icon.orders
@@ -218,13 +218,13 @@ html(lang='en')
                     .stat-number $245
                     .stat-label Total Saved
                     .stat-trend.positive
-                      span Through deals &amp; discounts
-              //-Recent Activity & Recommendations
+                      span Through deals & discounts
+              //- Recent Activity & Recommendations
               .dashboard-widgets
                 .widget.recent-orders
                   .widget-header
                     h3 Recent Orders
-                    a.view-all(href='#', data-section='orders') View All
+                    a.view-all(href='/orders', data-section='orders') View All
                   .order-list
                     .order-item
                       .order-image
@@ -249,7 +249,7 @@ html(lang='en')
                 .widget.recommendations
                   .widget-header
                     h3 Recommended for You
-                    a.view-all(href='#') Browse More
+                    a.view-all(href='/products') Browse More
                   .product-grid
                     .product-card
                       .product-image
@@ -269,7 +269,7 @@ html(lang='en')
                           span.current $299.99
                           span.original $349.99
                         button.btn.btn-primary Add to Cart
-            //-Orders Section
+            //- Orders Section
             section#orders.content-section
               .section-header
                 h2 Order History
@@ -286,7 +286,7 @@ html(lang='en')
                     input.search-input(type='text', placeholder='Search orders...')
                   button.btn.btn-outline.download-orders
                     i.fas.fa-download
-                                                      Export Orders
+                    | Export Orders
                 .orders-list
                   .order-card
                     .order-header
@@ -313,14 +313,14 @@ html(lang='en')
                     .order-actions
                       button.btn.btn-outline
                         i.fas.fa-truck
-                                                                  Track Order
+                        | Track Order
                       button.btn.btn-outline
                         i.fas.fa-receipt
-                                                                  View Invoice
+                        | View Invoice
                       button.btn.btn-outline
                         i.fas.fa-redo
-                                                                  Reorder
-            //-Messages Section
+                        | Reorder
+            //- Messages Section
             section#messages.content-section
               .section-header
                 h2 Messages
@@ -354,7 +354,7 @@ html(lang='en')
                       .message-actions
                         button.btn.btn-text Shop Now
                         button.btn.btn-text Mark as Read
-            //-Cart Section
+            //- Cart Section
             section#cart.content-section
               .section-header
                 h2 Shopping Cart
@@ -406,11 +406,11 @@ html(lang='en')
                       span $284.19
                     button.btn.btn-primary.checkout-btn
                       i.fas.fa-lock
-                        Secure Checkout
+                      | Secure Checkout
                   .promo-code
                     h4 Promo Code
                     .promo-input
                       input(type='text', placeholder='Enter code')
                       button.btn.btn-outline Apply
-            //-Other sections would follow similar patterns...
+            //- Other sections would follow similar patterns...
     script(src='/vanilla-js/client-dashboard.js')

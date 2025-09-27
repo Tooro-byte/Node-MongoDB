@@ -35,7 +35,7 @@ const upload = multer({
 });
 
 // <<<< A post Route To add New Products to the WebPage <<<<<<<
-router.post("/add-product", upload.array(images, 8), async (req, res) => {
+router.post("/add-product", upload.array('images', 8), async (req, res) => {
   const { title, description, category, price, stockId } = req.body;
   const images = req.file.map((image) => image.filename);
   if (images.length === 0) {

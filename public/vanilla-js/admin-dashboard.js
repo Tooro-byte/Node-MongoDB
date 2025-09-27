@@ -1,35 +1,160 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Navigation Tab Switching
+  // Socket.IO Integration for Real-Time Updates
+  const socket = io();
+
+  socket.on("connect", () => {
+    console.log("Connected to Socket.IO server");
+  });
+
+  socket.on("product-added", (product) => {
+    console.log("New product added:", product);
+    const productList = document.querySelector(".product-list tbody");
+    if (productList && window.location.pathname === "/admin-page") {
+      const productRow = document.createElement("tr");
+      productRow.dataset.productId = product._id;
+      productRow.innerHTML = `
+        <td>
+          <img src="/upload/products/${product.images[0]}" alt="${product.title}" width="50">
+        </td>
+        <td>${product.title}</td>
+        <td>${product.category.name}</td>
+        <td>$${product.price.toFixed(2)}</td>
+        <td>${product.stockId}</td>
+        <td>
+          <a href="/admin/products/edit/${product._id}" class="btn btn-primary">Edit</a>
+          <button class="btn btn-danger delete-product" data-product-id="${product._id}">Delete</button>
+        </td>
+      `;
+      productList.prepend(productRow);
+      showToast("New product added!", "success");
+    }
+  });
+
+  socket.on("product-updated", (product) => {
+    console.log("Product updated:", product);
+    if (window.location.pathname === "/admin-page") {
+      const productRow = document.querySelector(`[data-product-id="${product._id}"]`);
+      if (productRow) {
+        productRow.querySelector("td:nth-child(2)").textContent = product.title;
+        productRow.querySelector("td:nth-child(3)").textContent = product.category.name;
+        productRow.querySelector("td:nth-child(4)").textContent = `$${product.price.toFixed(2)}`;
+        productRow.querySelector("td:nth-child(5)").textContent = product.stockId;
+        productRow.querySelector("img").src = `/upload/products/${product.images[0]}`;
+        productRow.querySelector("a.btn-primary").href = `/admin/products/edit/${product._id}`;
+        showToast("Product updated!", "info");
+      }
+    }
+  });
+
+  socket.on("product-deleted", ({ id }) => {
+    console.log("Product deleted:", id);
+    if (window.location.pathname === "/admin-page") {
+      const productRow = document.querySelector(`[data-product-id="${id}"]`);
+      if (productRow) {
+        productRow.remove();
+        showToast("Product deleted!", "info");
+      }
+    }
+  });
+
+  socket.on("category-added", (category) => {
+    console.log("New category added:", category);
+    const categoryList = document.querySelector(".category-list tbody");
+    if (categoryList && window.location.pathname === "/admin-page") {
+      const categoryRow = document.createElement("tr");
+      categoryRow.dataset.categoryId = category._id;
+      categoryRow.innerHTML = `
+        <td>
+          <img src="/upload/category/${category.image}" alt="${category.name}" width="50">
+        </td>
+        <td>${category.name}</td>
+      `;
+      categoryList.prepend(categoryRow);
+      showToast("New category added!", "success");
+    }
+  });
+
+  // Navigation Tab Switching (Updated for href routing)
   const navTabs = document.querySelectorAll(".nav-tab");
+  const sidebarItems = document.querySelectorAll(".sidebar-nav .nav-item:not(.logout)");
   const contentSections = document.querySelectorAll(".content-section");
 
+  // Helper function to check if link should navigate or toggle section
+  function shouldNavigate(href) {
+    const navigableRoutes = [
+      "/admin-page",
+      "/admin/add-product/new",
+      "/admin/categories/new",
+      "/admin/products/edit",
+      "/admin/profile",
+      "/admin/security",
+      "/support",
+      "/logout",
+      "/admin/sales",
+      "/admin/orders",
+      "/admin/inventory",
+      "/admin/customers",
+      "/admin/employees",
+      "/admin/marketing",
+      "/admin/payments",
+      "/admin/website",
+      "/admin/support",
+      "/admin/analytics",
+      "/admin/financials",
+      "/admin/settings"
+    ];
+    return navigableRoutes.some(route => href.includes(route));
+  }
+
+  // Top Navigation Tabs
   navTabs.forEach((tab) => {
     tab.addEventListener("click", (e) => {
-      e.preventDefault();
+      const href = tab.getAttribute("href");
       const section = tab.getAttribute("data-section");
 
-      navTabs.forEach((t) => t.classList.remove("active"));
-      contentSections.forEach((s) => s.classList.remove("active"));
+      // Check if this is a navigable route
+      if (href !== "#" && shouldNavigate(href)) {
+        // Allow default navigation
+        return;
+      }
 
-      tab.classList.add("active");
-      document.getElementById(section).classList.add("active");
+      // Handle section toggling for internal dashboard sections
+      if (section) {
+        e.preventDefault();
+        navTabs.forEach((t) => t.classList.remove("active"));
+        contentSections.forEach((s) => s.classList.remove("active"));
+        tab.classList.add("active");
+        const targetSection = document.getElementById(section);
+        if (targetSection) {
+          targetSection.classList.add("active");
+        }
+      }
     });
   });
 
   // Sidebar Navigation
-  const sidebarItems = document.querySelectorAll(
-    ".sidebar-nav .nav-item:not(.logout)"
-  );
   sidebarItems.forEach((item) => {
     item.addEventListener("click", (e) => {
-      e.preventDefault();
+      const href = item.getAttribute("href");
       const section = item.getAttribute("data-section");
 
-      sidebarItems.forEach((i) => i.classList.remove("active"));
-      contentSections.forEach((s) => s.classList.remove("active"));
+      // Check if this is a navigable route
+      if (href !== "#" && shouldNavigate(href)) {
+        // Allow default navigation
+        return;
+      }
 
-      item.classList.add("active");
-      document.getElementById(section)?.classList.add("active");
+      // Handle section toggling for internal dashboard sections
+      if (section) {
+        e.preventDefault();
+        sidebarItems.forEach((i) => i.classList.remove("active"));
+        contentSections.forEach((s) => s.classList.remove("active"));
+        item.classList.add("active");
+        const targetSection = document.getElementById(section);
+        if (targetSection) {
+          targetSection.classList.add("active");
+        }
+      }
     });
   });
 
@@ -37,180 +162,113 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".logout").forEach((logout) => {
     logout.addEventListener("click", (e) => {
       e.preventDefault();
-      showToast("Logged out successfully", "success");
-      // Simulate logout (replace with actual logout logic)
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1000);
+      if (confirm("Are you sure you want to log out?")) {
+        showToast("Logging out...", "info");
+        setTimeout(() => {
+          window.location.href = "/logout";
+        }, 1000);
+      }
     });
   });
 
-  // Add New Product Modal
-  const addProductButtons = document.querySelectorAll(".add-product");
-  addProductButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      showProductModal();
+  // Add New Product Button (Updated to navigate instead of modal)
+  const addProductButtons = document.querySelectorAll(".add-product a");
+  addProductButtons.forEach((link) => {
+    link.addEventListener("click", (e) => {
+      // Allow navigation to /admin/add-product/new
+      console.log("Navigating to add product form");
     });
   });
 
-  // Product Modal Logic
-  function showProductModal() {
-    const modal = document.createElement("div");
-    modal.className = "modal";
-    modal.innerHTML = `
-      <div class="modal-content">
-        <h3>Add New Product</h3>
-        <form id="productForm">
-          <div class="form-group">
-            <label for="productName">Product Name</label>
-            <input type="text" id="productName" required>
-          </div>
-          <div class="form-group">
-            <label for="productPrice">Price (UGX)</label>
-            <input type="number" id="productPrice" step="0.01" required>
-          </div>
-          <div class="form-group">
-            <label for="productStock">Stock</label>
-            <input type="number" id="productStock" required>
-          </div>
-          <div class="form-group">
-            <label for="productCategory">Category</label>
-            <select id="productCategory" required>
-              <option value="apparel">Apparel</option>
-              <option value="accessories">Accessories</option>
-              <option value="footwear">Footwear</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="productImage">Product Image</label>
-            <input type="file" id="productImage" accept="image/*">
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn btn-secondary cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary">Add Product</button>
-          </div>
-        </form>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    // Modal Styles
-    const style = document.createElement("style");
-    style.textContent = `
-      .modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 2000;
-      }
-      .modal-content {
-        background: #fff;
-        border-radius: 12px;
-        padding: 20px;
-        width: 400px;
-        max-width: 90%;
-      }
-      .modal-content h3 {
-        margin-bottom: 20px;
-        font-size: 20px;
-      }
-      .form-group {
-        margin-bottom: 15px;
-      }
-      .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-      }
-      .form-group input,
-      .form-group select {
-        width: 100%;
-        padding: 8px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-      }
-      .form-actions {
-        display: flex;
-        gap: 10px;
-        justify-content: flex-end;
-      }
-      .btn-secondary {
-        background: #6c757d;
-        color: #fff;
-        border: none;
-      }
-      .btn-secondary:hover {
-        background: #5a6268;
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Modal Handlers
-    modal.querySelector(".cancel").addEventListener("click", () => {
-      modal.remove();
-    });
-
-    modal.querySelector("#productForm").addEventListener("submit", (e) => {
+  // Delete Product Handler
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("delete-product")) {
       e.preventDefault();
-      const productName = modal.querySelector("#productName").value;
-      showToast(`Product "${productName}" added successfully`, "success");
-      modal.remove();
-      // Add backend API call here for actual product creation
-    });
-  }
+      const productId = e.target.dataset.productId;
+      const confirmed = confirm("Are you sure you want to delete this product?");
+      if (confirmed) {
+        try {
+          const response = await fetch(`/admin/products/${productId}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          if (response.ok) {
+            e.target.closest("tr").remove();
+            showToast("Product deleted successfully", "success");
+          } else {
+            const error = await response.json();
+            showToast("Failed to delete product: " + error.error, "error");
+          }
+        } catch (error) {
+          console.error("Error deleting product:", error);
+          showToast("Error deleting product", "error");
+        }
+      }
+    }
+  });
 
-  // Toast Notification
+  // Toast Notification (Updated)
   function showToast(message, type = "success") {
     const toastContainer = document.getElementById("toastContainer");
+    if (!toastContainer) {
+      console.warn("Toast container not found");
+      return;
+    }
+
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
     toast.innerHTML = `
       <div class="toast-icon">
         <i class="fas fa-${
-          type === "success" ? "check-circle" : "exclamation-circle"
+          type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle"
         }"></i>
       </div>
       <div class="toast-message">${message}</div>
+      <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
     `;
     toastContainer.appendChild(toast);
+
+    // Auto-remove after 3 seconds
     setTimeout(() => {
-      toast.remove();
+      if (toast.parentNode) {
+        toast.remove();
+      }
     }, 3000);
   }
 
-  // Chart Initialization (Using Chart.js as an example)
+  // Chart Initialization (Updated to check for Chart.js)
   const initCharts = () => {
+    // Check if Chart.js is loaded
     if (typeof Chart !== "undefined") {
       // Revenue Chart
-      const revenueChart = new Chart(document.getElementById("revenueChart"), {
-        type: "line",
-        data: {
-          labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-          datasets: [
-            {
-              label: "Revenue (UGX)",
-              data: [5000000, 6000000, 5500000, 7000000, 6500000, 8000000],
-              borderColor: "#007bff",
-              fill: false,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-        },
-      });
+      const revenueCtx = document.getElementById("revenueChart");
+      if (revenueCtx) {
+        new Chart(revenueCtx, {
+          type: "line",
+          data: {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [
+              {
+                label: "Revenue (UGX)",
+                data: [5000000, 6000000, 5500000, 7000000, 6500000, 8000000],
+                borderColor: "#007bff",
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+          },
+        });
+      }
 
       // Sales Trend Chart
-      const salesTrendChart = new Chart(
-        document.getElementById("salesTrendChart"),
-        {
+      const salesTrendCtx = document.getElementById("salesTrendChart");
+      if (salesTrendCtx) {
+        new Chart(salesTrendCtx, {
           type: "bar",
           data: {
             labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
@@ -226,13 +284,13 @@ document.addEventListener("DOMContentLoaded", () => {
             responsive: true,
             maintainAspectRatio: false,
           },
-        }
-      );
+        });
+      }
 
       // Category Chart
-      const categoryChart = new Chart(
-        document.getElementById("categoryChart"),
-        {
+      const categoryCtx = document.getElementById("categoryChart");
+      if (categoryCtx) {
+        new Chart(categoryCtx, {
           type: "pie",
           data: {
             labels: ["Apparel", "Accessories", "Footwear"],
@@ -247,8 +305,10 @@ document.addEventListener("DOMContentLoaded", () => {
             responsive: true,
             maintainAspectRatio: false,
           },
-        }
-      );
+        });
+      }
+    } else {
+      console.warn("Chart.js not loaded. Charts will not be displayed.");
     }
   };
 
@@ -256,37 +316,91 @@ document.addEventListener("DOMContentLoaded", () => {
   initCharts();
 
   // Refresh Button Handler
-  document.querySelector(".refresh-btn").addEventListener("click", () => {
-    showToast("Dashboard refreshed", "success");
-    // Add API call to refresh data
-  });
+  const refreshBtn = document.querySelector(".refresh-btn");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", async () => {
+      try {
+        // Fetch updated dashboard data
+        const response = await fetch("/admin-page", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          showToast("Dashboard refreshed", "success");
+          // Optionally reload the page or update specific elements
+          location.reload();
+        } else {
+          showToast("Failed to refresh dashboard", "error");
+        }
+      } catch (error) {
+        console.error("Error refreshing dashboard:", error);
+        showToast("Error refreshing dashboard", "error");
+      }
+    });
+  }
 
   // Time Filter Handler
-  document.querySelector(".filter-select").addEventListener("change", (e) => {
-    const period = e.target.value;
-    showToast(`Showing data for ${period}`, "success");
-    // Add API call to filter data by period
-  });
+  const timeFilter = document.querySelector(".filter-select");
+  if (timeFilter) {
+    timeFilter.addEventListener("change", (e) => {
+      const period = e.target.value;
+      showToast(`Showing data for ${period}`, "info");
+      // Add API call to filter data by period
+      // fetch(`/api/admin/dashboard?period=${period}`)
+      //   .then(response => response.json())
+      //   .then(data => updateDashboardMetrics(data));
+    });
+  }
 
-  // Backend Integration Placeholder
-  // Example: Fetch dashboard data
-  function fetchDashboardData() {
-    // Replace with actual API call
-    /*
-    fetch('/api/admin/dashboard')
-      .then(response => response.json())
-      .then(data => {
-        // Update dashboard metrics
-        document.querySelector('.stat-card.revenue .stat-number').textContent = `UGX ${data.revenue.toLocaleString()}`;
-        document.querySelector('.stat-card.orders .stat-number').textContent = data.orders;
-        document.querySelector('.stat-card.traffic .stat-number').textContent = data.traffic;
-      })
-      .catch(error => {
-        showToast('Failed to fetch dashboard data', 'error');
-      });
-    */
+  // Backend Integration (Updated)
+  async function fetchDashboardData() {
+    try {
+      const response = await fetch("/admin-page");
+      if (response.ok) {
+        const data = await response.text(); // Since it's a rendered page
+        console.log("Dashboard data fetched successfully");
+        // Note: For dynamic updates, consider creating an API endpoint
+        // /api/admin/dashboard that returns JSON data
+      } else {
+        showToast("Failed to fetch dashboard data", "error");
+      }
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      showToast("Network error loading dashboard", "error");
+    }
   }
 
   // Initialize Dashboard Data
   fetchDashboardData();
+
+  // Delete Category Handler (if needed)
+  document.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("delete-category")) {
+      e.preventDefault();
+      const categoryId = e.target.dataset.categoryId;
+      const confirmed = confirm("Are you sure you want to delete this category?");
+      if (confirmed) {
+        try {
+          const response = await fetch(`/admin/categories/${categoryId}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          if (response.ok) {
+            e.target.closest("tr").remove();
+            showToast("Category deleted successfully", "success");
+          } else {
+            const error = await response.json();
+            showToast("Failed to delete category: " + error.error, "error");
+          }
+        } catch (error) {
+          console.error("Error deleting category:", error);
+          showToast("Error deleting category", "error");
+        }
+      }
+    }
+  });
 });

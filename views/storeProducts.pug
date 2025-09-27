@@ -1,0 +1,134 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title= title
+    link(rel='stylesheet', href='/Styles/storeProducts.css')
+    link(href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css', rel='stylesheet')
+  
+  body
+    //-Navigation Bar
+    nav.navbar
+      .nav-container
+        .nav-brand
+          i.fas.fa-crown
+          | Kings Collections
+        
+        .nav-menu
+          .nav-item
+            a(href='#cart')
+              i.fas.fa-shopping-cart
+              | MyCart
+          .nav-item
+            a(href='#history')
+              i.fas.fa-history
+              | History
+          .nav-item
+            a(href='#payment')
+              i.fas.fa-credit-card
+              | Payment
+          .nav-item
+            a(href='/orders')
+              i.fas.fa-box
+              | MyOrders
+          .nav-item
+            a(href='/profile')
+              i.fas.fa-user
+              | Profile
+          .nav-item
+            a(href='/client-page')
+              i.fas.fa-user
+              | Go Back
+
+
+    .main-container
+      //-Sidebar
+      aside.sidebar
+        .sidebar-header
+          h2
+            i.fas.fa-list
+            | Categories
+        
+        .category-list
+          .category-item.active(data-category='all')
+            .category-icon
+              i.fas.fa-th-large
+            .category-name ALL CATEGORIES
+          
+          .category-item(data-category='1')
+            .category-icon
+              img(src='https://images.pexels.com/photos/1038916/pexels-photo-1038916.jpeg', alt='caps')
+            .category-name CAPS
+          
+          .category-item(data-category='2')
+            .category-icon
+              img(src='https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg', alt='jeans')
+            .category-name JEANS
+          
+          .category-item(data-category='3')
+            .category-icon
+              img(src='https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg', alt='shoes')
+            .category-name SHOES
+          
+          .category-item(data-category='4')
+            .category-icon
+              img(src='https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg', alt='t-shirts')
+            .category-name T-SHIRTS
+          
+          .category-item(data-category='5')
+            .category-icon
+              img(src='https://images.pexels.com/photos/277390/pexels-photo-277390.jpeg', alt='watches')
+            .category-name WATCHES
+          
+          .category-item(data-category='6')
+            .category-icon
+              img(src='https://images.pexels.com/photos/1183266/pexels-photo-1183266.jpeg', alt='jackets')
+            .category-name JACKETS
+          
+          .category-item(data-category='7')
+            .category-icon
+              img(src='https://images.pexels.com/photos/5864245/pexels-photo-5864245.jpeg', alt='belts')
+            .category-name BELTS
+          
+          .category-item(data-category='8')
+            .category-icon
+              img(src='https://images.pexels.com/photos/2422915/pexels-photo-2422915.jpeg', alt='bags')
+            .category-name BAGS
+          
+          .category-item
+            .category-icon
+              img(src='https://images.pexels.com/photos/701877/pexels-photo-701877.jpeg', alt='sunglasses')
+            .category-name SUNGLASSES
+
+      //-Main Content
+      main.main-content
+        .content-header
+          h1 Men's Collection
+          .filter-info
+            span#active-category All Categories
+            span#product-count= products.length + ' Products'
+
+        //-Products Grid
+        .products-grid#products-container
+          each product in products
+            .product-card(data-category=product.category)
+              .product-image-container
+                img.product-image(src=product.images[0], alt=product.title)
+                .product-overlay
+                  .quick-view Quick View
+              
+              .product-info
+                .product-header
+                  h3.product-title= product.title
+                  .product-stock Stock ID: #{product.stockId}
+                
+                p.product-description= product.description
+                
+                .product-footer
+                  .product-price $#{product.price}
+                  button.buy-now-btn(data-product-id=product._id)
+                    i.fas.fa-shopping-bag
+                    | Buy Now
+
+    script(src='/vanilla-js/storeProducts.js')

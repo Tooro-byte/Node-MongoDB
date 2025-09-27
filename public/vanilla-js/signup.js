@@ -84,8 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
       database_error: "Database error occurred. Please try again.",
 
       // Network errors
-      network_error:
-        "Network connection error. Please check your internet and try again.",
+      network_error: "Network error: Please check your internet and try again.",
     };
 
     return (
@@ -396,7 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const result = await response.json();
 
         if (response.ok) {
-          localStorage.setItem("authToken", result.token);
           console.log("Email signup success:", result.redirectUrl);
           showSuccessMessage("Account created successfully! Redirecting...");
 
@@ -473,6 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showError(form, "password", message);
     } else if (message.includes("mailing")) {
       showError(form, "mailingAddress", message);
+      ss;
     } else {
       showError(form, "email", message);
     }

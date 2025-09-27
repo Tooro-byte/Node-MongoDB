@@ -39,36 +39,63 @@ class EcommerceDashboard {
   }
 
   setupNavigation() {
-    // Main nav tabs
-    const navTabs = document.querySelectorAll(".nav-tab");
-    const sidebarItems = document.querySelectorAll(".nav-item");
+    // Main nav tabs and sidebar items
+    const navTabs = document.querySelectorAll(".nav-tab, .nav-item");
     const contentSections = document.querySelectorAll(".content-section");
 
-    // Handle main nav tab clicks
     navTabs.forEach((tab) => {
       tab.addEventListener("click", (e) => {
-        e.preventDefault();
+        const href = tab.getAttribute("href");
         const section = tab.dataset.section;
-        this.switchSection(section, navTabs, contentSections);
-      });
-    });
 
-    // Handle sidebar nav clicks
-    sidebarItems.forEach((item) => {
-      item.addEventListener("click", (e) => {
-        if (item.classList.contains("logout")) {
-          this.handleLogout(e);
+        // Allow navigation for specific routes
+        const navigableRoutes = [
+          "/products",
+          "/orders",
+          "/cart",
+          "/messages",
+          "/payment-methods",
+          "/account",
+          "/addresses",
+          "/wishlist",
+          "/reviews",
+          "/notifications",
+          "/loyalty",
+          "/subscriptions",
+          "/referrals",
+          "/settings",
+          "/support",
+          "/logout",
+          "/client-page",
+        ];
+
+        if (navigableRoutes.includes(href)) {
+          // Allow default navigation behavior
           return;
         }
 
-        e.preventDefault();
-        const section = item.dataset.section;
+        // Handle section toggling for dashboard content
         if (section) {
-          this.switchSection(
-            section,
-            [...navTabs, ...sidebarItems],
-            contentSections
-          );
+          e.preventDefault();
+          this.switchSection(section, navTabs, contentSections);
+        }
+      });
+    });
+
+    // Handle "View All" links in widgets
+    document.querySelectorAll(".view-all").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        const href = link.getAttribute("href");
+        const section = link.dataset.section;
+
+        if (["/products", "/orders"].includes(href)) {
+          // Allow navigation to /products or /orders
+          return;
+        }
+
+        if (section) {
+          e.preventDefault();
+          this.switchSection(section, navTabs, contentSections);
         }
       });
     });
@@ -78,11 +105,11 @@ class EcommerceDashboard {
     // Remove active class from all nav elements
     navElements.forEach((el) => el.classList.remove("active"));
 
-    // Add active class to clicked element
-    const activeElement = document.querySelector(`[data-section="${section}"]`);
-    if (activeElement) {
-      activeElement.classList.add("active");
-    }
+    // Add active class to clicked element and its corresponding nav-tab/nav-item
+    const activeElements = document.querySelectorAll(
+      `[data-section="${section}"]`
+    );
+    activeElements.forEach((el) => el.classList.add("active"));
 
     // Hide all content sections
     contentSections.forEach((content) => content.classList.remove("active"));
@@ -760,8 +787,8 @@ class EcommerceDashboard {
     if (confirm("Are you sure you want to logout?")) {
       this.showNotification("Logging out...", "info");
       setTimeout(() => {
-        // Simulate logout
-        window.location.href = "/login";
+        // Navigate to logout route
+        window.location.href = "/logout";
       }, 1500);
     }
   }

@@ -1,0 +1,109 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    title= title
+    link(rel='stylesheet', href='/Styles/productsForm.css')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css')
+    script(src='/socket.io/socket.io.js')
+
+  body
+    nav.admin-navbar
+      .nav-container
+        .nav-brand
+          i.fas.fa-crown
+          | Kings Collections Admin
+        .nav-menu
+          .nav-item
+            a(href='/admin-page')
+              i.fas.fa-tachometer-alt
+              | Dashboard
+          .nav-item
+            a.active(href='/add-product/new')
+              i.fas.fa-box
+              | Add Product
+          .nav-item
+            a(href='/categories/new')
+              i.fas.fa-tags
+              | Add Category
+
+    .form-container
+      .form-header
+        h1 Add New Product & Category
+        p Manage your Kings Collections inventory
+
+      .forms-grid
+        //-Category Form
+        .form-section
+          .form-card
+            .card-header
+              i.fas.fa-tags
+              h2 Add Category
+            form#categoryForm.admin-form(action='/admin/categories', method='POST', enctype='multipart/form-data')
+              .form-group
+                label(for='categoryName') Category Name
+                input#categoryName(type='text', name='name', placeholder='Enter category name', required)
+              .form-group
+                label(for='categoryImage') Category Icon
+                .file-upload-area
+                  input#categoryImage(type='file', name='image', accept='image/jpeg,image/png,image/gif', required)
+                  .upload-placeholder
+                    i.fas.fa-cloud-upload-alt
+                    span Click to upload category icon
+                  .image-preview#categoryPreview
+              button.btn.btn-primary(type='submit')
+                i.fas.fa-plus
+                | Add Category
+
+        //-Product Form
+        .form-section
+          .form-card
+            .card-header
+              i.fas.fa-box
+              h2 Add Product
+            form#productForm.admin-form(action='/admin/add-product', method='POST', enctype='multipart/form-data')
+              .form-row
+                .form-group
+                  label(for='productTitle') Product Title
+                  input#productTitle(type='text', name='title', placeholder='Enter product title', maxlength='50', required)
+                .form-group
+                  label(for='productCategory') Category
+                  select#productCategory(name='category', required)
+                    option(value='') Select Category
+                    each category in categories
+                      option(value=category._id)= category.name
+              .form-group
+                label(for='productDescription') Description
+                textarea#productDescription(name='description', placeholder='Enter product description', maxlength='100', required)
+              .form-row
+                .form-group
+                  label(for='productPrice') Price ($)
+                  input#productPrice(type='number', name='price', placeholder='0.00', step='0.01', min='0', required)
+                .form-group
+                  label(for='productStock') Stock ID
+                  input#productStock(type='number', name='stockId', placeholder='Enter stock ID', min='0', required)
+              .form-group
+                label(for='productImages') Product Images (Max 8)
+                .file-upload-area
+                  input#productImages(type='file', name='images', accept='image/jpeg,image/png,image/gif', multiple, required)
+                  .upload-placeholder
+                    i.fas.fa-images
+                    span Click to upload product images
+                  .images-preview#productImagesPreview
+              button.btn.btn-success(type='submit')
+                i.fas.fa-plus
+                | Add Product
+
+      .recent-additions
+        .section-header
+          h2 Recent Additions
+          .real-time-indicator
+            .indicator-dot
+            span Real-time Updates
+        .additions-grid#recentAdditions
+          //-Real-time additions will appear here
+
+    .toast-container#toastContainer
+
+    script(src='/vanilla-js/productsForm.js')

@@ -1,3 +1,4 @@
+// index.js
 // <<<<<<<<< Configuring the different DOTENV Files >>>>>>>>>>
 require("dotenv").config();
 require("./config/passport");
@@ -9,13 +10,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const passport = require("passport");
 const expressSession = require("express-session")({
-  secret: process.env.SESSION_SECRET || "Tooro-byte", // Use env variable for secret
+  secret: process.env.SESSION_SECRET || "Tooro-byte",
   resave: false,
   saveUninitialized: false,
 });
-
+const http = require("http");
+const { Server } = require("socket.io");
 // >>>>>>> My E-commerce Website Instantiations <<<<<<<<
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+app.locals.io = io;
 const PORT = process.env.PORT || 3005;
 
 const User = require("./models/users");
@@ -25,22 +30,22 @@ const userSigup = require("./routes/userAuth");
 const authRoutes = require("./routes/auth");
 const clientPage = require("./routes/client");
 const salesPage = require("./routes/salesAgent");
-const adminPage = require("./routes/admin");
+const adminPage = require("./routes/admin"); // The admin router
 const categoryRouter = require("./routes/categoryRoutes");
 const indexRouter = require("./routes/indexRoute");
-const sideBarSales = require("./routes/salesSideBarRoutes"); // Consider renaming for clarity
-const addNewProuct = require("./routes/addNewProduct");
+const myPages = require("./routes/webPages");
 
 // >>>>>>>>> Handling JSON Objects with the Express Middleware <<<<<<<
 app.use(express.json());
 app.use("/upload/category", express.static("upload/category"));
+app.use("/upload/products", express.static("upload/products")); // Added: to serve product images
 
 // >>>>>>>>>>> Setting up Templating Engines <<<<<<<<<<
 app.set("view engine", "pug");
 app.set("views", "./views");
 
 // >>>>>>>>>>> More Middlewares <<<<<<<<<<
-// Updated: Configure helmet's Content Security Policy to allow Font Awesome, YouTube, Google, and Facebook
+// [Your existing helmet configuration remains here...]
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -49,39 +54,37 @@ app.use(
         "'self'",
         "https://cdn.tailwindcss.com",
         "https://kit.fontawesome.com",
-        "'unsafe-inline'", // Allows inline scripts in Pug files
-        "https://www.youtube.com", // For YouTube embed scripts
-        "https://s.ytimg.com", // For YouTube iframe player scripts
+        "'unsafe-inline'",
+        "https://www.youtube.com",
+        "https://s.ytimg.com",
       ],
       styleSrc: [
         "'self'",
         "https://cdn.tailwindcss.com",
         "https://fonts.googleapis.com",
-        "https://cdnjs.cloudflare.com", // Added for Font Awesome CSS
-        "'unsafe-inline'", // Allows inline styles in Pug files
+        "https://cdnjs.cloudflare.com",
+        "'unsafe-inline'",
       ],
       fontSrc: [
         "'self'",
         "https://fonts.gstatic.com",
-        "https://cdnjs.cloudflare.com", // Added for Font Awesome font files
+        "https://cdnjs.cloudflare.com",
       ],
       frameSrc: [
         "'self'",
-        "https://www.youtube.com", // For YouTube iframes
-        "https://www.youtube-nocookie.com", // For privacy-enhanced YouTube mode
+        "https://www.youtube.com",
+        "https://www.youtube-nocookie.com",
       ],
-      imgSrc: [
-        "'self'",
-        "data:", // For base64-encoded images
-        "https://i.ytimg.com", // For YouTube thumbnails
-      ],
+      imgSrc: ["'self'", "data:", "https://i.ytimg.com"],
       connectSrc: [
         "'self'",
-        "https://www.youtube.com", // For YouTube API connections
-        "https://accounts.google.com", // For Google OAuth
-        "https://www.googleapis.com", // For Google API
-        "https://www.facebook.com", // For Facebook OAuth
-        "https://graph.facebook.com", // For Facebook API
+        "https://www.youtube.com",
+        "https://accounts.google.com",
+        "https://www.googleapis.com",
+        "https://www.facebook.com",
+        "https://graph.facebook.com",
+        "ws://localhost:3005",
+        "wss://localhost:3005",
       ],
     },
   })
@@ -108,7 +111,7 @@ async function connectToDatabase() {
     console.log("MongoDB connection successful");
   } catch (error) {
     console.error("Error connecting to MongoDB:", error.message);
-    process.exit(1); // Exit on DB connection failure
+    process.exit(1);
   }
 }
 connectToDatabase();
@@ -118,32 +121,36 @@ passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+// >>>>>>> Socket.IO Connection Handling <<<<<<<<
+io.on("connection", (socket) => {
+  console.log("Client connected:", socket.id);
+  socket.on("disconnect", () => {
+    console.log("Client disconnected:", socket.id);
+  });
+});
+
 // >>>>>>> Use the already imported Routes <<<<<<<<<
+// Mount Admin routes at /admin
+app.use("/", adminPage);
+
+// Other Routes (ensure they don't conflict with /admin/*)
 app.use("/", indexRouter);
 app.use("/", userSigup);
 app.use("/api/auth", authRoutes);
 app.use("/", clientPage);
 app.use("/", salesPage);
-app.use("/", adminPage);
 app.use("/", categoryRouter);
-app.use("/", sideBarSales);
-app.use("/", addNewProuct);
+app.use("/", myPages);
+// app.use("/", addNewProuct); // Removed
 
 // Handling Non-existing routes
 app.use((req, res) => {
   console.log("404 - Route not found:", req.originalUrl);
-  res.status(404).send("Bad Request, Page Not Found");
-});
-
-// Error Handler
-app.use((err, req, res, next) => {
-  console.error("Server error:", err.message, err.stack);
-  res
-    .status(500)
-    .render("error", { title: "Server Error", error: err.message }); // Consider rendering a Pug template for errors
+  // Sending a clearer response
+  res.send(" Bad Request, Page Not Found");
 });
 
 // >>>>>>>>>>>>> Bootstrapping the Server <<<<<<<<<<
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
