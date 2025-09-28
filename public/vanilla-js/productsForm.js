@@ -52,7 +52,7 @@ categoryForm.addEventListener("submit", async (e) => {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
 
-    const response = await fetch("/admin/categories", {
+    const response = await fetch("/categories", {
       method: "POST",
       body: formData,
     });
@@ -91,7 +91,7 @@ productForm.addEventListener("submit", async (e) => {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
 
-    const response = await fetch("/admin/products", {
+    const response = await fetch("/add-product", {
       method: "POST",
       body: formData,
     });

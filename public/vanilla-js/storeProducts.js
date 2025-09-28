@@ -201,11 +201,19 @@ document.addEventListener("DOMContentLoaded", () => {
           .textContent.toLowerCase();
 
         if (title.includes(searchTerm) || description.includes(searchTerm)) {
-          product.style.display = "block";
+          product.classList.remove("hidden");
         } else {
-          product.style.display = "none";
+          product.classList.add("hidden");
         }
       });
+
+      // Update product count after search
+      const visibleProducts = document.querySelectorAll(
+        ".product-card:not(.hidden)"
+      ).length;
+      document.getElementById(
+        "product-count"
+      ).textContent = `${visibleProducts} Products`;
     });
   };
 

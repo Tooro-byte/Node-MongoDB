@@ -14,11 +14,11 @@ const productSchema = new mongoose.Schema({
   seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "users",
-    required: true,
+    default: null, // Made optional
   },
   category: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "categoryModel",
+    ref: "Category",
     required: true,
   },
   price: {

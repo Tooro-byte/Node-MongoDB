@@ -1,16 +1,15 @@
-// routes/admin.js
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const Category = require("../models/categoryModel");
 const Product = require("../models/productsSchema");
 const User = require("../models/users");
-// const {
-//   ensureAuthenticated,
-//   ensureAdmin,
-// } = require("../AuthMiddleWare/checkRole");
+const {
+  ensureAuthenticated,
+  ensureAdmin,
+} = require("../AuthMiddleWare/checkRole");
 
-// console.log("Admin.js router loaded");
+console.log("Admin.js router loaded");
 
 // Multer configuration for products
 const productStorage = multer.diskStorage({
@@ -61,29 +60,34 @@ const categoryUpload = multer({
 });
 
 // Admin dashboard route
-router.get("/admin-page", async (req, res) => {
-  try {
-    const products = await Product.find()
-      .populate("category")
-      .sort({ createdAt: -1 });
-    const categories = await Category.find().sort({ name: 1 });
-    res.render("admin-dashboard", {
-      title: "Admin Dashboard - Kings Collections",
-      products,
-      categories,
-      user: req.user,
-    });
-  } catch (error) {
-    console.error("Error loading admin dashboard:", error);
-    res.status(500).json({ error: "Server error" });
+router.get(
+  "/admin-page",
+  ensureAuthenticated,
+  ensureAdmin,
+  async (req, res) => {
+    try {
+      const products = await Product.find()
+        .populate("category")
+        .sort({ createdAt: -1 });
+      const categories = await Category.find().sort({ name: 1 });
+      res.render("admin-dashboard", {
+        title: "Admin Dashboard - Kings Collections",
+        products,
+        categories,
+        user: req.user,
+      });
+    } catch (error) {
+      console.error("Error loading admin dashboard:", error);
+      res.status(500).json({ error: "Server error" });
+    }
   }
-});
+);
 
 // Product form route
 router.get(
   "/add-product/new",
-  // ensureAuthenticated,
-  // ensureAdmin,
+  ensureAuthenticated,
+  ensureAdmin,
   async (req, res) => {
     console.log("GET /add-product/new accessed for user:", req.user);
     try {
@@ -104,8 +108,8 @@ router.get(
 // Category form route
 router.get(
   "/categories/new",
-  // ensureAuthenticated,
-  // ensureAdmin,
+  ensureAuthenticated,
+  ensureAdmin,
   async (req, res) => {
     try {
       res.render("categoryForm", {
@@ -122,8 +126,8 @@ router.get(
 // Update product form route
 router.get(
   "/products/edit/:id",
-  // ensureAuthenticated,
-  // ensureAdmin,
+  ensureAuthenticated,
+  ensureAdmin,
   async (req, res) => {
     console.log("GET /products/edit/:id accessed");
     try {
@@ -150,8 +154,8 @@ router.get(
 // Create product
 router.post(
   "/add-product",
-  // ensureAuthenticated,
-  // ensureAdmin,
+  ensureAuthenticated,
+  ensureAdmin,
   productUpload.array("images", 8),
   async (req, res) => {
     console.log("POST /add-product accessed");
@@ -172,7 +176,7 @@ router.post(
         price: parseFloat(price),
         stockId: parseInt(stockId),
         images,
-        seller: req.user._id,
+        seller: req.user ? req.user._id : null, // Fallback to null if not authenticated
       });
 
       await newProduct.save();
@@ -183,7 +187,7 @@ router.post(
       res.status(201).json({ success: true, product: newProduct });
     } catch (error) {
       console.error("Error creating product:", error);
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ message: error.message });
     }
   }
 );
@@ -191,8 +195,8 @@ router.post(
 // Create category
 router.post(
   "/categories",
-  // ensureAuthenticated,
-  // ensureAdmin,
+  ensureAuthenticated,
+  ensureAdmin,
   categoryUpload.single("image"),
   async (req, res) => {
     console.log("POST /categories accessed");
@@ -201,6 +205,14 @@ router.post(
 
       if (!name || !req.file) {
         return res.status(400).json({ message: "Name and image are required" });
+      }
+
+      // Check for existing category
+      const existingCategory = await Category.findOne({ name });
+      if (existingCategory) {
+        return res
+          .status(400)
+          .json({ message: `Category "${name}" already exists` });
       }
 
       const newCategory = new Category({
@@ -215,7 +227,7 @@ router.post(
       res.status(201).json({ success: true, category: newCategory });
     } catch (error) {
       console.error("Error creating category:", error);
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ message: error.message });
     }
   }
 );
@@ -223,8 +235,8 @@ router.post(
 // Update product
 router.put(
   "/products/:id",
-  // ensureAuthenticated,
-  // ensureAdmin,
+  ensureAuthenticated,
+  ensureAdmin,
   productUpload.array("images", 8),
   async (req, res) => {
     console.log("PUT /products/:id accessed");
@@ -257,7 +269,7 @@ router.put(
       res.json({ success: true, product: updatedProduct });
     } catch (error) {
       console.error("Error updating product:", error);
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ message: error.message });
     }
   }
 );
@@ -265,8 +277,8 @@ router.put(
 // Delete product
 router.delete(
   "/products/:id",
-  // ensureAuthenticated,
-  // ensureAdmin,
+  ensureAuthenticated,
+  ensureAdmin,
   async (req, res) => {
     console.log("DELETE /products/:id accessed");
     try {
@@ -280,7 +292,7 @@ router.delete(
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting product:", error);
-      res.status(400).json({ error: error.message });
+      res.status(400).json({ message: error.message });
     }
   }
 );

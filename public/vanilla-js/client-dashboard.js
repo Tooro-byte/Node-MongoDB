@@ -1,4 +1,3 @@
-// Dashboard JavaScript functionality
 class EcommerceDashboard {
   constructor() {
     this.init();
@@ -44,7 +43,7 @@ class EcommerceDashboard {
     const contentSections = document.querySelectorAll(".content-section");
 
     navTabs.forEach((tab) => {
-      tab.addEventListener("click", (e) => {
+      tab.addEventListener("click", async (e) => {
         const href = tab.getAttribute("href");
         const section = tab.dataset.section;
 
@@ -321,17 +320,24 @@ class EcommerceDashboard {
     }
   }
 
-  performSearch(query) {
+  async performSearch(query) {
     if (query.length < 2) return;
 
-    // Simulate search functionality
     console.log("Searching for:", query);
 
-    // Show search results or suggestions
-    this.showSearchResults(query);
+    try {
+      const response = await fetch(
+        `/api/products?search=${encodeURIComponent(query)}`
+      );
+      const products = await response.json();
+      this.showSearchResults(products);
+    } catch (error) {
+      console.error("Error searching products:", error);
+      this.showNotification("Error searching products", "error");
+    }
   }
 
-  showSearchResults(query) {
+  showSearchResults(products) {
     // Create search results dropdown
     let dropdown = document.querySelector(".search-results");
     if (!dropdown) {
@@ -355,23 +361,27 @@ class EcommerceDashboard {
       document.querySelector(".search-box").appendChild(dropdown);
     }
 
-    // Sample search results
-    dropdown.innerHTML = `
-            <div class="search-result-item" style="padding: 0.5rem; cursor: pointer; border-radius: 0.25rem; margin-bottom: 0.5rem;">
-                <div style="font-weight: 600;">Premium Cotton Shirt</div>
-                <div style="color: var(--text-secondary); font-size: 0.875rem;">$89.99</div>
-            </div>
-            <div class="search-result-item" style="padding: 0.5rem; cursor: pointer; border-radius: 0.25rem;">
-                <div style="font-weight: 600;">Designer Denim Jacket</div>
-                <div style="color: var(--text-secondary); font-size: 0.875rem;">$199.99</div>
-            </div>
-        `;
+    // Populate search results
+    dropdown.innerHTML = products.length
+      ? products
+          .map(
+            (product) => `
+                <div class="search-result-item" style="padding: 0.5rem; cursor: pointer; border-radius: 0.25rem; margin-bottom: 0.5rem;" data-product-id="${product._id}">
+                    <div style="font-weight: 600;">${product.title}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.875rem;">$${product.price}</div>
+                </div>
+            `
+          )
+          .join("")
+      : '<div style="padding: 0.5rem; color: var(--text-secondary);">No products found</div>';
 
     // Add click handlers for results
     dropdown.querySelectorAll(".search-result-item").forEach((item) => {
       item.addEventListener("click", () => {
+        const productId = item.dataset.productId;
         dropdown.remove();
         this.showNotification("Product added to cart!", "success");
+        // Optionally, add to cart via API
       });
 
       item.addEventListener("mouseenter", () => {
@@ -793,11 +803,10 @@ class EcommerceDashboard {
     }
   }
 
-  loadSectionData(section) {
-    // Simulate loading data for different sections
+  async loadSectionData(section) {
     console.log(`Loading data for section: ${section}`);
 
-    // Add any section-specific initialization here
+    // Add section-specific initialization here
     switch (section) {
       case "dashboard":
         this.loadDashboardData();
@@ -811,22 +820,127 @@ class EcommerceDashboard {
       case "cart":
         this.updateCartTotal();
         break;
+      case "products":
+        await this.loadProductsData();
+        break;
     }
   }
 
-  loadDashboardData() {
+  async loadDashboardData() {
     // Simulate loading dashboard metrics
     this.animateCounters();
   }
 
-  loadOrdersData() {
+  async loadOrdersData() {
     // Simulate loading orders
     this.showNotification("Orders updated", "info", 1000);
   }
 
-  loadMessagesData() {
+  async loadMessagesData() {
     // Simulate loading messages
     this.updateMessageCount();
+  }
+
+  async loadProductsData() {
+    try {
+      const [categoriesResponse, productsResponse] = await Promise.all([
+        fetch("/api/category"),
+        fetch("/api/products"),
+      ]);
+
+      const categories = await categoriesResponse.json();
+      const products = await productsResponse.json();
+
+      // Update categories in sidebar
+      const categoryList = document.querySelector(".category-list");
+      if (categoryList) {
+        categoryList.innerHTML = `
+          <div class="category-item active" data-category="all">
+            <div class="category-icon">
+              <i class="fas fa-th-large"></i>
+            </div>
+            <div class="category-name">ALL CATEGORIES</div>
+          </div>
+          ${categories
+            .map(
+              (category) => `
+                <div class="category-item" data-category="${category._id}">
+                  <div class="category-icon">
+                    <img src="${
+                      category.image.startsWith("http")
+                        ? category.image
+                        : `/upload/category/${category.image}`
+                    }" alt="${category.name}">
+                  </div>
+                  <div class="category-name">${category.name}</div>
+                </div>
+              `
+            )
+            .join("")}
+        `;
+
+        // Re-initialize ProductsManager to bind new category event listeners
+        if (window.ProductsManager) {
+          new ProductsManager();
+        }
+      }
+
+      // Update products in grid
+      const productsGrid = document.querySelector(".products-grid");
+      if (productsGrid) {
+        productsGrid.innerHTML = products
+          .map(
+            (product) => `
+              <div class="product-card" data-category="${product.category._id}">
+                <div class="product-image-container">
+                  <img class="product-image" src="${
+                    product.images[0].startsWith("http")
+                      ? product.images[0]
+                      : `/upload/products/${product.images[0]}`
+                  }" alt="${product.title}">
+                  <div class="product-overlay">
+                    <div class="quick-view">Quick View</div>
+                  </div>
+                </div>
+                <div class="product-info">
+                  <div class="product-header">
+                    <h3 class="product-title">${product.title}</h3>
+                    <div class="product-stock">Stock ID: ${
+                      product.stockId
+                    }</div>
+                  </div>
+                  <p class="product-description">${product.description}</p>
+                  <div class="product-footer">
+                    <div class="product-price">$${product.price}</div>
+                    <button class="buy-now-btn" data-product-id="${
+                      product._id
+                    }">
+                      <i class="fas fa-shopping-bag"></i> Buy Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `
+          )
+          .join("");
+
+        // Re-initialize ProductsManager to bind new product event listeners
+        if (window.ProductsManager) {
+          new ProductsManager();
+        }
+
+        // Update product count
+        const productCountSpan = document.getElementById("product-count");
+        if (productCountSpan) {
+          productCountSpan.textContent = `${products.length} Products`;
+        }
+      }
+
+      this.showNotification("Products loaded successfully", "success", 1000);
+    } catch (error) {
+      console.error("Error loading products data:", error);
+      this.showNotification("Error loading products", "error");
+    }
   }
 
   animateCounters() {
@@ -895,3 +1009,4 @@ function handleResponsiveNav() {
 // Handle responsive behavior
 window.addEventListener("resize", handleResponsiveNav);
 window.addEventListener("load", handleResponsiveNav);
+sssss;

@@ -34,6 +34,7 @@ const adminPage = require("./routes/admin"); // The admin router
 const categoryRouter = require("./routes/categoryRoutes");
 const indexRouter = require("./routes/indexRoute");
 const myPages = require("./routes/webPages");
+const apiRoute = require("./routes/api");
 
 // >>>>>>>>> Handling JSON Objects with the Express Middleware <<<<<<<
 app.use(express.json());
@@ -141,7 +142,11 @@ app.use("/", clientPage);
 app.use("/", salesPage);
 app.use("/", categoryRouter);
 app.use("/", myPages);
+app.use("/", apiRoute);
 // app.use("/", addNewProuct); // Removed
+
+
+app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 // Handling Non-existing routes
 app.use((req, res) => {

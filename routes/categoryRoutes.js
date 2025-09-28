@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const category = require("../models/categoryModel");
+const Category = require("../models/categoryModel");
 const multer = require("multer");
 
 const storage = multer.diskStorage({
@@ -9,13 +9,14 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const timeStamp = Date.now();
-    const orignalName = file.originalname
+    const originalName = file.originalname
       .replace(/\s+/g, "-")
-      .replace(/[^a-zA-Z0-9 .-]/g, "");
+      .replace(/[^a-zA-Z0-9.-]/g, "");
     cb(null, `${timeStamp}-${originalName}`);
   },
 });
-const fileFilter = (req, res, cb) => {
+
+const fileFilter = (req, file, cb) => {
   const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
@@ -31,23 +32,14 @@ const upload = multer({
     fileSize: 2 * 1024 * 1024,
   },
 });
-//>>>> Define Route for Adding New Category >>>>>
+
+// Disabled: Use /categories in admin.js instead
 router.post("/api/category", upload.single("icon"), async (req, res) => {
-  if (!req.body.name || !req.file) {
-    return res.status(400).json({ message: "Name and Icon Are Required" });
-  }
-  const newCategory = new category({
-    name: req.body.name,
-    image: req.file.filename,
-  });
-  await newCategory.save();
-  res
-    .status(201)
-    .json({ message: "Category Created Sucessfully", category: "newCategory" });
+  res.status(404).json({ message: "Use /categories instead" });
 });
 
 router.get("/api/category", async (req, res) => {
-  const categories = await category.find().sort("name");
+  const categories = await Category.find().sort({ name: 1 });
   res.json(categories);
 });
 

@@ -34,13 +34,13 @@ html(lang='en')
         p Manage your Kings Collections inventory
 
       .forms-grid
-        //-Category Form
+        //- Category Form
         .form-section
           .form-card
             .card-header
               i.fas.fa-tags
               h2 Add Category
-            form#categoryForm.admin-form(action='/admin/categories', method='POST', enctype='multipart/form-data')
+            form#categoryForm.admin-form(action='/categories', method='POST', enctype='multipart/form-data')
               .form-group
                 label(for='categoryName') Category Name
                 input#categoryName(type='text', name='name', placeholder='Enter category name', required)
@@ -56,13 +56,13 @@ html(lang='en')
                 i.fas.fa-plus
                 | Add Category
 
-        //-Product Form
+        //- Product Form
         .form-section
           .form-card
             .card-header
               i.fas.fa-box
               h2 Add Product
-            form#productForm.admin-form(action='/admin/add-product', method='POST', enctype='multipart/form-data')
+            form#productForm.admin-form(action='/add-product', method='POST', enctype='multipart/form-data')
               .form-row
                 .form-group
                   label(for='productTitle') Product Title
@@ -102,7 +102,7 @@ html(lang='en')
             .indicator-dot
             span Real-time Updates
         .additions-grid#recentAdditions
-          //-Real-time additions will appear here
+          //- Real-time additions will appear here
 
     .toast-container#toastContainer
 
