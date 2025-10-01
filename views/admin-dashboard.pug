@@ -12,108 +12,95 @@ html(lang='en')
     script(src='/socket.io/socket.io.js')
 
   body
-    //- Top Navigation Bar
-    nav.top-nav
-      .container
-        .nav-content
-          a.nav-tab.active(href='/admin-page', data-section='dashboard')
-            i.fas.fa-tachometer-alt
-            span Dashboard Home
-          //- Note: /admin/sales is not implemented in admin.js (will 404)
-          a.nav-tab(href='/sales', data-section='sales')
-            i.fas.fa-chart-line
-            span Sales
-            span.badge 12
-          //- Note: /admin/orders is not implemented in admin.js (will 404)
-          a.nav-tab(href='/orders', data-section='orders')
-            i.fas.fa-box
-            span Orders
-            span.badge.urgent 15
-          //- Note: /admin/inventory is not implemented in admin.js (will 404)
-          a.nav-tab(href='/inventory', data-section='inventory')
-            i.fas.fa-warehouse
-            span Inventory
-            span.badge.warning 8
-          .nav-actions
-            //- FIXED: Changed invalid button/anchor nesting to a single anchor tag
-            a.btn.btn-primary.add-product(href='/add-product/new')
-              i.fas.fa-plus-circle
-              span Add New Product
-
     //- Header
     header.header
       .header-background
       .container
         .header-content
-          .header-row
-            .header-column.header-logo
-              .logo-section
-                .logo-icon
-                  i.fas.fa-crown
-                .logo-text
-                  .brand-name Kings Collection
-                  .brand-tagline Admin Control Panel
-            .header-column.header-welcome
-              .welcome-section
-                .welcome-message
+          .header-column.header-welcome
+            .welcome-section
+              .welcome-message
+                .welcome-text
                   .greeting-text Welcome,
                   .user-name= user && user.name ? user.name : 'Guest'
                   .role-badge
                     i.fas.fa-shield-alt
                     span Administrator
-            .header-column.header-stats
-              .header-stats
-                .stat-card.revenue
-                  .stat-icon
-                    i.fas.fa-money-bill
-                  .stat-content
-                    .stat-number UGX 12.5M
-                    .stat-label Monthly Revenue
-                    .stat-trend.up +10%
-                .stat-card.orders
-                  .stat-icon
-                    i.fas.fa-shopping-cart
-                  .stat-content
-                    .stat-number 245
-                    .stat-label Pending Orders
-                    .stat-trend.up +5%
-                .stat-card.traffic
-                  .stat-icon
-                    i.fas.fa-users
-                  .stat-content
-                    .stat-number 1.2K
-                    .stat-label Website Visits
-                    .stat-trend.up +15%
-            .header-column.header-actions
-              .header-actions
-                .user-menu
-                  .user-avatar
-                    img(src='https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=60', alt='Admin Avatar')
-                    .status-indicator.online
-                  .dropdown-menu
-                    .dropdown-header
-                      .user-info
-                        .user-name= user && user.name ? user.name : 'Guest'
-                        .user-email= user && user.email ? user.email : 'No email'
-                    .dropdown-divider
-                    //- Note: /admin/profile is not implemented in admin.js (will 404)
-                    a.dropdown-item(href='/profile', data-action='profile')
-                      i.fas.fa-user
-                      span Profile Settings
-                    //- Note: /admin/security is not implemented in admin.js (will 404)
-                    a.dropdown-item(href='/security', data-action='security')
-                      i.fas.fa-shield-alt
-                      span Security Settings
-                    //- Note: /support is not implemented (will 404)
-                    a.dropdown-item(href='/support', data-action='help')
-                      i.fas.fa-question-circle
-                      span Help & Support
-                    .dropdown-divider
-                    a.dropdown-item.logout(href='/logout', data-action='logout')
-                      i.fas.fa-sign-out-alt
-                      span Logout
+                .user-avatar
+                  img(src='/Images/girl.jpeg', alt='Admin Avatar')
+                  .status-indicator.online
+                .dropdown-menu
+                  .dropdown-header
+                    .user-info
+                      .user-name= user && user.name ? user.name : 'Guest'
+                      .user-email= user && user.email ? user.email : 'No email'
+                  .dropdown-divider
+                  a.dropdown-item(href='/profile', data-action='profile')
+                    i.fas.fa-user
+                    span Profile Settings
+                  a.dropdown-item(href='/security', data-action='security')
+                    i.fas.fa-shield-alt
+                    span Security Settings
+                  a.dropdown-item(href='/support', data-action='help')
+                    i.fas.fa-question-circle
+                    span Help & Support
+                  .dropdown-divider
+                  a.dropdown-item.logout(href='/logout', data-action='logout')
+                    i.fas.fa-sign-out-alt
+                    span Logout
+          .header-column.header-stats
+            .header-stats
+              .stat-card.revenue
+                .stat-icon
+                  i.fas.fa-money-bill
+                .stat-content
+                  .stat-number UGX 12.5M
+                  .stat-label Monthly Revenue
+                  .stat-trend.up +10%
+              .stat-card.orders
+                .stat-icon
+                  i.fas.fa-shopping-cart
+                .stat-content
+                  .stat-number 245
+                  .stat-label Pending Orders
+                  .stat-trend.up +5%
+              .stat-card.traffic
+                .stat-icon
+                  i.fas.fa-users
+                .stat-content
+                  .stat-number 1.2K
+                  .stat-label Website Visits
+                  .stat-trend.up +15%
+          .header-column.header-logo
+            nav.logo-section
+              .logo-container
+                .logo-icon
+                  i.fas.fa-crown
+                .logo-text
+                  .brand-name Kings Collection
+                  .brand-tagline Admin Control Panel
+              .nav-content
+                a.nav-tab.active(href='/admin-page', data-section='dashboard')
+                  i.fas.fa-tachometer-alt
+                  span Dashboard Home
+                a.nav-tab(href='/sales', data-section='sales')
+                  i.fas.fa-chart-line
+                  span Sales
+                  span.badge 12
+                a.nav-tab(href='/orders', data-section='orders')
+                  i.fas.fa-box
+                  span Orders
+                  span.badge.urgent 15
+                a.nav-tab(href='/inventory', data-section='inventory')
+                  i.fas.fa-warehouse
+                  span Inventory
+                  span.badge.warning 8
+                .nav-actions
+                  a.btn.btn-primary.add-product(href='/add-product/new')
+                    i.fas.fa-plus-circle
+                    span Add New Product
 
-    //- Main Content Area
+    //- Main Content Area (Unchanged)
     main.main-content
       .container
         .dashboard-layout
@@ -125,21 +112,18 @@ html(lang='en')
             nav.sidebar-nav
               .nav-section
                 .section-title Management
-                //- Note: /admin/customers is not implemented in admin.js (will 404)
                 a.nav-item(href='/customers', data-section='customers')
                   .nav-icon
                     i.fas.fa-users
                   .nav-content
                     span Customers
                     .nav-badge 20
-                //- Note: /admin/employees is not implemented in admin.js (will 404)
                 a.nav-item(href='/employees', data-section='employees')
                   .nav-icon
                     i.fas.fa-user-tie
                   .nav-content
                     span Employees
                     .nav-badge 10
-                //- Note: /admin/marketing is not implemented in admin.js (will 404)
                 a.nav-item(href='/marketing', data-section='marketing')
                   .nav-icon
                     i.fas.fa-tags
@@ -153,19 +137,16 @@ html(lang='en')
                     span Products
               .nav-section
                 .section-title Operations
-                //- Note: /admin/payments is not implemented in admin.js (will 404)
                 a.nav-item(href='/payments', data-section='payments')
                   .nav-icon
                     i.fas.fa-credit-card
                   .nav-content
                     span Payments
-                //- Note: /admin/website is not implemented in admin.js (will 404)
                 a.nav-item(href='/website', data-section='website')
                   .nav-icon
                     i.fas.fa-globe
                   .nav-content
                     span Website Management
-                //- Note: /admin/support is not implemented in admin.js (will 404)
                 a.nav-item(href='/support', data-section='support')
                   .nav-icon
                     i.fas.fa-headset
@@ -174,13 +155,11 @@ html(lang='en')
                     .nav-badge.urgent 5
               .nav-section
                 .section-title Insights
-                //- Note: /admin/analytics is not implemented in admin.js (will 404)
                 a.nav-item(href='/analytics', data-section='analytics')
                   .nav-icon
                     i.fas.fa-chart-bar
                   .nav-content
                     span Analytics
-                //- Note: /admin/financials is not implemented in admin.js (will 404)
                 a.nav-item(href='/financials', data-section='financials')
                   .nav-icon
                     i.fas.fa-dollar-sign
@@ -188,13 +167,11 @@ html(lang='en')
                     span Financials
               .nav-section
                 .section-title Admin
-                //- Note: /admin/security is not implemented in admin.js (will 404)
                 a.nav-item(href='/security', data-section='security')
                   .nav-icon
                     i.fas.fa-shield-alt
                   .nav-content
                     span Security
-                //- Note: /admin/settings is not implemented in admin.js (will 404)
                 a.nav-item(href='/settings', data-section='settings')
                   .nav-icon
                     i.fas.fa-cog
@@ -222,7 +199,6 @@ html(lang='en')
                     i.fas.fa-sync-alt
                     span Refresh
               .dashboard-grid
-                // Products Section
                 section.products-section
                   h3 Products
                   a.btn.btn-primary(href='/add-product/new') Add New Product
@@ -254,7 +230,6 @@ html(lang='en')
                   else
                     p No products available
                     
-                // Categories Section
                 section.categories-section
                   h3 Categories
                   a.btn.btn-primary(href='/categories/new') Add New Category
@@ -264,7 +239,7 @@ html(lang='en')
                         tr
                           th Image
                           th Name
-                          th Actions //- ADDED: Actions column for consistency
+                          th Actions
                       tbody
                         each category in categories
                           tr(data-category-id=category._id)
@@ -275,7 +250,6 @@ html(lang='en')
                                 .placeholder No Image
                             td= category.name || 'No Name'
                             td
-                              //- ADDED: Edit/Delete buttons for category management
                               a.btn.btn-primary.btn-sm(href=`/admin/categories/edit/${category._id}`) Edit
                               button.btn.btn-danger.btn-sm.delete-category(data-category-id=category._id) Delete
                   else
@@ -324,7 +298,6 @@ html(lang='en')
                             .status-count 320
                             .status-label Shipped
                       .card-action
-                        //- Note: /admin/orders is not implemented in admin.js (will 404)
                         button.btn.btn-outline
                           span View All Orders
                           i.fas.fa-arrow-right
@@ -348,14 +321,12 @@ html(lang='en')
                           .stat-value 1,500
                           .stat-trend.neutral
                       .card-action
-                        //- Note: /admin/inventory is not implemented in admin.js (will 404)
                         button.btn.btn-outline
                           span Manage Inventory
                           i.fas.fa-arrow-right
                 .priority-section
                   .section-title
                     h3 Critical Alerts
-                    //- Note: /admin/activity is not implemented
                     button.btn.btn-text.view-all View All
                   .priority-grid
                     .priority-card.urgent
@@ -372,7 +343,6 @@ html(lang='en')
                             .item-title Low Stock Alert
                             .item-subtitle 8 items critically low
                           .item-action
-                            //- Note: /admin/inventory is not implemented
                             button.btn.btn-sm.btn-danger Restock Now
                         .priority-item
                           .item-icon
@@ -381,7 +351,6 @@ html(lang='en')
                             .item-title Support Ticket
                             .item-subtitle Customer escalation
                           .item-action
-                            //- Note: /admin/support is not implemented
                             button.btn.btn-sm.btn-primary Review
                     .priority-card.performance
                       .priority-header
@@ -397,7 +366,6 @@ html(lang='en')
                             .item-title Traffic Spike
                             .item-subtitle +20% visitors today
                           .item-action
-                            //- Note: /admin/analytics is not implemented
                             button.btn.btn-sm.btn-info Analyze
                         .priority-item
                           .item-icon
@@ -406,17 +374,15 @@ html(lang='en')
                             .item-title Sales Drop
                             .item-subtitle -5% in category X
                           .item-action
-                            //- Note: /admin/sales is not implemented
                             button.btn.btn-sm.btn-warning Review
                 .activity-section
                   .section-title
                     h3 Recent Activity
-                    //- Note: /admin/activity is not implemented
                     button.btn.btn-text.view-all View All
                   .activity-feed
                     .activity-item
                       .activity-avatar
-                        img(src='https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=40', alt='Admin')
+                        img(src='/Images/girl.jpeg', alt='Admin')
                       .activity-content
                         .activity-text
                           strong Admin
@@ -424,7 +390,6 @@ html(lang='en')
                           strong Premium Jacket
                         .activity-time 10 minutes ago
                       .activity-action
-                        //- Note: Product detail route is not implemented
                         button.btn.btn-sm.btn-outline View Product
                     .activity-item
                       .activity-avatar
@@ -437,7 +402,6 @@ html(lang='en')
                           span was shipped
                         .activity-time 1 hour ago
                       .activity-action
-                        //- Note: Order tracking route is not implemented
                         button.btn.btn-sm.btn-outline Track
                     .activity-item
                       .activity-avatar
@@ -450,10 +414,8 @@ html(lang='en')
                           strong #TCK-2024-009
                         .activity-time 2 hours ago
                       .activity-action
-                        //- Note: Ticket detail route is not implemented
                         button.btn.btn-sm.btn-outline View Ticket
 
-            //- Note: /admin/sales is not implemented in admin.js (will 404)
             section#sales.content-section
               .section-header
                 .header-content
@@ -499,7 +461,6 @@ html(lang='en')
                     .card-footer
                       button.btn.btn-outline View Category Details
 
-            //- Note: /admin/orders is not implemented in admin.js (will 404)
             section#orders.content-section
               .section-header
                 .header-content
@@ -529,7 +490,7 @@ html(lang='en')
                       .order-total UGX 299.99
                     .order-items
                       .order-item
-                        img(src='https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Product')
+                        img(src='/Images/T-shirt-1.webp', alt='Product')
                         .item-details
                           h5 Premium Cotton Shirt
                           p Size: L, Color: White | Qty: 1
@@ -538,15 +499,13 @@ html(lang='en')
                       button.btn.btn-outline Track Order
                       button.btn.btn-outline View Invoice
 
-            //- Note: /admin/inventory is not implemented in admin.js (will 404)
             section#inventory.content-section
               .section-header
                 .header-content
                   h2 Inventory Management
                   p Manage stock levels and products
                 .header-actions
-                  //- FIXED: Changed invalid button/anchor nesting to a single anchor tag
-                  a.btn.btn-primary.add-product(href='/admin/add-product/new')
+                  a.btn.btn-primary.add-product(href='/add-product/new')
                     i.fas.fa-plus-circle
                     span Add New Product
               .inventory-content
@@ -559,7 +518,7 @@ html(lang='en')
                 .inventory-list
                   .inventory-item
                     .item-image
-                      img(src='https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Product')
+                      img(src='/Images/Shirt2.webp', alt='Product')
                     .item-details
                       h4 Premium Cotton Shirt
                       p SKU: KC-SHIRT-001 | Category: Apparel

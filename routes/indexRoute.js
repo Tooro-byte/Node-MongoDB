@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const AuthMiddleWare = require("../AuthMiddleWare/checkRole")
+const AuthMiddleWare = require("../AuthMiddleWare/checkRole");
 
 // Splash page route
 router.get("/", (req, res) => {
@@ -9,7 +9,7 @@ router.get("/", (req, res) => {
 });
 
 // Main application route
-router.get("/index",(req, res) => {
+router.get("/index", (req, res) => {
   // Render the main index.pug file
   res.render("index");
 });

@@ -1,11 +1,9 @@
-// index.js
-// <<<<<<<<< Configuring the different DOTENV Files >>>>>>>>>>
+// >>>>>>>>>>> General Configurations >>>>>>>>>>
 require("dotenv").config();
 require("./config/passport");
 
 // >>>>>>> My E-commerce Website Dependencies <<<<<<<<
 const helmet = require("helmet");
-const morgan = require("morgan");
 const express = require("express");
 const mongoose = require("mongoose");
 const passport = require("passport");
@@ -16,6 +14,7 @@ const expressSession = require("express-session")({
 });
 const http = require("http");
 const { Server } = require("socket.io");
+
 // >>>>>>> My E-commerce Website Instantiations <<<<<<<<
 const app = express();
 const server = http.createServer(app);
@@ -35,18 +34,19 @@ const categoryRouter = require("./routes/categoryRoutes");
 const indexRouter = require("./routes/indexRoute");
 const myPages = require("./routes/webPages");
 const apiRoute = require("./routes/api");
+const cartRoutes = require("./routes/cart");
 
 // >>>>>>>>> Handling JSON Objects with the Express Middleware <<<<<<<
 app.use(express.json());
 app.use("/upload/category", express.static("upload/category"));
-app.use("/upload/products", express.static("upload/products")); // Added: to serve product images
+app.use("/upload/products", express.static("upload/products"));
 
 // >>>>>>>>>>> Setting up Templating Engines <<<<<<<<<<
 app.set("view engine", "pug");
 app.set("views", "./views");
 
 // >>>>>>>>>>> More Middlewares <<<<<<<<<<
-// [Your existing helmet configuration remains here...]
+// Helmet configurations.........]
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -130,11 +130,8 @@ io.on("connection", (socket) => {
   });
 });
 
-// >>>>>>> Use the already imported Routes <<<<<<<<<
-// Mount Admin routes at /admin
+// >>>>>>> Using the already imported Routes <<<<<<<<<
 app.use("/", adminPage);
-
-// Other Routes (ensure they don't conflict with /admin/*)
 app.use("/", indexRouter);
 app.use("/", userSigup);
 app.use("/api/auth", authRoutes);
@@ -143,9 +140,9 @@ app.use("/", salesPage);
 app.use("/", categoryRouter);
 app.use("/", myPages);
 app.use("/", apiRoute);
-// app.use("/", addNewProuct); // Removed
+app.use("/api/cart", cartRoutes);
 
-
+// >>>>>>>>>> Handling the Favicon >>>>>>>>>>>
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 // Handling Non-existing routes
