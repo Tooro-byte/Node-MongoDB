@@ -3,12 +3,12 @@ class EcommerceDashboard {
     this.init();
   }
 
-  init() {
+  async init() {
     this.setupEventListeners();
     this.startClock();
     this.initializeCounters();
     this.setupNotifications();
-    this.loadDashboardData();
+    await this.loadDashboardData(); // Load initial data
   }
 
   setupEventListeners() {
@@ -38,7 +38,6 @@ class EcommerceDashboard {
   }
 
   setupNavigation() {
-    // Main nav tabs and sidebar items
     const navTabs = document.querySelectorAll(".nav-tab, .nav-item");
     const contentSections = document.querySelectorAll(".content-section");
 
@@ -47,7 +46,6 @@ class EcommerceDashboard {
         const href = tab.getAttribute("href");
         const section = tab.dataset.section;
 
-        // Allow navigation for specific routes
         const navigableRoutes = [
           "/products",
           "/orders",
@@ -69,11 +67,9 @@ class EcommerceDashboard {
         ];
 
         if (navigableRoutes.includes(href)) {
-          // Allow default navigation behavior
           return;
         }
 
-        // Handle section toggling for dashboard content
         if (section) {
           e.preventDefault();
           this.switchSection(section, navTabs, contentSections);
@@ -81,14 +77,12 @@ class EcommerceDashboard {
       });
     });
 
-    // Handle "View All" links in widgets
     document.querySelectorAll(".view-all").forEach((link) => {
       link.addEventListener("click", (e) => {
         const href = link.getAttribute("href");
         const section = link.dataset.section;
 
         if (["/products", "/orders"].includes(href)) {
-          // Allow navigation to /products or /orders
           return;
         }
 
@@ -101,26 +95,19 @@ class EcommerceDashboard {
   }
 
   switchSection(section, navElements, contentSections) {
-    // Remove active class from all nav elements
     navElements.forEach((el) => el.classList.remove("active"));
-
-    // Add active class to clicked element and its corresponding nav-tab/nav-item
     const activeElements = document.querySelectorAll(
       `[data-section="${section}"]`
     );
     activeElements.forEach((el) => el.classList.add("active"));
 
-    // Hide all content sections
     contentSections.forEach((content) => content.classList.remove("active"));
-
-    // Show target section
     const targetSection = document.getElementById(section);
     if (targetSection) {
       targetSection.classList.add("active");
       this.animateSection(targetSection);
     }
 
-    // Load section-specific data
     this.loadSectionData(section);
   }
 
@@ -138,8 +125,6 @@ class EcommerceDashboard {
   startClock() {
     const updateTime = () => {
       const now = new Date();
-
-      // Update time
       const timeElement = document.getElementById("current-time");
       if (timeElement) {
         const timeString = now.toLocaleTimeString("en-US", {
@@ -151,7 +136,6 @@ class EcommerceDashboard {
         timeElement.textContent = timeString;
       }
 
-      // Update date
       const dateElement = document.getElementById("current-date");
       if (dateElement) {
         const dateString = now.toLocaleDateString("en-US", {
@@ -164,17 +148,15 @@ class EcommerceDashboard {
       }
     };
 
-    // Update immediately and then every second
     updateTime();
     setInterval(updateTime, 1000);
   }
 
   initializeCounters() {
-    // Animate counter numbers on page load
     const counters = document.querySelectorAll(".summary-number, .stat-number");
 
     counters.forEach((counter) => {
-      const target = parseInt(counter.textContent.replace(/[^0-9]/g, ""));
+      const target = parseInt(counter.textContent.replace(/[^0-9]/g, "")) || 0;
       const prefix = counter.textContent.replace(/[0-9]/g, "");
       let current = 0;
       const increment = target / 100;
@@ -185,125 +167,160 @@ class EcommerceDashboard {
           counter.textContent = prefix + Math.ceil(current);
           requestAnimationFrame(updateCounter);
         } else {
-          counter.textContent = counter.textContent; // Reset to original
+          counter.textContent = prefix + target;
         }
       };
 
-      // Start animation after a delay
       setTimeout(updateCounter, 500);
     });
   }
 
   setupCart() {
-    // Quantity controls
-    document.addEventListener("click", (e) => {
-      if (e.target.closest(".qty-btn")) {
-        const btn = e.target.closest(".qty-btn");
-        const input = btn.parentNode.querySelector(".qty-input");
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest(".qty-btn");
+      if (btn) {
+        const productId = btn.dataset.productId;
         const isPlus = btn.classList.contains("plus");
 
-        let quantity = parseInt(input.value);
-        quantity = isPlus ? quantity + 1 : Math.max(1, quantity - 1);
-        input.value = quantity;
+        try {
+          const endpoint = isPlus
+            ? `/api/cart/increase/${productId}`
+            : `/api/cart/decrease/${productId}`;
+          const response = await fetch(endpoint, { method: "PATCH" });
+          const result = await response.json();
 
-        this.updateCartTotal();
+          if (response.ok) {
+            this.showNotification(result.Message, "success");
+            await this.loadCartData(); // Reload cart data
+          } else {
+            this.showNotification(result.Message, "error");
+          }
+        } catch (error) {
+          console.error("Error updating cart:", error);
+          this.showNotification("Error updating cart", "error");
+        }
+
         this.animateButton(btn);
       }
-    });
 
-    // Remove item from cart
-    document.addEventListener("click", (e) => {
-      if (e.target.closest(".remove-item, .action-btn.remove")) {
-        const item = e.target.closest(".cart-item");
-        if (item && confirm("Remove this item from your cart?")) {
-          this.removeCartItem(item);
+      if (e.target.closest(".action-btn.remove")) {
+        const btn = e.target.closest(".action-btn.remove");
+        const productId = btn.dataset.productId;
+        if (confirm("Remove this item from your cart?")) {
+          try {
+            const response = await fetch(`/api/cart/${productId}`, {
+              method: "DELETE",
+            });
+            const result = await response.json();
+
+            if (response.ok) {
+              this.showNotification(result.Message, "success");
+              await this.loadCartData();
+            } else {
+              this.showNotification(result.Message, "error");
+            }
+          } catch (error) {
+            console.error("Error removing item:", error);
+            this.showNotification("Error removing item", "error");
+          }
+        }
+      }
+
+      if (e.target.closest(".action-btn.wishlist")) {
+        const btn = e.target.closest(".action-btn.wishlist");
+        const productId = btn.dataset.productId;
+        this.toggleWishlist(btn, productId);
+      }
+
+      if (e.target.closest(".btn.btn-primary[data-product-id]")) {
+        const btn = e.target.closest(".btn.btn-primary");
+        const productId = btn.dataset.productId;
+        try {
+          const response = await fetch(`/api/cart/${productId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ quantity: 1 }),
+          });
+          const result = await response.json();
+
+          if (response.ok) {
+            this.showNotification(result.Message, "success");
+            await this.loadCartData();
+          } else {
+            this.showNotification(result.Message, "error");
+          }
+        } catch (error) {
+          console.error("Error adding to cart:", error);
+          this.showNotification("Error adding to cart", "error");
         }
       }
     });
-
-    // Add to wishlist
-    document.addEventListener("click", (e) => {
-      if (e.target.closest(".action-btn.wishlist")) {
-        const btn = e.target.closest(".action-btn.wishlist");
-        this.toggleWishlist(btn);
-      }
-    });
   }
 
-  updateCartTotal() {
-    const cartItems = document.querySelectorAll(".cart-item");
-    let subtotal = 0;
-
-    cartItems.forEach((item) => {
-      const price = parseFloat(
-        item.querySelector(".item-price").textContent.replace(/[^0-9.]/g, "")
-      );
-      const quantity = parseInt(item.querySelector(".qty-input").value);
-      const total = price * quantity;
-
-      const totalElement = item.querySelector(".item-total");
-      if (totalElement) {
-        totalElement.textContent = "$" + total.toFixed(2);
-      }
-
-      subtotal += total;
-    });
-
-    // Update summary
-    const summaryRows = document.querySelectorAll(".summary-row");
-    summaryRows.forEach((row) => {
-      const label = row.querySelector("span:first-child").textContent;
-      const valueElement = row.querySelector("span:last-child");
-
-      if (label.includes("Subtotal")) {
-        valueElement.textContent = "$" + subtotal.toFixed(2);
-      } else if (label.includes("Total")) {
-        const tax = subtotal * 0.08; // 8% tax
-        const discount = subtotal * 0.1; // 10% discount
-        const total = subtotal + tax - discount;
-        valueElement.textContent = "$" + total.toFixed(2);
-      }
-    });
-  }
-
-  removeCartItem(item) {
-    item.style.transition = "all 0.3s ease";
-    item.style.transform = "translateX(-100%)";
-    item.style.opacity = "0";
-
-    setTimeout(() => {
-      item.remove();
-      this.updateCartTotal();
-      this.updateCartCount();
-    }, 300);
-  }
-
-  toggleWishlist(btn) {
+  async toggleWishlist(btn, productId) {
     const icon = btn.querySelector("i");
     const isInWishlist = icon.classList.contains("fas");
 
-    if (isInWishlist) {
-      icon.classList.remove("fas");
-      icon.classList.add("far");
-      this.showNotification("Removed from wishlist", "info");
-    } else {
-      icon.classList.remove("far");
-      icon.classList.add("fas");
-      this.showNotification("Added to wishlist", "success");
+    try {
+      const response = await fetch(`/api/wishlist/${productId}`, {
+        method: isInWishlist ? "DELETE" : "POST",
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        if (isInWishlist) {
+          icon.classList.remove("fas");
+          icon.classList.add("far");
+          this.showNotification("Removed from wishlist", "info");
+        } else {
+          icon.classList.remove("far");
+          icon.classList.add("fas");
+          this.showNotification("Added to wishlist", "success");
+        }
+        this.updateWishlistCount();
+      } else {
+        this.showNotification(result.Message, "error");
+      }
+    } catch (error) {
+      console.error("Error toggling wishlist:", error);
+      this.showNotification("Error updating wishlist", "error");
     }
 
     this.animateButton(btn);
   }
 
-  updateCartCount() {
-    const cartItems = document.querySelectorAll(".cart-item").length;
-    const countElements = document.querySelectorAll(
-      '.cart-icon .cart-count, .nav-tab[data-section="cart"] .badge, .nav-item[data-section="cart"] .count'
-    );
+  async updateCartCount() {
+    try {
+      const response = await fetch("/api/cart/count");
+      const { totalProducts } = await response.json();
+      const countElements = document.querySelectorAll(
+        '.cart-icon .cart-count, .nav-tab[data-section="cart"] .badge, .nav-item[data-section="cart"] .count'
+      );
 
-    countElements.forEach((element) => {
-      element.textContent = cartItems;
-    });
+      countElements.forEach((element) => {
+        element.textContent = totalProducts || 0;
+      });
+    } catch (error) {
+      console.error("Error updating cart count:", error);
+      this.showNotification("Error updating cart count", "error");
+    }
+  }
+
+  async updateWishlistCount() {
+    try {
+      const response = await fetch("/api/wishlist/count");
+      const { count } = await response.json();
+      const countElements = document.querySelectorAll(
+        '.nav-item[data-section="wishlist"] .count'
+      );
+
+      countElements.forEach((element) => {
+        element.textContent = count || 0;
+      });
+    } catch (error) {
+      console.error("Error updating wishlist count:", error);
+      this.showNotification("Error updating wishlist count", "error");
+    }
   }
 
   setupSearch() {
@@ -323,8 +340,6 @@ class EcommerceDashboard {
   async performSearch(query) {
     if (query.length < 2) return;
 
-    console.log("Searching for:", query);
-
     try {
       const response = await fetch(
         `/api/products?search=${encodeURIComponent(query)}`
@@ -338,50 +353,67 @@ class EcommerceDashboard {
   }
 
   showSearchResults(products) {
-    // Create search results dropdown
     let dropdown = document.querySelector(".search-results");
     if (!dropdown) {
       dropdown = document.createElement("div");
       dropdown.className = "search-results";
       dropdown.style.cssText = `
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: white;
-                border-radius: 0.5rem;
-                box-shadow: var(--shadow-lg);
-                max-height: 300px;
-                overflow-y: auto;
-                z-index: 1000;
-                margin-top: 0.5rem;
-                padding: 1rem;
-            `;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-lg);
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        margin-top: 0.5rem;
+        padding: 1rem;
+      `;
       document.querySelector(".search-box").style.position = "relative";
       document.querySelector(".search-box").appendChild(dropdown);
     }
 
-    // Populate search results
     dropdown.innerHTML = products.length
       ? products
           .map(
             (product) => `
-                <div class="search-result-item" style="padding: 0.5rem; cursor: pointer; border-radius: 0.25rem; margin-bottom: 0.5rem;" data-product-id="${product._id}">
-                    <div style="font-weight: 600;">${product.title}</div>
-                    <div style="color: var(--text-secondary); font-size: 0.875rem;">$${product.price}</div>
-                </div>
+              <div class="search-result-item" style="padding: 0.5rem; cursor: pointer; border-radius: 0.25rem; margin-bottom: 0.5rem;" data-product-id="${
+                product._id
+              }">
+                <div style="font-weight: 600;">${product.title}</div>
+                <div style="color: var(--text-secondary); font-size: 0.875rem;">$${product.price.toFixed(
+                  2
+                )}</div>
+              </div>
             `
           )
           .join("")
       : '<div style="padding: 0.5rem; color: var(--text-secondary);">No products found</div>';
 
-    // Add click handlers for results
     dropdown.querySelectorAll(".search-result-item").forEach((item) => {
-      item.addEventListener("click", () => {
+      item.addEventListener("click", async () => {
         const productId = item.dataset.productId;
+        try {
+          const response = await fetch(`/api/cart/${productId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ quantity: 1 }),
+          });
+          const result = await response.json();
+
+          if (response.ok) {
+            this.showNotification("Product added to cart!", "success");
+            await this.loadCartData();
+          } else {
+            this.showNotification(result.Message, "error");
+          }
+        } catch (error) {
+          console.error("Error adding to cart:", error);
+          this.showNotification("Error adding to cart", "error");
+        }
         dropdown.remove();
-        this.showNotification("Product added to cart!", "success");
-        // Optionally, add to cart via API
       });
 
       item.addEventListener("mouseenter", () => {
@@ -393,7 +425,6 @@ class EcommerceDashboard {
       });
     });
 
-    // Remove dropdown when clicking outside
     setTimeout(() => {
       document.addEventListener(
         "click",
@@ -411,7 +442,6 @@ class EcommerceDashboard {
   }
 
   setupFilters() {
-    // Order filters
     const orderFilters = document.querySelectorAll(".filter-select");
     orderFilters.forEach((filter) => {
       filter.addEventListener("change", (e) => {
@@ -419,7 +449,6 @@ class EcommerceDashboard {
       });
     });
 
-    // Message filters
     const messageFilters = document.querySelectorAll(".filter-btn");
     messageFilters.forEach((btn) => {
       btn.addEventListener("click", (e) => {
@@ -431,7 +460,7 @@ class EcommerceDashboard {
   }
 
   filterOrders(status) {
-    const orders = document.querySelectorAll(".order-card, .order-item");
+    const orders = document.querySelectorAll(".order-card");
 
     orders.forEach((order) => {
       const orderStatus = order.querySelector(".order-status span");
@@ -504,10 +533,8 @@ class EcommerceDashboard {
   }
 
   setupNotifications() {
-    // Initialize notification system
     this.createNotificationContainer();
 
-    // Mark notifications as read
     document.addEventListener("click", (e) => {
       if (e.target.closest(".notification-btn")) {
         this.showNotificationDropdown();
@@ -521,12 +548,12 @@ class EcommerceDashboard {
     const container = document.createElement("div");
     container.className = "notification-container";
     container.style.cssText = `
-            position: fixed;
-            top: 2rem;
-            right: 2rem;
-            z-index: 10000;
-            pointer-events: none;
-        `;
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      z-index: 10000;
+      pointer-events: none;
+    `;
     document.body.appendChild(container);
   }
 
@@ -537,55 +564,52 @@ class EcommerceDashboard {
     const notification = document.createElement("div");
     notification.className = `notification notification-${type}`;
     notification.style.cssText = `
-            background: ${
-              type === "success"
-                ? "var(--success)"
-                : type === "error"
-                ? "var(--error)"
-                : "var(--primary)"
-            };
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 0.75rem;
-            margin-bottom: 0.5rem;
-            box-shadow: var(--shadow-lg);
-            transform: translateX(100%);
-            transition: all 0.3s ease;
-            pointer-events: auto;
-            cursor: pointer;
-            max-width: 350px;
-            word-wrap: break-word;
-        `;
+      background: ${
+        type === "success"
+          ? "var(--success)"
+          : type === "error"
+          ? "var(--error)"
+          : "var(--primary)"
+      };
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      margin-bottom: 0.5rem;
+      box-shadow: var(--shadow-lg);
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      pointer-events: auto;
+      cursor: pointer;
+      max-width: 350px;
+      word-wrap: break-word;
+    `;
 
     notification.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <i class="fas fa-${
-                  type === "success"
-                    ? "check-circle"
-                    : type === "error"
-                    ? "exclamation-circle"
-                    : "info-circle"
-                }"></i>
-                <span>${message}</span>
-                <button style="background: none; border: none; color: white; cursor: pointer; margin-left: auto;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <i class="fas fa-${
+          type === "success"
+            ? "check-circle"
+            : type === "error"
+            ? "exclamation-circle"
+            : "info-circle"
+        }"></i>
+        <span>${message}</span>
+        <button style="background: none; border: none; color: white; cursor: pointer; margin-left: auto;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    `;
 
     container.appendChild(notification);
 
-    // Animate in
     setTimeout(() => {
       notification.style.transform = "translateX(0)";
     }, 10);
 
-    // Auto dismiss
     const dismissTimer = setTimeout(() => {
       this.dismissNotification(notification);
     }, duration);
 
-    // Manual dismiss
     notification.addEventListener("click", () => {
       clearTimeout(dismissTimer);
       this.dismissNotification(notification);
@@ -601,62 +625,73 @@ class EcommerceDashboard {
     }, 300);
   }
 
-  showNotificationDropdown() {
-    // Create and show notification dropdown
-    const dropdown = document.createElement("div");
-    dropdown.style.cssText = `
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: var(--shadow-xl);
-            padding: 1rem;
-            min-width: 300px;
-            max-height: 400px;
-            overflow-y: auto;
-            z-index: 1000;
-            margin-top: 0.5rem;
-        `;
+  async showNotificationDropdown() {
+    try {
+      const response = await fetch("/api/notifications");
+      const notifications = await response.json();
 
-    dropdown.innerHTML = `
-            <div style="margin-bottom: 1rem;">
-                <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Notifications</h4>
-                <button class="btn btn-text" style="font-size: 0.75rem;">Mark all as read</button>
-            </div>
-            <div class="notification-list">
-                <div class="notification-item" style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); cursor: pointer;">
-                    <div style="font-weight: 600; font-size: 0.875rem;">Order Shipped</div>
-                    <div style="color: var(--text-secondary); font-size: 0.75rem; margin: 0.25rem 0;">Your order #KC-2024-001 is on its way</div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem;">2 hours ago</div>
-                </div>
-                <div class="notification-item" style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); cursor: pointer;">
-                    <div style="font-weight: 600; font-size: 0.875rem;">Special Offer</div>
-                    <div style="color: var(--text-secondary); font-size: 0.75rem; margin: 0.25rem 0;">25% off on selected items</div>
-                    <div style="color: var(--text-muted); font-size: 0.75rem;">1 day ago</div>
-                </div>
-            </div>
-        `;
+      const dropdown = document.createElement("div");
+      dropdown.style.cssText = `
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: var(--shadow-xl);
+        padding: 1rem;
+        min-width: 300px;
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 1000;
+        margin-top: 0.5rem;
+      `;
 
-    const notificationBtn = document.querySelector(".notification-btn");
-    notificationBtn.parentNode.style.position = "relative";
-    notificationBtn.parentNode.appendChild(dropdown);
-
-    // Remove dropdown when clicking outside
-    setTimeout(() => {
-      document.addEventListener(
-        "click",
-        (e) => {
-          if (
-            !dropdown.contains(e.target) &&
-            !notificationBtn.contains(e.target)
-          ) {
-            dropdown.remove();
+      dropdown.innerHTML = `
+        <div style="margin-bottom: 1rem;">
+          <h4 style="font-weight: 600; margin-bottom: 0.5rem;">Notifications</h4>
+          <button class="btn btn-text" style="font-size: 0.75rem;">Mark all as read</button>
+        </div>
+        <div class="notification-list">
+          ${
+            notifications.length
+              ? notifications
+                  .map(
+                    (notification) => `
+                  <div class="notification-item" style="padding: 0.75rem; border-bottom: 1px solid var(--border-light); cursor: pointer;">
+                    <div style="font-weight: 600; font-size: 0.875rem;">${notification.title}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.75rem; margin: 0.25rem 0;">${notification.content}</div>
+                    <div style="color: var(--text-muted); font-size: 0.75rem;">${notification.timeAgo}</div>
+                  </div>
+                `
+                  )
+                  .join("")
+              : '<div style="padding: 0.75rem; color: var(--text-secondary);">No notifications</div>'
           }
-        },
-        { once: true }
-      );
-    }, 100);
+        </div>
+      `;
+
+      const notificationBtn = document.querySelector(".notification-btn");
+      notificationBtn.parentNode.style.position = "relative";
+      notificationBtn.parentNode.appendChild(dropdown);
+
+      setTimeout(() => {
+        document.addEventListener(
+          "click",
+          (e) => {
+            if (
+              !dropdown.contains(e.target) &&
+              !notificationBtn.contains(e.target)
+            ) {
+              dropdown.remove();
+            }
+          },
+          { once: true }
+        );
+      }, 100);
+    } catch (error) {
+      console.error("Error loading notifications:", error);
+      this.showNotification("Error loading notifications", "error");
+    }
   }
 
   setupNotificationHandlers() {
@@ -664,8 +699,7 @@ class EcommerceDashboard {
       if (e.target.closest(".close-notification")) {
         const notification = e.target.closest(".notification");
         if (notification) {
-          notification.style.transform = "translateX(100%)";
-          setTimeout(() => notification.remove(), 300);
+          this.dismissNotification(notification);
         }
       }
     });
@@ -682,18 +716,11 @@ class EcommerceDashboard {
         case btnText.includes("Track Order"):
           this.trackOrder(btn);
           break;
-        case btnText.includes("View Details"):
         case btnText.includes("View Invoice"):
           this.viewOrderDetails(btn);
           break;
         case btnText.includes("Reorder"):
           this.reorderItems(btn);
-          break;
-        case btnText.includes("Leave Review"):
-          this.leaveReview(btn);
-          break;
-        case btnText.includes("Return Item"):
-          this.returnItem(btn);
           break;
         case btnText.includes("Export Orders"):
           this.exportOrders();
@@ -704,7 +731,6 @@ class EcommerceDashboard {
 
   trackOrder(btn) {
     this.showNotification("Opening order tracking...", "info");
-    // Simulate opening tracking page
     setTimeout(() => {
       this.showNotification("Order is currently in transit", "success");
     }, 1000);
@@ -715,22 +741,29 @@ class EcommerceDashboard {
     this.animateButton(btn);
   }
 
-  reorderItems(btn) {
-    this.showNotification("Items added to cart!", "success");
-    this.updateCartCount();
-    this.animateButton(btn);
-  }
+  async reorderItems(btn) {
+    this.showNotification("Adding items to cart...", "info");
+    try {
+      const orderId = btn
+        .closest(".order-card")
+        ?.querySelector("h4")
+        ?.textContent.split("#")[1];
+      const response = await fetch(`/api/orders/reorder/${orderId}`, {
+        method: "POST",
+      });
+      const result = await response.json();
 
-  leaveReview(btn) {
-    this.showNotification("Opening review form...", "info");
-    this.animateButton(btn);
-  }
-
-  returnItem(btn) {
-    if (confirm("Are you sure you want to return this item?")) {
-      this.showNotification("Return request submitted", "success");
-      this.animateButton(btn);
+      if (response.ok) {
+        this.showNotification("Items added to cart!", "success");
+        await this.loadCartData();
+      } else {
+        this.showNotification(result.Message, "error");
+      }
+    } catch (error) {
+      console.error("Error reordering items:", error);
+      this.showNotification("Error reordering items", "error");
     }
+    this.animateButton(btn);
   }
 
   exportOrders() {
@@ -741,7 +774,7 @@ class EcommerceDashboard {
   }
 
   setupMessageActions() {
-    document.addEventListener("click", (e) => {
+    document.addEventListener("click", async (e) => {
       if (e.target.closest(".message-actions button")) {
         const btn = e.target.closest("button");
         const btnText = btn.textContent.trim();
@@ -749,7 +782,21 @@ class EcommerceDashboard {
 
         switch (true) {
           case btnText.includes("Mark as Read"):
-            this.markMessageAsRead(messageItem);
+            const messageId = messageItem.dataset.messageId;
+            try {
+              const response = await fetch(`/api/messages/${messageId}/read`, {
+                method: "PATCH",
+              });
+              if (response.ok) {
+                this.markMessageAsRead(messageItem);
+                this.showNotification("Message marked as read", "success");
+              } else {
+                this.showNotification("Error marking message as read", "error");
+              }
+            } catch (error) {
+              console.error("Error marking message as read:", error);
+              this.showNotification("Error marking message as read", "error");
+            }
             break;
           case btnText.includes("Track Order"):
             this.trackOrder(btn);
@@ -771,18 +818,22 @@ class EcommerceDashboard {
     this.updateMessageCount();
   }
 
-  updateMessageCount() {
-    const unreadCount = document.querySelectorAll(
-      ".message-item.unread"
-    ).length;
-    const countElements = document.querySelectorAll(
-      '.nav-tab[data-section="messages"] .badge, .nav-item[data-section="messages"] .count'
-    );
+  async updateMessageCount() {
+    try {
+      const response = await fetch("/api/messages/count");
+      const { unreadCount } = await response.json();
+      const countElements = document.querySelectorAll(
+        '.nav-tab[data-section="messages"] .badge, .nav-item[data-section="messages"] .count'
+      );
 
-    countElements.forEach((element) => {
-      element.textContent = unreadCount;
-      element.classList.toggle("new", unreadCount > 0);
-    });
+      countElements.forEach((element) => {
+        element.textContent = unreadCount || 0;
+        element.classList.toggle("new", unreadCount > 0);
+      });
+    } catch (error) {
+      console.error("Error updating message count:", error);
+      this.showNotification("Error updating message count", "error");
+    }
   }
 
   animateButton(btn) {
@@ -797,7 +848,6 @@ class EcommerceDashboard {
     if (confirm("Are you sure you want to logout?")) {
       this.showNotification("Logging out...", "info");
       setTimeout(() => {
-        // Navigate to logout route
         window.location.href = "/logout";
       }, 1500);
     }
@@ -805,20 +855,18 @@ class EcommerceDashboard {
 
   async loadSectionData(section) {
     console.log(`Loading data for section: ${section}`);
-
-    // Add section-specific initialization here
     switch (section) {
       case "dashboard":
-        this.loadDashboardData();
+        await this.loadDashboardData();
         break;
       case "orders":
-        this.loadOrdersData();
+        await this.loadOrdersData();
         break;
       case "messages":
-        this.loadMessagesData();
+        await this.loadMessagesData();
         break;
       case "cart":
-        this.updateCartTotal();
+        await this.loadCartData();
         break;
       case "products":
         await this.loadProductsData();
@@ -826,19 +874,388 @@ class EcommerceDashboard {
     }
   }
 
-  async loadDashboardData() {
-    // Simulate loading dashboard metrics
-    this.animateCounters();
+  async loadCartData() {
+    try {
+      const response = await fetch("/api/cart");
+      if (!response.ok) {
+        console.error(
+          `Cart fetch error: Status ${
+            response.status
+          }, ${await response.text()}`
+        );
+        throw new Error("Failed to fetch cart");
+      }
+      let cart = await response.json();
+
+      // Fallback to server-rendered cart if API fails or returns invalid data
+      if (!cart || !cart.products) {
+        cart = window.serverCart || {
+          totalProducts: 0,
+          totalCartPrice: 0,
+          products: [],
+        };
+      }
+
+      const cartItems = document.querySelector(".cart-items");
+      if (cartItems) {
+        cartItems.innerHTML =
+          cart.products && cart.products.length
+            ? cart.products
+                .map(
+                  (item) => `
+              <div class="cart-item">
+                <div class="item-checkbox">
+                  <input type="checkbox" id="item${item.productId}" checked>
+                  <label for="item${item.productId}"></label>
+                </div>
+                <div class="item-image">
+                  <img src="${
+                    item.image ||
+                    "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=150"
+                  }" alt="Product">
+                </div>
+                <div class="item-details">
+                  <h4>${item.title}</h4>
+                  <p>Size: ${item.size || "N/A"}, Color: ${
+                    item.color || "N/A"
+                  }</p>
+                  <div class="item-features">
+                    <span class="feature-tag">Premium Quality</span>
+                    <span class="feature-tag">Free Shipping</span>
+                  </div>
+                  <div class="item-price">$${item.price.toFixed(2)}</div>
+                </div>
+                <div class="item-quantity">
+                  <button class="qty-btn minus" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-minus"></i></button>
+                  <input class="qty-input" type="number" value="${
+                    item.quantity
+                  }" min="1" data-product-id="${item.productId}">
+                  <button class="qty-btn plus" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="item-total">$${(item.price * item.quantity).toFixed(
+                  2
+                )}</div>
+                <div class="item-actions">
+                  <button class="action-btn wishlist" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-heart"></i></button>
+                  <button class="action-btn remove" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
+            `
+                )
+                .join("")
+            : "<p>Your cart is empty.</p>";
+      }
+
+      const cartSummary = document.querySelector(".cart-summary");
+      if (cartSummary) {
+        const subtotal = cart.totalCartPrice || 0;
+        const tax = subtotal * 0.08;
+        const discount = subtotal * 0.1;
+        const total = subtotal + tax - discount;
+
+        cartSummary.querySelectorAll(".summary-row").forEach((row, index) => {
+          const valueElement = row.querySelector("span:last-child");
+          if (index === 0) valueElement.textContent = `$${subtotal.toFixed(2)}`;
+          if (index === 1) valueElement.textContent = "Free";
+          if (index === 2) valueElement.textContent = `$${tax.toFixed(2)}`;
+          if (index === 3)
+            valueElement.textContent = `-$${discount.toFixed(2)}`;
+          if (index === 4) valueElement.textContent = `$${total.toFixed(2)}`;
+        });
+      }
+
+      await this.updateCartCount();
+    } catch (error) {
+      console.error("Error loading cart:", error.message);
+      this.showNotification("Error loading cart", "error");
+      // Fallback to server-rendered cart
+      const cart = window.serverCart || {
+        totalProducts: 0,
+        totalCartPrice: 0,
+        products: [],
+      };
+      const cartItems = document.querySelector(".cart-items");
+      if (cartItems) {
+        cartItems.innerHTML =
+          cart.products && cart.products.length
+            ? cart.products
+                .map(
+                  (item) => `
+              <div class="cart-item">
+                <div class="item-checkbox">
+                  <input type="checkbox" id="item${item.productId}" checked>
+                  <label for="item${item.productId}"></label>
+                </div>
+                <div class="item-image">
+                  <img src="${
+                    item.image ||
+                    "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=150"
+                  }" alt="Product">
+                </div>
+                <div class="item-details">
+                  <h4>${item.title}</h4>
+                  <p>Size: ${item.size || "N/A"}, Color: ${
+                    item.color || "N/A"
+                  }</p>
+                  <div class="item-features">
+                    <span class="feature-tag">Premium Quality</span>
+                    <span class="feature-tag">Free Shipping</span>
+                  </div>
+                  <div class="item-price">$${item.price.toFixed(2)}</div>
+                </div>
+                <div class="item-quantity">
+                  <button class="qty-btn minus" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-minus"></i></button>
+                  <input class="qty-input" type="number" value="${
+                    item.quantity
+                  }" min="1" data-product-id="${item.productId}">
+                  <button class="qty-btn plus" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="item-total">$${(item.price * item.quantity).toFixed(
+                  2
+                )}</div>
+                <div class="item-actions">
+                  <button class="action-btn wishlist" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-heart"></i></button>
+                  <button class="action-btn remove" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
+            `
+                )
+                .join("")
+            : "<p>Your cart is empty.</p>";
+      }
+    }
   }
 
   async loadOrdersData() {
-    // Simulate loading orders
-    this.showNotification("Orders updated", "info", 1000);
+    try {
+      const response = await fetch("/api/orders");
+      const orders = await response.json();
+
+      const ordersList = document.querySelector(".orders-list");
+      if (ordersList) {
+        ordersList.innerHTML = orders.length
+          ? orders
+              .map(
+                (order) => `
+              <div class="order-card">
+                <div class="order-header">
+                  <div class="order-info">
+                    <h4>Order #${order.orderId}</h4>
+                    <p>${order.orderDate}</p>
+                  </div>
+                  <div class="order-status ${order.status.toLowerCase()}">
+                    <i class="fas fa-${
+                      order.status === "Shipped"
+                        ? "truck"
+                        : order.status === "Delivered"
+                        ? "check-circle"
+                        : "hourglass"
+                    }"></i>
+                    <span>${order.status}</span>
+                  </div>
+                  <div class="order-total">$${order.totalPrice.toFixed(2)}</div>
+                </div>
+                <div class="order-items">
+                  ${order.items
+                    .map(
+                      (item) => `
+                    <div class="order-item">
+                      <img src="${
+                        item.image ||
+                        "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100"
+                      }" alt="Product">
+                      <div class="item-details">
+                        <h5>${item.title}</h5>
+                        <p>Size: ${item.size || "N/A"}, Color: ${
+                        item.color || "N/A"
+                      } | Qty: ${item.quantity}</p>
+                        <span class="item-price">$${item.price.toFixed(
+                          2
+                        )}</span>
+                      </div>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>
+                <div class="order-actions">
+                  <button class="btn btn-outline"><i class="fas fa-truck"></i> Track Order</button>
+                  <button class="btn btn-outline"><i class="fas fa-receipt"></i> View Invoice</button>
+                  <button class="btn btn-outline"><i class="fas fa-redo"></i> Reorder</button>
+                </div>
+              </div>
+            `
+              )
+              .join("")
+          : "<p>No orders found.</p>";
+      }
+
+      this.showNotification("Orders updated", "info", 1000);
+    } catch (error) {
+      console.error("Error loading orders:", error);
+      this.showNotification("Error loading orders", "error");
+    }
   }
 
   async loadMessagesData() {
-    // Simulate loading messages
-    this.updateMessageCount();
+    try {
+      const response = await fetch("/api/messages");
+      const messages = await response.json();
+
+      const messagesList = document.querySelector(".messages-list");
+      if (messagesList) {
+        messagesList.innerHTML = messages.length
+          ? messages
+              .map(
+                (message) => `
+              <div class="message-item ${
+                message.isUnread ? "unread" : ""
+              }" data-message-id="${message._id}">
+                <div class="message-avatar">
+                  <i class="fas fa-${
+                    message.type === "order" ? "truck" : "gift"
+                  }"></i>
+                </div>
+                <div class="message-content">
+                  <div class="message-header">
+                    <h4>${message.title}</h4>
+                    <span class="message-time">${message.timeAgo}</span>
+                  </div>
+                  <p>${message.content}</p>
+                  <div class="message-actions">
+                    ${
+                      message.type === "order"
+                        ? '<button class="btn btn-text">Track Order</button>'
+                        : ""
+                    }
+                    ${
+                      message.isUnread
+                        ? '<button class="btn btn-text">Mark as Read</button>'
+                        : ""
+                    }
+                    ${
+                      message.type === "promotion"
+                        ? '<button class="btn btn-text">Shop Now</button>'
+                        : ""
+                    }
+                  </div>
+                </div>
+              </div>
+            `
+              )
+              .join("")
+          : "<p>No messages available.</p>";
+      }
+
+      await this.updateMessageCount();
+    } catch (error) {
+      console.error("Error loading messages:", error);
+      this.showNotification("Error loading messages", "error");
+    }
+  }
+
+  async loadCartData() {
+    try {
+      const response = await fetch("/api/cart");
+      const cart = await response.json();
+
+      const cartItems = document.querySelector(".cart-items");
+      if (cartItems) {
+        cartItems.innerHTML =
+          cart.products && cart.products.length
+            ? cart.products
+                .map(
+                  (item) => `
+              <div class="cart-item">
+                <div class="item-checkbox">
+                  <input type="checkbox" id="item${item.productId}" checked>
+                  <label for="item${item.productId}"></label>
+                </div>
+                <div class="item-image">
+                  <img src="${
+                    item.image ||
+                    "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=150"
+                  }" alt="Product">
+                </div>
+                <div class="item-details">
+                  <h4>${item.title}</h4>
+                  <p>Size: ${item.size || "N/A"}, Color: ${
+                    item.color || "N/A"
+                  }</p>
+                  <div class="item-features">
+                    <span class="feature-tag">Premium Quality</span>
+                    <span class="feature-tag">Free Shipping</span>
+                  </div>
+                  <div class="item-price">$${item.price.toFixed(2)}</div>
+                </div>
+                <div class="item-quantity">
+                  <button class="qty-btn minus" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-minus"></i></button>
+                  <input class="qty-input" type="number" value="${
+                    item.quantity
+                  }" min="1" data-product-id="${item.productId}">
+                  <button class="qty-btn plus" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-plus"></i></button>
+                </div>
+                <div class="item-total">$${(item.price * item.quantity).toFixed(
+                  2
+                )}</div>
+                <div class="item-actions">
+                  <button class="action-btn wishlist" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-heart"></i></button>
+                  <button class="action-btn remove" data-product-id="${
+                    item.productId
+                  }"><i class="fas fa-trash"></i></button>
+                </div>
+              </div>
+            `
+                )
+                .join("")
+            : "<p>Your cart is empty.</p>";
+      }
+
+      const cartSummary = document.querySelector(".cart-summary");
+      if (cartSummary) {
+        const subtotal = cart.totalCartPrice || 0;
+        const tax = subtotal * 0.08;
+        const discount = subtotal * 0.1;
+        const total = subtotal + tax - discount;
+
+        cartSummary.querySelectorAll(".summary-row").forEach((row, index) => {
+          const valueElement = row.querySelector("span:last-child");
+          if (index === 0) valueElement.textContent = `$${subtotal.toFixed(2)}`;
+          if (index === 1) valueElement.textContent = "Free";
+          if (index === 2) valueElement.textContent = `$${tax.toFixed(2)}`;
+          if (index === 3)
+            valueElement.textContent = `-$${discount.toFixed(2)}`;
+          if (index === 4) valueElement.textContent = `$${total.toFixed(2)}`;
+        });
+      }
+
+      await this.updateCartCount();
+    } catch (error) {
+      console.error("Error loading cart:", error);
+      this.showNotification("Error loading cart", "error");
+    }
   }
 
   async loadProductsData() {
@@ -851,7 +1268,6 @@ class EcommerceDashboard {
       const categories = await categoriesResponse.json();
       const products = await productsResponse.json();
 
-      // Update categories in sidebar
       const categoryList = document.querySelector(".category-list");
       if (categoryList) {
         categoryList.innerHTML = `
@@ -879,13 +1295,11 @@ class EcommerceDashboard {
             .join("")}
         `;
 
-        // Re-initialize ProductsManager to bind new category event listeners
         if (window.ProductsManager) {
           new ProductsManager();
         }
       }
 
-      // Update products in grid
       const productsGrid = document.querySelector(".products-grid");
       if (productsGrid) {
         productsGrid.innerHTML = products
@@ -911,7 +1325,9 @@ class EcommerceDashboard {
                   </div>
                   <p class="product-description">${product.description}</p>
                   <div class="product-footer">
-                    <div class="product-price">$${product.price}</div>
+                    <div class="product-price">$${product.price.toFixed(
+                      2
+                    )}</div>
                     <button class="buy-now-btn" data-product-id="${
                       product._id
                     }">
@@ -924,12 +1340,10 @@ class EcommerceDashboard {
           )
           .join("");
 
-        // Re-initialize ProductsManager to bind new product event listeners
         if (window.ProductsManager) {
           new ProductsManager();
         }
 
-        // Update product count
         const productCountSpan = document.getElementById("product-count");
         if (productCountSpan) {
           productCountSpan.textContent = `${products.length} Products`;
@@ -944,7 +1358,6 @@ class EcommerceDashboard {
   }
 
   animateCounters() {
-    // Re-animate counters when dashboard loads
     const counters = document.querySelectorAll("#dashboard .stat-number");
     counters.forEach((counter, index) => {
       setTimeout(() => {
@@ -957,29 +1370,20 @@ class EcommerceDashboard {
   }
 }
 
-// Initialize dashboard when DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   window.dashboard = new EcommerceDashboard();
 
-  // Show welcome message
   setTimeout(() => {
-    window.dashboard.showNotification(
-      "Welcome back, John! 👋",
-      "success",
-      4000
-    );
+    window.dashboard.showNotification("Welcome back!", "success", 4000);
   }, 1000);
 });
 
-// Add smooth scrolling for better UX
 document.documentElement.style.scrollBehavior = "smooth";
 
-// Add loading states for better perceived performance
 window.addEventListener("beforeunload", () => {
   document.body.style.opacity = "0.7";
 });
 
-// Handle responsive navigation
 function handleResponsiveNav() {
   const nav = document.querySelector(".main-nav");
   const toggleBtn = document.createElement("button");
@@ -988,14 +1392,14 @@ function handleResponsiveNav() {
     toggleBtn.className = "nav-toggle";
     toggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
     toggleBtn.style.cssText = `
-            display: block;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem;
-            border-radius: 0.375rem;
-            cursor: pointer;
-        `;
+      display: block;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+    `;
 
     document.querySelector(".header-content").insertBefore(toggleBtn, nav);
 
@@ -1006,7 +1410,5 @@ function handleResponsiveNav() {
   }
 }
 
-// Handle responsive behavior
 window.addEventListener("resize", handleResponsiveNav);
 window.addEventListener("load", handleResponsiveNav);
-sssss;

@@ -4,16 +4,45 @@ class ProductsManager {
     this.products = document.querySelectorAll(".product-card");
     this.activeCategorySpan = document.getElementById("active-category");
     this.productCountSpan = document.getElementById("product-count");
-    this.buyNowButtons = document.querySelectorAll(".buy-now-btn");
+    this.addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
+    this.cartCountSpan = document.getElementById("cart-count"); // Added for cart count
 
     this.init();
   }
 
   init() {
     this.setupCategoryFiltering();
-    this.setupBuyNowButtons();
+    this.setupAddToCartButtons();
     this.setupProductInteractions();
     this.updateProductCount();
+    this.fetchCartCount(); // Fetch initial cart count
+  }
+
+  async fetchCartCount() {
+    try {
+      const response = await fetch("/api/cart/count", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        this.updateCartCount(data.totalProducts || 0);
+      } else {
+        console.error("Failed to fetch cart count:", data.Message);
+        this.updateCartCount(0);
+      }
+    } catch (error) {
+      console.error("Error fetching cart count:", error);
+      this.updateCartCount(0);
+    }
+  }
+
+  updateCartCount(count) {
+    if (this.cartCountSpan) {
+      this.cartCountSpan.textContent = ` (${count})`;
+    }
   }
 
   setupCategoryFiltering() {
@@ -71,21 +100,67 @@ class ProductsManager {
     this.productCountSpan.textContent = `${visibleProducts} Products`;
   }
 
-  setupBuyNowButtons() {
-    this.buyNowButtons.forEach((button) => {
-      button.addEventListener("click", (e) => {
+  setupAddToCartButtons() {
+    this.addToCartButtons.forEach((button) => {
+      button.addEventListener("click", async (e) => {
+        e.preventDefault();
         const productId = button.dataset.productId;
 
         // Add loading state
-        button.innerHTML =
-          '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
         button.disabled = true;
 
-        // Simulate processing time
-        setTimeout(() => {
-          // Redirect to payment page
-          window.location.href = `/payment/${productId}`;
-        }, 1000);
+        try {
+          // Send POST request to add product to cart
+          const response = await fetch(`/api/cart/${productId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              quantity: 1, // Default quantity is 1
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            // Show success message
+            button.innerHTML = '<i class="fas fa-check"></i> Added!';
+            button.style.background = "#48bb78";
+
+            // Update cart count with the new totalProducts from response
+            this.updateCartCount(data.cart.totalProducts || 0);
+
+            // Show success notification
+            this.showNotification(
+              "Product added to cart successfully!",
+              "success"
+            );
+
+            // Reset button after 2 seconds
+            setTimeout(() => {
+              button.innerHTML = originalHTML;
+              button.style.background = "";
+              button.disabled = false;
+            }, 2000);
+          } else {
+            const data = await response.json();
+            throw new Error(data.Message || "Failed to add product to cart");
+          }
+        } catch (error) {
+          console.error("Error adding to cart:", error);
+
+          // Show error message
+          this.showNotification(
+            error.message || "Failed to add product to cart",
+            "error"
+          );
+
+          // Reset button
+          button.innerHTML = originalHTML;
+          button.disabled = false;
+        }
       });
     });
   }
@@ -158,6 +233,49 @@ class ProductsManager {
       }
     });
   }
+
+  showNotification(message, type = "info") {
+    // Create notification element
+    const notification = document.createElement("div");
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      background: ${type === "success" ? "#48bb78" : "#fc8181"};
+      color: white;
+      font-weight: 600;
+      z-index: 10001;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+
+    // Add animation
+    const style = document.createElement("style");
+    style.textContent = `
+      @keyframes slideIn {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    document.body.appendChild(notification);
+
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.style.animation = "slideIn 0.3s ease reverse";
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
 }
 
 // Initialize the products manager when DOM is loaded
@@ -185,36 +303,43 @@ document.addEventListener("DOMContentLoaded", () => {
      `;
 
     const contentHeader = document.querySelector(".content-header");
-    contentHeader.after(searchInput);
+    if (contentHeader) {
+      contentHeader.after(searchInput);
 
-    // Search functionality
-    document.getElementById("product-search").addEventListener("input", (e) => {
-      const searchTerm = e.target.value.toLowerCase();
-      const products = document.querySelectorAll(".product-card");
+      // Search functionality
+      document
+        .getElementById("product-search")
+        .addEventListener("input", (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          const products = document.querySelectorAll(".product-card");
 
-      products.forEach((product) => {
-        const title = product
-          .querySelector(".product-title")
-          .textContent.toLowerCase();
-        const description = product
-          .querySelector(".product-description")
-          .textContent.toLowerCase();
+          products.forEach((product) => {
+            const title = product
+              .querySelector(".product-title")
+              .textContent.toLowerCase();
+            const description = product
+              .querySelector(".product-description")
+              .textContent.toLowerCase();
 
-        if (title.includes(searchTerm) || description.includes(searchTerm)) {
-          product.classList.remove("hidden");
-        } else {
-          product.classList.add("hidden");
-        }
-      });
+            if (
+              title.includes(searchTerm) ||
+              description.includes(searchTerm)
+            ) {
+              product.classList.remove("hidden");
+            } else {
+              product.classList.add("hidden");
+            }
+          });
 
-      // Update product count after search
-      const visibleProducts = document.querySelectorAll(
-        ".product-card:not(.hidden)"
-      ).length;
-      document.getElementById(
-        "product-count"
-      ).textContent = `${visibleProducts} Products`;
-    });
+          // Update product count after search
+          const visibleProducts = document.querySelectorAll(
+            ".product-card:not(.hidden)"
+          ).length;
+          document.getElementById(
+            "product-count"
+          ).textContent = `${visibleProducts} Products`;
+        });
+    }
   };
 
   searchFeature();

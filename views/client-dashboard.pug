@@ -25,18 +25,18 @@ html(lang='en')
             a.nav-tab(href='/orders', data-section='orders')
               i.fas.fa-box
               span My Orders
-              span.badge 3
+              span.badge #{orderCount || 0}
             a.nav-tab(href='/products', data-section='products')
               i.fas.fa-tags
               span Products
-            a.nav-tab(href='/cart', data-section='cart')
+            a.nav-tab(href='/api/cart', data-section='cart')
               i.fas.fa-shopping-cart
               span Cart
-              span.badge 5
+              span.badge #{cart ? cart.totalProducts : 0}
             a.nav-tab(href='/messages', data-section='messages')
               i.fas.fa-envelope
               span Messages
-              span.badge.new 2
+              span.badge.new #{messageCount || 0}
             a.nav-tab(href='/payment-methods', data-section='payment-methods')
               i.fas.fa-credit-card
               span Payment
@@ -47,13 +47,13 @@ html(lang='en')
             .notifications
               button.notification-btn
                 i.fas.fa-bell
-                span.notification-count 4
+                span.notification-count #{notificationCount || 0}
             .user-menu
               .user-avatar
-                img(src='https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100', alt='User')
+                img(src=user.photo || 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=100', alt='User')
               .user-info
-                span.user-name John Doe
-                span.user-status Premium Member
+                span.user-name #{user.name || 'Guest'}
+                span.user-status #{user.role === 'client' ? 'Premium Member' : user.role}
               .dropdown-menu
                 a(href='/account', data-section='account')
                   i.fas.fa-user
@@ -73,7 +73,7 @@ html(lang='en')
             .welcome-text
               h1
                 | Welcome back, 
-                span.highlight John!
+                span.highlight #{user.name || 'Guest'}!
               p Ready to discover amazing deals and new arrivals?
               .digital-clock
                 .clock-display
@@ -84,25 +84,25 @@ html(lang='en')
                 .summary-icon
                   i.fas.fa-box
                 .summary-content
-                  .summary-number 24
+                  .summary-number #{orderCount || 0}
                   .summary-label Total Orders
               .summary-item
                 .summary-icon
                   i.fas.fa-dollar-sign
                 .summary-content
-                  .summary-number $4,850
+                  .summary-number $#{totalSpent || 0}
                   .summary-label Total Spent
               .summary-item
                 .summary-icon
                   i.fas.fa-calendar
                 .summary-content
-                  .summary-number Dec 28
+                  .summary-number #{lastOrderDate || 'N/A'}
                   .summary-label Last Order
               .summary-item
                 .summary-icon
                   i.fas.fa-star
                 .summary-content
-                  .summary-number 2,450
+                  .summary-number #{loyaltyPoints || 0}
                   .summary-label Loyalty Points
         //- Dashboard Grid
         .dashboard-grid
@@ -117,7 +117,7 @@ html(lang='en')
                 a.nav-item(href='/orders', data-section='orders')
                   i.fas.fa-box
                   span My Orders
-                  span.count 3
+                  span.count #{orderCount || 0}
                 a.nav-item(href='/products', data-section='products')
                   i.fas.fa-tags
                   span Products
@@ -137,11 +137,11 @@ html(lang='en')
                 a.nav-item(href='/wishlist', data-section='wishlist')
                   i.fas.fa-heart
                   span Wishlist
-                  span.count 8
+                  span.count #{wishlistCount || 0}
                 a.nav-item(href='/cart', data-section='cart')
                   i.fas.fa-shopping-cart
                   span Cart
-                  span.count 5
+                  span.count #{cart ? cart.totalProducts : 0}
                 a.nav-item(href='/reviews', data-section='reviews')
                   i.fas.fa-star
                   span Reviews
@@ -150,11 +150,11 @@ html(lang='en')
                 a.nav-item(href='/messages', data-section='messages')
                   i.fas.fa-envelope
                   span Messages
-                  span.count.new 2
+                  span.count.new #{messageCount || 0}
                 a.nav-item(href='/notifications', data-section='notifications')
                   i.fas.fa-bell
                   span Notifications
-                  span.count 4
+                  span.count #{notificationCount || 0}
               .nav-section
                 h4 Services
                 a.nav-item(href='/loyalty', data-section='loyalty')
@@ -190,7 +190,7 @@ html(lang='en')
                   .stat-icon.orders
                     i.fas.fa-box
                   .stat-content
-                    .stat-number 24
+                    .stat-number #{orderCount || 0}
                     .stat-label Orders This Year
                     .stat-trend.positive
                       i.fas.fa-arrow-up
@@ -199,15 +199,15 @@ html(lang='en')
                   .stat-icon.wishlist
                     i.fas.fa-heart
                   .stat-content
-                    .stat-number 8
+                    .stat-number #{wishlistCount || 0}
                     .stat-label Wishlist Items
                     .stat-trend.neutral
-                      span 2 items on sale
+                      span #{wishlistOnSale || 0} items on sale
                 .stat-card
                   .stat-icon.loyalty
                     i.fas.fa-star
                   .stat-content
-                    .stat-number 2,450
+                    .stat-number #{loyaltyPoints || 0}
                     .stat-label Loyalty Points
                     .stat-trend.positive
                       span Ready to redeem
@@ -215,7 +215,7 @@ html(lang='en')
                   .stat-icon.savings
                     i.fas.fa-piggy-bank
                   .stat-content
-                    .stat-number $245
+                    .stat-number $#{totalSaved || 0}
                     .stat-label Total Saved
                     .stat-trend.positive
                       span Through deals & discounts
@@ -226,49 +226,53 @@ html(lang='en')
                     h3 Recent Orders
                     a.view-all(href='/orders', data-section='orders') View All
                   .order-list
-                    .order-item
-                      .order-image
-                        img(src='https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Order')
-                      .order-info
-                        h4 Premium Cotton Shirt
-                        p Order #KC-2024-001
-                        span.order-date Dec 28, 2024
-                      .order-status.shipped
-                        i.fas.fa-truck
-                        span Shipped
-                    .order-item
-                      .order-image
-                        img(src='https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Order')
-                      .order-info
-                        h4 Designer Denim Jacket
-                        p Order #KC-2024-002
-                        span.order-date Dec 25, 2024
-                      .order-status.delivered
-                        i.fas.fa-check-circle
-                        span Delivered
+                    if recentOrders && recentOrders.length
+                      each order in recentOrders
+                        .order-item
+                          .order-image
+                            img(src=order.image || 'https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Order')
+                          .order-info
+                            h4 #{order.title || 'Product'}
+                            p Order #{order.orderId || 'N/A'}
+                            span.order-date #{order.orderDate || 'N/A'}
+                          .order-status(class=order.status ? order.status.toLowerCase() : 'pending')
+                            i.fas(class=order.status === 'Shipped' ? 'fa-truck' : order.status === 'Delivered' ? 'fa-check-circle' : 'fa-hourglass')
+                            span #{order.status || 'Pending'}
+                    else
+                      p No recent orders found.
                 .widget.recommendations
                   .widget-header
                     h3 Recommended for You
                     a.view-all(href='/products') Browse More
                   .product-grid
-                    .product-card
-                      .product-image
-                        img(src='https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=300', alt='Leather Boots')
-                        .product-badge New
-                      .product-info
-                        h4 Premium Leather Boots
-                        .product-rating
-                          .stars
-                            i.fas.fa-star
-                            i.fas.fa-star
-                            i.fas.fa-star
-                            i.fas.fa-star
-                            i.fas.fa-star-half-alt
-                          span (4.8)
-                        .product-price
-                          span.current $299.99
-                          span.original $349.99
-                        button.btn.btn-primary Add to Cart
+                    if recommendedProducts && recommendedProducts.length
+                      each product in recommendedProducts
+                        .product-card
+                          .product-image
+                            img(src=product.images[0] || 'https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=300', alt=product.title)
+                            if product.isNew
+                              .product-badge New
+                          .product-info
+                            h4 #{product.title}
+                            .product-rating
+                              .stars
+                                - var rating = product.averageRating || 4.8
+                                - var fullStars = Math.floor(rating)
+                                - var halfStar = rating % 1 >= 0.5
+                                - for (var i = 0; i < fullStars; i++)
+                                  i.fas.fa-star
+                                if halfStar
+                                  i.fas.fa-star-half-alt
+                                - for (var i = fullStars + (halfStar ? 1 : 0); i < 5; i++)
+                                  i.far.fa-star
+                              span (#{rating})
+                            .product-price
+                              span.current $#{product.price.toFixed(2)}
+                              if product.originalPrice
+                                span.original $#{product.originalPrice.toFixed(2)}
+                            button.btn.btn-primary(data-product-id=product._id) Add to Cart
+                    else
+                      p No recommendations available.
             //- Orders Section
             section#orders.content-section
               .section-header
@@ -288,38 +292,37 @@ html(lang='en')
                     i.fas.fa-download
                     | Export Orders
                 .orders-list
-                  .order-card
-                    .order-header
-                      .order-info
-                        h4 Order #KC-2024-001
-                        p December 28, 2024
-                      .order-status.shipped
-                        i.fas.fa-truck
-                        span Shipped
-                      .order-total $299.99
-                    .order-items
-                      .order-item
-                        img(src='https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Product')
-                        .item-details
-                          h5 Premium Cotton Shirt
-                          p Size: L, Color: White | Qty: 1
-                          span.item-price $89.99
-                      .order-item
-                        img(src='https://images.pexels.com/photos/1598507/pexels-photo-1598507.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Product')
-                        .item-details
-                          h5 Designer Denim Jacket
-                          p Size: M, Color: Blue | Qty: 1
-                          span.item-price $199.99
-                    .order-actions
-                      button.btn.btn-outline
-                        i.fas.fa-truck
-                        | Track Order
-                      button.btn.btn-outline
-                        i.fas.fa-receipt
-                        | View Invoice
-                      button.btn.btn-outline
-                        i.fas.fa-redo
-                        | Reorder
+                  if orders && orders.length
+                    each order in orders
+                      .order-card
+                        .order-header
+                          .order-info
+                            h4 Order #{order.orderId || 'N/A'}
+                            p #{order.orderDate || 'N/A'}
+                          .order-status(class=order.status ? order.status.toLowerCase() : 'pending')
+                            i.fas(class=order.status === 'Shipped' ? 'fa-truck' : order.status === 'Delivered' ? 'fa-check-circle' : 'fa-hourglass')
+                            span #{order.status || 'Pending'}
+                          .order-total $#{order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}
+                        .order-items
+                          each item in order.items
+                            .order-item
+                              img(src=item.image || 'https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=100', alt='Product')
+                              .item-details
+                                h5 #{item.title}
+                                p Size: #{item.size || 'N/A'}, Color: #{item.color || 'N/A'} | Qty: #{item.quantity}
+                                span.item-price $#{item.price.toFixed(2)}
+                        .order-actions
+                          button.btn.btn-outline
+                            i.fas.fa-truck
+                            | Track Order
+                          button.btn.btn-outline
+                            i.fas.fa-receipt
+                            | View Invoice
+                          button.btn.btn-outline
+                            i.fas.fa-redo
+                            | Reorder
+                  else
+                    p No orders found.
             //- Messages Section
             section#messages.content-section
               .section-header
@@ -328,32 +331,29 @@ html(lang='en')
               .messages-container
                 .message-filters
                   button.filter-btn.active(data-filter='all') All Messages
-                  button.filter-btn(data-filter='unread') Unread (2)
+                  button.filter-btn(data-filter='unread') Unread (#{unreadMessageCount || 0})
                   button.filter-btn(data-filter='orders') Order Updates
                   button.filter-btn(data-filter='promotions') Promotions
                 .messages-list
-                  .message-item.unread
-                    .message-avatar
-                      i.fas.fa-truck
-                    .message-content
-                      .message-header
-                        h4 Order Shipped
-                        span.message-time 2 hours ago
-                      p Your order #KC-2024-001 has been shipped and is on its way!
-                      .message-actions
-                        button.btn.btn-text Track Order
-                        button.btn.btn-text Mark as Read
-                  .message-item.unread
-                    .message-avatar
-                      i.fas.fa-gift
-                    .message-content
-                      .message-header
-                        h4 Special Offer
-                        span.message-time 5 hours ago
-                      p Exclusive 25% off on your favorite items. Limited time offer!
-                      .message-actions
-                        button.btn.btn-text Shop Now
-                        button.btn.btn-text Mark as Read
+                  if messages && messages.length
+                    each message in messages
+                      .message-item(class=message.isUnread ? 'unread' : '')
+                        .message-avatar
+                          i.fas(class=message.type === 'order' ? 'fa-truck' : 'fa-gift')
+                        .message-content
+                          .message-header
+                            h4 #{message.title}
+                            span.message-time #{message.timeAgo || 'Recent'}
+                          p #{message.content}
+                          .message-actions
+                            if message.type === 'order'
+                              button.btn.btn-text Track Order
+                            if message.isUnread
+                              button.btn.btn-text Mark as Read
+                            if message.type === 'promotion'
+                              button.btn.btn-text Shop Now
+                  else
+                    p No messages available.
             //- Cart Section
             section#cart.content-section
               .section-header
@@ -361,49 +361,53 @@ html(lang='en')
                 p Review your items before checkout
               .cart-container
                 .cart-items
-                  .cart-item
-                    .item-checkbox
-                      input#item1(type='checkbox', checked='')
-                      label(for='item1')
-                    .item-image
-                      img(src='https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=150', alt='Product')
-                    .item-details
-                      h4 Premium Cotton Shirt
-                      p Size: L, Color: White
-                      .item-features
-                        span.feature-tag Premium Quality
-                        span.feature-tag Free Shipping
-                      .item-price $89.99
-                    .item-quantity
-                      button.qty-btn.minus
-                        i.fas.fa-minus
-                      input.qty-input(type='number', value='1', min='1')
-                      button.qty-btn.plus
-                        i.fas.fa-plus
-                    .item-total $89.99
-                    .item-actions
-                      button.action-btn.wishlist
-                        i.fas.fa-heart
-                      button.action-btn.remove
-                        i.fas.fa-trash
+                  if cart && cart.products && cart.products.length
+                    each item in cart.products
+                      .cart-item
+                        .item-checkbox
+                          input(type='checkbox', id=`item${item.productId}`, checked='')
+                          label(for=`item${item.productId}`)
+                        .item-image
+                          img(src=item.image || 'https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=150', alt='Product')
+                        .item-details
+                          h4 #{item.title}
+                          p Size: #{item.size || 'N/A'}, Color: #{item.color || 'N/A'}
+                          .item-features
+                            span.feature-tag Premium Quality
+                            span.feature-tag Free Shipping
+                          .item-price $#{item.price.toFixed(2)}
+                        .item-quantity
+                          button.qty-btn.minus(data-product-id=item.productId)
+                            i.fas.fa-minus
+                          input.qty-input(type='number', value=item.quantity, min='1', data-product-id=item.productId)
+                          button.qty-btn.plus(data-product-id=item.productId)
+                            i.fas.fa-plus
+                        .item-total $#{ (item.price * item.quantity).toFixed(2) }
+                        .item-actions
+                          button.action-btn.wishlist(data-product-id=item.productId)
+                            i.fas.fa-heart
+                          button.action-btn.remove(data-product-id=item.productId)
+                            i.fas.fa-trash
+                  else
+                    p Your cart is empty.
                 .cart-sidebar
                   .cart-summary
                     h3 Order Summary
                     .summary-row
-                      span Subtotal (2 items):
-                      span $289.98
+                      span Subtotal (#{cart ? cart.totalProducts : 0} items):
+                      span $#{cart ? cart.totalCartPrice.toFixed(2) : '0.00'}
                     .summary-row
                       span Shipping:
                       span.free Free
                     .summary-row
                       span Tax:
-                      span $23.20
+                      span $#{cart ? (cart.totalCartPrice * 0.08).toFixed(2) : '0.00'}
                     .summary-row.discount
                       span Loyalty Discount (10%):
-                      span -$28.99
+                      span -$#{cart ? (cart.totalCartPrice * 0.1).toFixed(2) : '0.00'}
                     .summary-row.total
                       span Total:
-                      span $284.19
+                      span $#{cart ? (cart.totalCartPrice + (cart.totalCartPrice * 0.08) - (cart.totalCartPrice * 0.1)).toFixed(2) : '0.00'}
                     button.btn.btn-primary.checkout-btn
                       i.fas.fa-lock
                       | Secure Checkout
@@ -412,5 +416,4 @@ html(lang='en')
                     .promo-input
                       input(type='text', placeholder='Enter code')
                       button.btn.btn-outline Apply
-            //- Other sections would follow similar patterns...
     script(src='/vanilla-js/client-dashboard.js')

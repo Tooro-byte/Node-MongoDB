@@ -530,4 +530,8 @@ html(lang='en')
                       button.btn.btn-outline Restock
 
     .toast-container#toastContainer
+    script.
+  window.serverCart = !{JSON.stringify(cart)};
+
+  
     script(src='/vanilla-js/admin-dashboard.js')

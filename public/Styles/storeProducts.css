@@ -120,7 +120,11 @@ body {
   flex-direction: column;
   gap: 0.5rem;
 }
-
+#cart-count {
+  font-weight: 600;
+  color: #667eea;
+  margin-left: 5px;
+}
 .category-item {
   display: flex;
   align-items: center;

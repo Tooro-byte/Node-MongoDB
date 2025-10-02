@@ -1,7 +1,23 @@
 const express = require("express");
 const Product = require("../models/productsSchema");
 const Cart = require("../models/cartModel");
+const { ensureAuthenticated } = require("../AuthMiddleWare/checkRole");
 const router = express.Router();
+
+// Apply authentication middleware to all routes
+router.use(ensureAuthenticated);
+
+// API to Get Cart Item Count
+router.get("/count", async (req, res) => {
+  try {
+    const cart = await Cart.findOne({ user: req.user._id });
+    const totalProducts = cart ? cart.totalProducts : 0;
+    res.status(200).json({ totalProducts });
+  } catch (error) {
+    console.error("Error fetching cart count:", error);
+    res.status(500).json({ Message: "Server Error", error: error.message });
+  }
+});
 
 // API to Add Product to Cart
 router.post("/:productId", async (req, res) => {
@@ -10,9 +26,11 @@ router.post("/:productId", async (req, res) => {
     const productId = req.params.productId;
     const userId = req.user._id;
 
-    // Check if user Does not Select a product and Quantity
-    if (!productId || !quantity) {
-      return res.status(400).json({ Message: "Missing Required Field(s)" });
+    // Check if user does not provide productId or quantity is not a valid number
+    if (!productId || typeof quantity !== "number" || quantity < 1) {
+      return res.status(400).json({
+        Message: "Product ID and a valid quantity (minimum 1) are required",
+      });
     }
 
     // Check if the product exists in the Database
@@ -25,7 +43,7 @@ router.post("/:productId", async (req, res) => {
       return res.status(400).json({ Message: "Sorry! Insufficient Stock" });
     }
 
-    // Find the Users Cart
+    // Find the User's Cart
     let cart = await Cart.findOne({ user: userId });
     if (!cart) {
       cart = new Cart({
@@ -36,7 +54,7 @@ router.post("/:productId", async (req, res) => {
       });
     }
 
-    // Check if product Exists in the Cart
+    // Check if product exists in the cart
     const existingProductIndex = cart.products.findIndex(
       (item) => item.productId.toString() === productId.toString()
     );
@@ -70,10 +88,13 @@ router.post("/:productId", async (req, res) => {
 
     await cart.save();
 
-    // Render cart page instead of JSON response
-    res.redirect("/api/cart");
+    // Return JSON response for AJAX requests
+    res.status(200).json({
+      Message: "Product added to cart successfully",
+      cart: cart,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error in add to cart:", error);
     res.status(500).json({ Message: "Server Error", error: error.message });
   }
 });
@@ -99,7 +120,7 @@ router.get("/", async (req, res) => {
 
     res.render("cart", { cart: cart, user: user });
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching cart:", error);
     res.status(500).json({ Message: "Server Error", error: error.message });
   }
 });
@@ -149,7 +170,7 @@ router.patch("/increase/:productId", async (req, res) => {
       cart: cart,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error increasing quantity:", error);
     res.status(500).json({ Message: "Server Error", error: error.message });
   }
 });
@@ -194,7 +215,7 @@ router.patch("/decrease/:productId", async (req, res) => {
       cart: cart,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error decreasing quantity:", error);
     res.status(500).json({ Message: "Server Error", error: error.message });
   }
 });
@@ -232,7 +253,7 @@ router.delete("/:productId", async (req, res) => {
 
     res.json({ Message: "Product Removed from Cart Successfully", cart: cart });
   } catch (error) {
-    console.error(error);
+    console.error("Error deleting product:", error);
     res.status(500).json({ Message: "Server Error", error: error.message });
   }
 });
@@ -256,7 +277,7 @@ router.delete("/clear/all", async (req, res) => {
 
     res.json({ Message: "Cart Cleared Successfully", cart: cart });
   } catch (error) {
-    console.error(error);
+    console.error("Error clearing cart:", error);
     res.status(500).json({ Message: "Server Error", error: error.message });
   }
 });

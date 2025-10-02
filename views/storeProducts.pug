@@ -19,7 +19,8 @@ html(lang='en')
           .nav-item
             a(href='/api/cart')
               i.fas.fa-shopping-cart
-              | MyCart
+              | MyCart 
+              span#cart-count 0
           .nav-item
             a(href='#history')
               i.fas.fa-history
@@ -87,8 +88,8 @@ html(lang='en')
                 
                 .product-footer
                   .product-price $#{product.price || '0.00'}
-                  button.buy-now-btn(data-product-id=product._id)
-                    i.fas.fa-shopping-bag
-                    | Buy Now
+                  button.add-to-cart-btn(data-product-id=product._id)
+                    i.fas.fa-cart-plus
+                    | Add to Cart
 
     script(src='/vanilla-js/storeProducts.js')
